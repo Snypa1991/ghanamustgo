@@ -16,13 +16,13 @@ export default function Icon() {
       <div
         style={{
           fontSize: 24,
-          background: '#003300',
+          background: '#FFFFFF',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#FFFFFF',
+          color: '#000000',
           borderRadius: '8px'
         }}
       >
