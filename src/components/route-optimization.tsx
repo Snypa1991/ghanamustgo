@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Map, Clock, Fuel, Loader2, Navigation } from 'lucide-react';
+import { Map, Clock, Fuel, Loader2, Navigation, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -55,16 +55,21 @@ export default function RouteOptimization() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div className="grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="startLocation"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Pickup Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Accra Mall" {...field} />
-                    </FormControl>
+                    <div className="flex gap-2">
+                        <FormControl>
+                          <Input placeholder="e.g., Accra Mall" {...field} />
+                        </FormControl>
+                        <Button variant="outline" type="button" onClick={() => form.setValue('startLocation', 'East Legon, American House')}>
+                            <MapPin className="mr-2 h-4 w-4" /> Pin on map
+                        </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -75,9 +80,14 @@ export default function RouteOptimization() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Drop-off Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Labadi Beach" {...field} />
-                    </FormControl>
+                     <div className="flex gap-2">
+                        <FormControl>
+                          <Input placeholder="e.g., Labadi Beach" {...field} />
+                        </FormControl>
+                         <Button variant="outline" type="button" onClick={() => form.setValue('endLocation', 'Osu Oxford Street')}>
+                            <MapPin className="mr-2 h-4 w-4" /> Pin on map
+                        </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
