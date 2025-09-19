@@ -1,3 +1,70 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "A vibrant street scene in Accra, Ghana, with Okadas (motorcycle taxis) in motion.",
+      "imageUrl": "https://picsum.photos/seed/ghana-street/1200/600",
+      "imageHint": "city street"
+    },
+    {
+      "id": "map-background",
+      "description": "A stylized map of a city, showing streets and locations.",
+      "imageUrl": "https://picsum.photos/seed/city-map/1200/800",
+      "imageHint": "city map"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Avatar for a user.",
+      "imageUrl": "https://picsum.photos/seed/avatar1/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "restaurant-1",
+      "description": "The exterior of a modern restaurant specializing in Jollof rice.",
+      "imageUrl": "https://picsum.photos/seed/restaurant1/400/300",
+      "imageHint": "restaurant exterior"
+    },
+    {
+      "id": "restaurant-2",
+      "description": "A cozy cafe with outdoor seating.",
+      "imageUrl": "https://picsum.photos/seed/restaurant2/400/300",
+      "imageHint": "cafe interior"
+    },
+    {
+      "id": "restaurant-3",
+      "description": "A street food vendor selling local delicacies.",
+      "imageUrl": "https://picsum.photos/seed/restaurant3/400/300",
+      "imageHint": "street food"
+    },
+    {
+      "id": "food-1",
+      "description": "A delicious plate of Jollof rice with chicken.",
+      "imageUrl": "https://picsum.photos/seed/food1/200/200",
+      "imageHint": "jollof rice"
+    },
+    {
+      "id": "food-2",
+      "description": "A bowl of fufu and light soup.",
+      "imageUrl": "https://picsum.photos/seed/food2/200/200",
+      "imageHint": "fufu soup"
+    },
+    {
+      "id": "marketplace-item-1",
+      "description": "A traditional Kente cloth.",
+      "imageUrl": "https://picsum.photos/seed/item1/400/300",
+      "imageHint": "kente cloth"
+    },
+    {
+      "id": "marketplace-item-2",
+      "description": "Handmade leather sandals.",
+      "imageUrl": "https://picsum.photos/seed/item2/400/300",
+      "imageHint": "leather sandals"
+    },
+    {
+      "id": "marketplace-item-3",
+      "description": "A set of beaded jewelry.",
+      "imageUrl": "https://picsum.photos/seed/item3/400/300",
+      "imageHint": "beaded jewelry"
+    }
+  ]
 }
