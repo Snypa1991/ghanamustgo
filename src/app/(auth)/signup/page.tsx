@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MopedIcon } from '@/components/icons';
+import { GhanaMustGoIcon } from '@/components/icons';
 import { User, Store, Car, Upload, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
@@ -83,7 +83,7 @@ export default function SignupPage() {
         {step === 1 && (
             <>
                 <CardHeader className="text-center">
-                    <MopedIcon className="mx-auto h-10 w-10 text-primary" />
+                    <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
                     <CardTitle className="mt-4 font-headline text-2xl">Join the Community</CardTitle>
                     <CardDescription>How would you like to use our service?</CardDescription>
                 </CardHeader>
@@ -131,7 +131,7 @@ export default function SignupPage() {
         {step === 2 && (
              <>
                 <CardHeader className="text-center">
-                    <MopedIcon className="mx-auto h-10 w-10 text-primary" />
+                    <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
                     <CardTitle className="mt-4 font-headline text-2xl">Create Your Account</CardTitle>
                     <CardDescription>
                         You are signing up as a <span className="font-bold text-primary">{selectedRoleInfo?.title}</span>.
@@ -161,7 +161,7 @@ export default function SignupPage() {
         {step === 3 && (
             <>
                 <CardHeader className="text-center">
-                    <MopedIcon className="mx-auto h-10 w-10 text-primary" />
+                    <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
                     <CardTitle className="mt-4 font-headline text-2xl">Account Verification</CardTitle>
                     <CardDescription>
                         For security, we require all users to verify their identity.

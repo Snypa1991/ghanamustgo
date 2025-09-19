@@ -44,7 +44,7 @@ export default function VehicleDetails({ role }: VehicleDetailsProps) {
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
-                    {role === 'rider' ? <MopedIcon/> : <Car/>}
+                    {role === 'rider' ? <MopedIcon className="h-6 w-6"/> : <Car/>}
                     Vehicle Information
                 </CardTitle>
                 <CardDescription>

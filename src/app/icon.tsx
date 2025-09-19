@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { MopedIcon } from '@/components/icons';
+import { GhanaMustGoIcon } from '@/components/icons';
 
 export const runtime = 'edge';
 
@@ -26,7 +26,7 @@ export default function Icon() {
           borderRadius: '8px'
         }}
       >
-        <MopedIcon 
+        <GhanaMustGoIcon 
           style={{
             width: '90%',
             height: '90%',

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MopedIcon } from '@/components/icons';
+import { GhanaMustGoIcon } from '@/components/icons';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -60,7 +60,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <MopedIcon className="mx-auto h-10 w-10 text-primary" />
+          <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
           <CardTitle className="mt-4 font-headline text-2xl">Welcome Back</CardTitle>
           <CardDescription>
             Sign in to continue your journey.

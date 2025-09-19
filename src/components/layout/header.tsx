@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut, Car, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { MopedIcon } from '@/components/icons';
+import { GhanaMustGoIcon, MopedIcon } from '@/components/icons';
 import { useAuth } from '@/context/app-context';
 import {
   DropdownMenu,
@@ -36,7 +36,7 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <MopedIcon className="h-8 w-auto text-primary" />
+            <GhanaMustGoIcon className="h-8 w-auto text-primary" />
             <span className="hidden font-bold sm:inline-block font-headline text-2xl">Ghana Must Go</span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
@@ -66,7 +66,7 @@ export default function Header() {
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
                   <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-                    <MopedIcon className="h-8 w-auto text-primary" />
+                    <GhanaMustGoIcon className="h-8 w-auto text-primary" />
                     <span className="font-bold font-headline text-2xl">Ghana Must Go</span>
                   </Link>
                 </div>
@@ -121,7 +121,7 @@ export default function Header() {
         <div className="flex flex-1 items-center justify-center md:justify-end">
           <div className="md:hidden">
             <Link href="/" className="flex items-center space-x-2">
-              <MopedIcon className="h-8 w-auto text-primary" />
+              <GhanaMustGoIcon className="h-8 w-auto text-primary" />
                <span className="font-bold font-headline text-2xl">Ghana Must Go</span>
             </Link>
           </div>

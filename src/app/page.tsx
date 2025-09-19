@@ -66,7 +66,7 @@ export default function Home() {
             Your City, Connected.
           </h1>
           <p className="mt-4 max-w-2xl text-lg sm:text-xl">
-            Rides, deliveries, food, and local goods—all in one app. Welcome to Okada.
+            Rides, deliveries, food, and local goods—all in one app. Welcome to Ghana Must Go.
           </p>
           <div className="mt-8 flex gap-4">
             <Link href="/book-ride">
