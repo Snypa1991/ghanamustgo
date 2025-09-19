@@ -63,7 +63,7 @@ export default function LoginPage() {
           <MopedIcon className="mx-auto h-10 w-10 text-primary" />
           <CardTitle className="mt-4 font-headline text-2xl">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in to continue your journey. <br /> Use a dummy account below to log in.
+            Sign in to continue your journey.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -110,7 +110,6 @@ export default function LoginPage() {
           </form>
         </Form>
         <CardContent>
-            <CardDescription className="text-center mb-2">Dummy Accounts (password: `password`)</CardDescription>
             <div className="flex justify-center gap-2 text-sm">
                 <Button variant="link" size="sm" onClick={() => {
                     form.setValue('email', 'customer@example.com');
