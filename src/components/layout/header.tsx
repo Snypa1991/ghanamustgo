@@ -34,7 +34,7 @@ export default function Header() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <MopedIcon className="h-8 w-auto text-primary" />
-            <span className="hidden font-bold sm:inline-block font-headline text-2xl">Okada</span>
+            <span className="hidden font-bold sm:inline-block font-headline text-2xl">Ghana Must Go</span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             {navItems.map((item) => (
@@ -64,7 +64,7 @@ export default function Header() {
                 <div className="p-4 border-b">
                   <Link href="/" className="flex items-center space-x-2">
                     <MopedIcon className="h-8 w-auto text-primary" />
-                    <span className="font-bold font-headline text-2xl">Okada</span>
+                    <span className="font-bold font-headline text-2xl">Ghana Must Go</span>
                   </Link>
                 </div>
                 <nav className="flex-grow p-4">
@@ -115,7 +115,7 @@ export default function Header() {
           <div className="md:hidden">
             <Link href="/" className="flex items-center space-x-2">
               <MopedIcon className="h-8 w-auto text-primary" />
-               <span className="font-bold font-headline text-2xl">Okada</span>
+               <span className="font-bold font-headline text-2xl">Ghana Must Go</span>
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-2">
