@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Package, UtensilsCrossed, Store, ArrowRight } from 'lucide-react';
+import { Package, UtensilsCrossed, Store, ArrowRight, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -12,6 +12,13 @@ const features = [
     description: 'Fast, reliable rides to get you where you need to be.',
     icon: MopedIcon,
     href: '/book-ride',
+    cta: 'Book Now',
+  },
+  {
+    title: 'Book a Taxi',
+    description: 'Comfortable and private car rides for your trips.',
+    icon: Car,
+    href: '/book-taxi',
     cta: 'Book Now',
   },
   {
@@ -84,7 +91,7 @@ export default function Home() {
               From commuting to cravings, we've got you covered.
             </p>
           </div>
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <Card key={feature.title} className="flex flex-col text-center items-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>

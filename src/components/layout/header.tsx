@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut } from 'lucide-react';
+import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { MopedIcon } from '@/components/icons';
@@ -18,7 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 const navItems = [
-  { href: '/book-ride', icon: MopedIcon, label: 'Rides' },
+  { href: '/book-ride', icon: MopedIcon, label: 'Okada' },
+  { href: '/book-taxi', icon: Car, label: 'Taxi' },
   { href: '/dispatch-package', icon: Package, label: 'Dispatch' },
   { href: '/restaurants', icon: UtensilsCrossed, label: 'Food' },
   { href: '/marketplace', icon: Store, label: 'Market' },
