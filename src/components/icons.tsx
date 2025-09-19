@@ -14,28 +14,38 @@ export const MopedIcon = (props: React.SVGProps<SVGSVGElement>) => (
         patternUnits="userSpaceOnUse"
       >
         <rect width="10" height="10" x="0" y="0" fill="#D42027" />
-        <rect width="10" height="10" x="10" y="0" fill="#006-255" />
-        <rect width="10" height="10" x="0" y="10" fill="#006-255" />
+        <rect width="10" height="10" x="10" y="0" fill="hsl(var(--primary))" />
+        <rect width="10" height="10" x="0" y="10" fill="hsl(var(--primary))" />
         <rect width="10" height="10" x="10" y="10" fill="#D42027" />
       </pattern>
     </defs>
 
+    {/* Bag body */}
     <path
       d="M10 30 L10 90 L90 90 L90 30 L55 30 L50 20 L45 30 Z"
       fill="url(#checker)"
-      stroke="hsl(var(--primary))"
-      strokeWidth="3"
+      stroke="hsl(var(--foreground))"
+      strokeWidth="2"
     />
     
+    {/* Handles */}
     <path
-      d="M40 30 L40 15 A 5 5 0 0 1 60 15 L60 30"
-      stroke="hsl(var(--primary))"
-      strokeWidth="5"
+      d="M30 30 C 30 10, 40 10, 40 30"
+      stroke="hsl(var(--foreground))"
+      strokeWidth="3"
+      fill="none"
+      strokeLinecap="round"
+    />
+    <path
+      d="M60 30 C 60 10, 70 10, 70 30"
+      stroke="hsl(var(--foreground))"
+      strokeWidth="3"
       fill="none"
       strokeLinecap="round"
     />
 
-    <g transform="translate(50 55)" fill="#FCD116">
+    {/* Star in the middle */}
+    <g transform="translate(50 60)" fill="#FCD116" stroke="#000" strokeWidth="1">
       <path d="M0 -10 L2.94 -4.05 L9.51 -3.09 L4.76 1.54 L5.88 8.09 L0 5 L-5.88 8.09 L-4.76 1.54 L-9.51 -3.09 L-2.94 -4.05 Z" />
     </g>
   </svg>
