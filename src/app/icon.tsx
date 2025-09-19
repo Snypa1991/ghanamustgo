@@ -16,20 +16,20 @@ export default function Icon() {
       <div
         style={{
           fontSize: 24,
-          background: '#FFF2E1',
+          background: '#1E293B',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#FF8C00',
+          color: '#FFFFFF',
           borderRadius: '8px'
         }}
       >
         <MopedIcon 
           style={{
-            width: '75%',
-            height: '75%',
+            width: '90%',
+            height: '90%',
           }}
         />
       </div>

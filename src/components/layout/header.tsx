@@ -33,8 +33,8 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <MopedIcon className="h-6 w-6 text-primary" />
-            <span className="hidden font-bold sm:inline-block font-headline">Ghana Must Go</span>
+            <MopedIcon className="h-8 w-auto text-primary" />
+            <span className="hidden font-bold sm:inline-block font-headline text-2xl">Okada</span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             {navItems.map((item) => (
@@ -43,7 +43,7 @@ export default function Header() {
               </Link>
             ))}
              {user?.role === 'admin' && (
-                <Link href="/admin/dashboard" className="transition-colors hover:text-primary text-primary font-bold">
+                <Link href="/admin/dashboard" className="transition-colors hover:text-primary text-accent font-bold">
                   Dashboard
                 </Link>
             )}
@@ -63,8 +63,8 @@ export default function Header() {
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
                   <Link href="/" className="flex items-center space-x-2">
-                    <MopedIcon className="h-6 w-6 text-primary" />
-                    <span className="font-bold font-headline">Ghana Must Go</span>
+                    <MopedIcon className="h-8 w-auto text-primary" />
+                    <span className="font-bold font-headline text-2xl">Okada</span>
                   </Link>
                 </div>
                 <nav className="flex-grow p-4">
@@ -114,8 +114,8 @@ export default function Header() {
         <div className="flex flex-1 items-center justify-center md:justify-end">
           <div className="md:hidden">
             <Link href="/" className="flex items-center space-x-2">
-              <MopedIcon className="h-6 w-6 text-primary" />
-              <span className="font-bold font-headline">Ghana Must Go</span>
+              <MopedIcon className="h-8 w-auto text-primary" />
+               <span className="font-bold font-headline text-2xl">Okada</span>
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-2">
