@@ -1,3 +1,4 @@
+
 {
   "placeholderImages": [
     {
@@ -49,6 +50,18 @@
       "imageHint": "fufu soup"
     },
     {
+      "id": "food-3",
+      "description": "Banku and Tilapia with hot pepper.",
+      "imageUrl": "https://picsum.photos/seed/food3/200/200",
+      "imageHint": "banku tilapia"
+    },
+    {
+      "id": "food-4",
+      "description": "Waakye served with shito, gari, and spaghetti.",
+      "imageUrl": "https://picsum.photos/seed/food4/200/200",
+      "imageHint": "waakye"
+    },
+    {
       "id": "marketplace-item-1",
       "description": "A traditional Kente cloth.",
       "imageUrl": "https://picsum.photos/seed/item1/400/300",
@@ -65,6 +78,12 @@
       "description": "A set of beaded jewelry.",
       "imageUrl": "https://picsum.photos/seed/item3/400/300",
       "imageHint": "beaded jewelry"
+    },
+    {
+      "id": "marketplace-item-4",
+      "description": "A carved wooden mask from Ghana.",
+      "imageUrl": "https://picsum.photos/seed/item4/400/300",
+      "imageHint": "wooden mask"
     }
   ]
 }

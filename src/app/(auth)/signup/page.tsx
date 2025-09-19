@@ -8,10 +8,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MopedIcon } from '@/components/icons';
-import { User, Store, Car, Upload, CheckCircle } from 'lucide-react';
+import { User, Store, Car, Upload, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { checkImage } from '@/app/actions';
 
 type Role = 'customer' | 'partner' | 'vendor';
 
@@ -39,6 +40,8 @@ const roles = [
 export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [selectedRole, setSelectedRole] = useState<Role>('customer');
+  const [isCheckingImage, setIsCheckingImage] = useState(false);
+  const [blurResult, setBlurResult] = useState<{ isBlurry: boolean, reasoning: string } | null>(null);
 
   const selectedRoleInfo = roles.find(r => r.name === selectedRole);
 
@@ -52,6 +55,27 @@ export default function SignupPage() {
     // In a real app, you would handle document submission here.
     setStep(4);
   }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const dataUri = reader.result as string;
+                setBlurResult(null);
+                setIsCheckingImage(true);
+                const result = await checkImage({ imageDataUri: dataUri });
+                if (result.success && result.data) {
+                    setBlurResult(result.data);
+                } else {
+                    setBlurResult({isBlurry: false, reasoning: "Could not check image quality."})
+                }
+                setIsCheckingImage(false);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
@@ -151,8 +175,25 @@ export default function SignupPage() {
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="ghana-card-upload">Upload Ghana Card</Label>
-                            <Input id="ghana-card-upload" type="file" required />
+                            <Input id="ghana-card-upload" type="file" required onChange={handleFileChange}/>
+                            <p className="text-xs text-muted-foreground">The image will be checked for clarity.</p>
                         </div>
+                        {isCheckingImage && (
+                            <div className="flex items-center text-sm text-muted-foreground">
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Checking image quality...
+                            </div>
+                        )}
+                        {blurResult && (
+                             <Alert variant={blurResult.isBlurry ? "destructive" : "default"} className={!blurResult.isBlurry ? "bg-green-50" : ""}>
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertTitle>{blurResult.isBlurry ? "Image Appears Blurry" : "Image Looks Clear"}</AlertTitle>
+                                <AlertDescription>
+                                    {blurResult.reasoning}
+                                    {blurResult.isBlurry && " Please upload a clearer image."}
+                                </AlertDescription>
+                            </Alert>
+                        )}
                     </div>
 
                     {selectedRole === 'partner' && (
@@ -169,7 +210,7 @@ export default function SignupPage() {
                     )}
                 </CardContent>
                 <CardFooter className="flex-col gap-4">
-                    <Button className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} onClick={handleVerification}>
+                    <Button className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} onClick={handleVerification} disabled={isCheckingImage || (blurResult?.isBlurry ?? false)}>
                         <Upload className="mr-2 h-4 w-4" />
                         Submit for Verification
                     </Button>
@@ -207,5 +248,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
-    
