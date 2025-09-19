@@ -110,16 +110,25 @@ export default function LoginPage() {
           </form>
         </Form>
         <CardContent>
-            <div className="flex justify-center gap-2 text-sm">
-                <Button variant="link" size="sm" onClick={() => {
+            <div className="text-center text-xs text-muted-foreground mb-2">Quick Logins</div>
+            <div className="flex justify-center flex-wrap gap-2 text-sm">
+                <Button variant="outline" size="sm" onClick={() => {
                     form.setValue('email', 'customer@example.com');
                     form.setValue('password', 'password');
                 }}>Customer</Button>
-                <Button variant="link" size="sm" onClick={() => {
+                <Button variant="outline" size="sm" onClick={() => {
                     form.setValue('email', 'rider@example.com');
                     form.setValue('password', 'password');
                 }}>Rider</Button>
-                 <Button variant="link" size="sm" onClick={() => {
+                 <Button variant="outline" size="sm" onClick={() => {
+                    form.setValue('email', 'driver@example.com');
+                    form.setValue('password', 'password');
+                }}>Driver</Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                    form.setValue('email', 'vendor@example.com');
+                    form.setValue('password', 'password');
+                }}>Vendor</Button>
+                 <Button variant="outline" size="sm" onClick={() => {
                     form.setValue('email', 'admin@example.com');
                     form.setValue('password', 'password');
                 }}>Admin</Button>

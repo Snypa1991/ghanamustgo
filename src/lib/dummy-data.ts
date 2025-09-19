@@ -3,7 +3,7 @@ export type User = {
   name: string;
   email: string;
   password?: string; // Should not be sent to client in a real app
-  role: 'customer' | 'rider' | 'admin';
+  role: 'customer' | 'rider' | 'admin' | 'driver' | 'vendor';
 };
 
 export const DUMMY_USERS: User[] = [
@@ -20,6 +20,20 @@ export const DUMMY_USERS: User[] = [
     email: 'rider@example.com',
     password: 'password',
     role: 'rider',
+  },
+   {
+    id: 'user-4',
+    name: 'Adjoa Driver',
+    email: 'driver@example.com',
+    password: 'password',
+    role: 'driver',
+  },
+  {
+    id: 'user-5',
+    name: 'Yaw Vendor',
+    email: 'vendor@example.com',
+    password: 'password',
+    role: 'vendor',
   },
   {
     id: 'user-3',
