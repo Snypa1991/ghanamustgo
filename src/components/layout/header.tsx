@@ -1,9 +1,21 @@
+"use client";
+
 import Link from 'next/link';
-import { Package, UtensilsCrossed, Store, UserCircle, Menu } from 'lucide-react';
+import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Separator } from '@/components/ui/separator';
 import { MopedIcon } from '@/components/icons';
+import { useAuth } from '@/context/app-context';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 const navItems = [
   { href: '/book-ride', icon: MopedIcon, label: 'Rides' },
@@ -13,6 +25,8 @@ const navItems = [
 ];
 
 export default function Header() {
+  const { user, logout } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -60,11 +74,24 @@ export default function Header() {
                   </ul>
                 </nav>
                 <div className="p-4 mt-auto border-t">
-                  <Link href="/login">
-                    <Button className="w-full justify-start" variant="ghost">
-                      <UserCircle className="mr-2 h-5 w-5" /> Login / Sign Up
-                    </Button>
-                  </Link>
+                  {user ? (
+                    <div className="space-y-2">
+                       <Link href="/profile">
+                          <Button className="w-full justify-start" variant="ghost">
+                            <UserCircle className="mr-2 h-5 w-5" /> My Profile
+                          </Button>
+                        </Link>
+                       <Button className="w-full justify-start" variant="ghost" onClick={logout}>
+                          <LogOut className="mr-2 h-5 w-5" /> Logout
+                        </Button>
+                    </div>
+                  ) : (
+                    <Link href="/login">
+                      <Button className="w-full justify-start" variant="ghost">
+                        <UserCircle className="mr-2 h-5 w-5" /> Login / Sign Up
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </SheetContent>
@@ -79,16 +106,50 @@ export default function Header() {
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-2">
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Login
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                Sign Up
-              </Button>
-            </Link>
+            {user ? (
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                       <AvatarImage src={`https://picsum.photos/seed/${user.email}/100/100`} alt={user.name} />
+                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile"><UserCircle className="mr-2 h-4 w-4" />Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="outline" size="sm">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button size="sm" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </div>

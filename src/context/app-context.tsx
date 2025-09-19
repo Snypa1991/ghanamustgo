@@ -1,0 +1,47 @@
+"use client";
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User } from '@/lib/dummy-data';
+
+interface AppContextType {
+  user: User | null;
+  login: (user: User) => void;
+  logout: () => void;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('ghana-must-go-user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const login = (userData: User) => {
+    localStorage.setItem('ghana-must-go-user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('ghana-must-go-user');
+    setUser(null);
+  };
+
+  return (
+    <AppContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AppContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AppProvider');
+  }
+  return context;
+}
