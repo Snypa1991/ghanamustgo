@@ -14,9 +14,7 @@ export default function Icon() {
     (
       <div
         style={{
-          fontSize: 8,
-          background: 'hsl(var(--primary))',
-          color: 'hsl(var(--primary-foreground))',
+          background: 'hsl(var(--background))',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -28,8 +26,9 @@ export default function Icon() {
           borderRadius: '8px'
         }}
       >
-        <div>GHANA</div>
-        <div>MUST GO</div>
+        <div style={{ color: '#CE1126', fontSize: 9 }}>GHANA</div>
+        <div style={{ color: '#FCD116', fontSize: 8 }}>★</div>
+        <div style={{ color: '#006B3F', fontSize: 9 }}>MUST GO</div>
       </div>
     ),
     {
