@@ -13,7 +13,6 @@ export default function BookRidePage() {
       <div className="text-center mb-12">
         <MopedIcon className="mx-auto h-12 w-12 text-primary" />
         <h1 className="mt-4 text-4xl font-bold font-headline">Book an Okada Ride</h1>
-        <p className="mt-2 text-lg text-muted-foreground">Enter your details and let us find the quickest route for you.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">

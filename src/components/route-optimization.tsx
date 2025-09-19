@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bot, Map, Clock, Fuel, Loader2 } from 'lucide-react';
+import { Bot, Map, Clock, Fuel, Loader2, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -54,11 +54,8 @@ export default function RouteOptimization() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <div className="flex items-center gap-2">
-            <Bot className="h-6 w-6 text-primary" />
-            <CardTitle className="font-headline">AI-Enhanced Route Optimization</CardTitle>
-        </div>
-        <CardDescription>Let our AI find the best route for you, saving time and fuel.</CardDescription>
+        <CardTitle className="font-headline">Enter Your Route</CardTitle>
+        <CardDescription>Our AI will find the best path for you.</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -69,7 +66,7 @@ export default function RouteOptimization() {
                 name="startLocation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Location</FormLabel>
+                    <FormLabel>Pickup Location</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Accra Mall" {...field} />
                     </FormControl>
@@ -82,7 +79,7 @@ export default function RouteOptimization() {
                 name="endLocation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>End Location</FormLabel>
+                    <FormLabel>Drop-off Location</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Labadi Beach" {...field} />
                     </FormControl>
@@ -91,57 +88,55 @@ export default function RouteOptimization() {
                 )}
               />
             </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="currentTrafficConditions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Current Traffic</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select traffic condition" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Light">Light</SelectItem>
-                          <SelectItem value="Moderate">Moderate</SelectItem>
-                          <SelectItem value="Heavy">Heavy</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shortestPathAlgorithm"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Algorithm</FormLabel>
+             <FormField
+                control={form.control}
+                name="currentTrafficConditions"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormLabel>Current Traffic</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select an algorithm" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Dijkstra">Dijkstra</SelectItem>
-                          <SelectItem value="A*">A* (A-Star)</SelectItem>
-                          <SelectItem value="Bellman-Ford">Bellman-Ford</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-             </div>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select traffic condition" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Light">Light</SelectItem>
+                        <SelectItem value="Moderate">Moderate</SelectItem>
+                        <SelectItem value="Heavy">Heavy</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="shortestPathAlgorithm"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormLabel>Algorithm</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an algorithm" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Dijkstra">Dijkstra</SelectItem>
+                        <SelectItem value="A*">A* (A-Star)</SelectItem>
+                        <SelectItem value="Bellman-Ford">Bellman-Ford</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isLoading} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
-              Optimize Route
+            <Button type="submit" disabled={isLoading} className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
+              Find Ride & Optimize
             </Button>
           </CardFooter>
         </form>
@@ -151,7 +146,7 @@ export default function RouteOptimization() {
          <div className="p-6 pt-0">
              <div className="flex items-center justify-center rounded-md border border-dashed p-8">
                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                 <p className="ml-4 text-muted-foreground">AI is thinking...</p>
+                 <p className="ml-4 text-muted-foreground">AI is optimizing...</p>
              </div>
          </div>
       )}
