@@ -44,15 +44,19 @@ export default function DispatchPackagePage() {
                   className="object-cover"
                   data-ai-hint={mapImage.imageHint}
                 />
-                 <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
+                 <div className="absolute top-1/4 left-1/4 animate-pulse">
                     <MapPin className="h-8 w-8 text-blue-500" />
-                    <span className="text-xs bg-black/50 text-white p-1 rounded">Pickup</span>
+                    <div className="absolute -bottom-5 left-1/2 -translate-x-1/2">
+                        <span className="text-xs bg-black/50 text-white p-1 rounded">Pickup</span>
+                    </div>
                 </div>
-                 <div className="absolute bottom-1/4 right-1/4 transform translate-x-1/2 translate-y-1/2">
+                 <div className="absolute bottom-1/4 right-1/4 animate-pulse">
                     <MapPin className="h-8 w-8 text-green-500" />
-                     <span className="text-xs bg-black/50 text-white p-1 rounded">Dropoff</span>
+                     <div className="absolute -bottom-5 left-1/2 -translate-x-1/2">
+                        <span className="text-xs bg-black/50 text-white p-1 rounded">Dropoff</span>
+                    </div>
                 </div>
-                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse">
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 animate-pulse">
                     <Package className="h-8 w-8 text-primary" />
                 </div>
               </div>

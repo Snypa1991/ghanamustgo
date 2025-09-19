@@ -34,13 +34,17 @@ export default function BookRidePage() {
                   className="object-cover"
                   data-ai-hint={mapImage.imageHint}
                 />
-                 <div className="absolute top-1/3 left-1/4">
-                    <MapPin className="h-8 w-8 text-green-500 animate-pulse" />
-                    <span className="text-xs bg-black/50 text-white p-1 rounded">You</span>
+                 <div className="absolute top-1/3 left-1/4 animate-pulse">
+                    <MapPin className="h-8 w-8 text-green-500" />
+                    <div className="absolute -bottom-5 left-1/2 -translate-x-1/2">
+                        <span className="text-xs bg-black/50 text-white p-1 rounded">You</span>
+                    </div>
                 </div>
-                 <div className="absolute top-2/3 left-2/3">
-                    <MopedIcon className="h-8 w-8 text-blue-500 animate-bounce" />
-                     <span className="text-xs bg-black/50 text-white p-1 rounded">Rider</span>
+                 <div className="absolute top-2/3 left-2/3 animate-bounce">
+                    <MopedIcon className="h-8 w-8 text-blue-500" />
+                     <div className="absolute -bottom-5 left-1/2 -translate-x-1/2">
+                        <span className="text-xs bg-black/50 text-white p-1 rounded">Rider</span>
+                    </div>
                 </div>
               </div>
             )}
