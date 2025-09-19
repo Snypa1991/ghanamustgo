@@ -44,7 +44,7 @@ export default function LoginPage() {
       login(user);
       toast({
         title: 'Login Successful',
-        description: `Welcome back, ${user.name}!`,
+        description: `Akwaaba, ${user.name}!`,
       });
       router.push('/profile');
     } else {
@@ -60,8 +60,8 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
-          <CardTitle className="mt-4 font-headline text-2xl">Welcome Back</CardTitle>
+          <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />
+          <CardTitle className="mt-4 font-headline text-2xl">Akwaaba</CardTitle>
           <CardDescription>
             Sign in to continue your journey.
           </CardDescription>
