@@ -54,22 +54,22 @@ export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export const MopedIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
     >
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="19" cy="18" r="3" />
-      <path d="M12 18h-3.5" />
-      <path d="M19 18h-2" />
-      <path d="M10 4h3l2 4" />
-      <path d="M6 18v-5h10.5" />
-      <path d="M10 9L6.5 13" />
-      <path d="m10 4-2 4" />
+        <path d="M5 18a3 3 0 0 0-3-3V9a3 3 0 0 1 3-3h1" />
+        <path d="M19 18a3 3 0 0 1-3-3V9a3 3 0 0 0-3-3h-1" />
+        <path d="m9 18-2-5" />
+        <path d="m6 13-2-2" />
+        <path d="M13 13h4" />
+        <path d="m15 18 2-5" />
+        <circle cx="6.5" cy="18.5" r="3.5" />
+        <circle cx="17.5" cy="18.5" r="3.5" />
     </svg>
 );
