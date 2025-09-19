@@ -1,5 +1,4 @@
 import { ImageResponse } from 'next/og';
-import { GhanaMustGoIcon } from '@/components/icons';
 
 export const runtime = 'edge';
 
@@ -15,23 +14,22 @@ export default function Icon() {
     (
       <div
         style={{
-          fontSize: 24,
-          background: '#FFFFFF',
+          fontSize: 8,
+          background: 'hsl(var(--primary))',
+          color: 'hsl(var(--primary-foreground))',
           width: '100%',
           height: '100%',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#000000',
+          fontFamily: 'Poppins, sans-serif',
+          fontWeight: 'bold',
           borderRadius: '8px'
         }}
       >
-        <GhanaMustGoIcon 
-          style={{
-            width: '90%',
-            height: '90%',
-          }}
-        />
+        <div>GHANA</div>
+        <div>MUST GO</div>
       </div>
     ),
     {
