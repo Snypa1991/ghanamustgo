@@ -36,7 +36,7 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <GhanaMustGoIcon className="h-10 w-auto text-primary" />
+            <GhanaMustGoIcon className="h-12 w-auto text-primary" />
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             {navItems.map((item) => (
@@ -65,7 +65,7 @@ export default function Header() {
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
                   <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-                    <GhanaMustGoIcon className="h-10 w-auto text-primary" />
+                    <GhanaMustGoIcon className="h-12 w-auto text-primary" />
                     <span className="font-bold font-headline text-2xl">Ghana Must Go</span>
                   </Link>
                 </div>
@@ -120,7 +120,7 @@ export default function Header() {
         <div className="flex flex-1 items-center justify-center md:justify-end">
           <div className="md:hidden">
             <Link href="/" className="flex items-center space-x-2">
-              <GhanaMustGoIcon className="h-10 w-auto text-primary" />
+              <GhanaMustGoIcon className="h-12 w-auto text-primary" />
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-2">
