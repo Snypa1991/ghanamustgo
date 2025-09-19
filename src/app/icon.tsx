@@ -34,7 +34,8 @@ export default function Icon() {
           transform: 'translate(-50%, -50%) scale(0.6)',
           color: 'black',
           fontSize: '48px',
-          lineHeight: 1
+          lineHeight: 1,
+          opacity: 0.15
         }}>★</div>
         <div style={{ color: '#CE1126', fontSize: 9 }}>GHANA</div>
         <div style={{ color: '#006B3F', fontSize: 9 }}>MUST GO</div>

@@ -11,7 +11,7 @@ export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
       </defs>
 
       <g>
-        <use href="#star-path" fill="black" transform="translate(0, -10) scale(0.8)" />
+        <use href="#star-path" fill="black" opacity="0.15" transform="translate(0, -10) scale(0.8)" />
         <text
             x="50%"
             y="30%"
@@ -44,8 +44,6 @@ export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export const MopedIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -54,14 +52,11 @@ export const MopedIcon = (props: React.SVGProps<SVGSVGElement>) => (
       strokeLinejoin="round"
       {...props}
     >
-      <path d="M18.66 17.55c.23.4.24.89.02 1.31l-1.57 3.14c-.23.46-.7.7-1.19.7H6.08c-.49 0-.96-.24-1.19-.7l-1.57-3.14c-.22-.42-.21-.91.02-1.31l.93-1.61" />
-      <path d="M17.5 13.33c-.22.37-.44.74-.66 1.11" />
-      <path d="M13.33 6.67H9l3.33 6.66" />
-      <path d="M6.33 13.33H4.5L3.33 11" />
-      <path d="m14 4 3.33 4" />
-      <path d="M12 2v2.67" />
-      <path d="M7.33 4.67 6 2" />
-      <circle cx="17.5" cy="9.5" r="1" />
-      <circle cx="6.5" cy="9.5" r="1" />
+        <path d="M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3z"/>
+        <path d="M8 19h8"/>
+        <path d="M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2z"/>
+        <path d="M5 11v-5h8"/>
+        <path d="M11 6L7 4"/>
+        <path d="M13 11V4h-2"/>
     </svg>
 );
