@@ -63,14 +63,12 @@ export const MopedIcon = (props: React.SVGProps<SVGSVGElement>) => (
         strokeLinejoin="round"
         {...props}
     >
-        <path d="M14 4h-4l-2 5h12l-2-5Z" />
-        <path d="M12 11V4" />
-        <path d="M7 11h10" />
-        <path d="M16 11.5a2.5 2.5 0 1 1-5 0" />
-        <path d="M18.5 18a3.5 3.5 0 1 0-7 0 3.5 3.5 0 0 0 7 0Z" />
-        <path d="M5.5 18a3.5 3.5 0 1 0-7 0 3.5 3.5 0 0 0 7 0Z" />
-        <path d="M15 18h-1.5" />
-        <path d="M6.5 18H8" />
-        <path d="M11.5 18h-3.5a1 1 0 0 1-1-1V9.5" />
+      <circle cx="6.5" cy="17.5" r="2.5" />
+      <circle cx="17.5" cy="17.5" r="2.5" />
+      <path d="M14 6.26-1.37 6.25a2 2 0 0 0-1.63 2.18l1.5 8a2 2 0 0 0 2 1.57h9.13" />
+      <path d="M14 6.25h3.5a2 2 0 0 1 2 2v2.5" />
+      <path d="M12.5 6.25 10.5 4 8.5 6.25" />
+      <path d="m10.5 11 2-5" />
+      <path d="m6.5 15.5 11-1" />
     </svg>
 );
