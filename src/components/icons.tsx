@@ -3,12 +3,18 @@ import React from 'react';
 export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 100 70"
+      viewBox="0 0 100 80"
       {...props}
     >
+      <defs>
+        <path id="star-path" d="M50 5 L61.2 35.5 L95 40 L70 60 L78.5 95 L50 75 L21.5 95 L30 60 L5 40 L38.8 35.5 Z" />
+      </defs>
+
+      <g>
+        <use href="#star-path" fill="black" transform="translate(0, -10) scale(0.8)" />
         <text
             x="50%"
-            y="35%"
+            y="30%"
             dominantBaseline="middle"
             textAnchor="middle"
             fontFamily="Poppins, sans-serif"
@@ -18,10 +24,9 @@ export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
         >
             GHANA
         </text>
-        <path d="M50 45 L52.94 54.51 L62.56 54.51 L54.81 60.49 L57.75 70 L50 64.01 L42.25 70 L45.19 60.49 L37.44 54.51 L47.06 54.51 Z" fill="#FCD116"/>
         <text
             x="50%"
-            y="90%"
+            y="70%"
             dominantBaseline="middle"
             textAnchor="middle"
             fontFamily="Poppins, sans-serif"
@@ -31,6 +36,7 @@ export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
         >
             MUST GO
         </text>
+      </g>
     </svg>
 );
 
