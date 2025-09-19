@@ -55,133 +55,21 @@ export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export const MopedIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 134 44"
+      viewBox="0 0 24 24"
       fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       {...props}
     >
-      <path
-        d="M2.99 22H1M26.99 22H25"
-        stroke="hsl(var(--accent))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M15.5 13H19L22 19"
-        stroke="hsl(var(--foreground))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M9.5 35a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"
-        fill="hsl(var(--foreground))"
-        stroke="hsl(var(--foreground))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M34.5 35a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"
-        fill="hsl(var(--foreground))"
-        stroke="hsl(var(--foreground))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M27 22H11l-2.5 9h21L27 22zM15.5 13l-4 9h4.5M22.5 22H24"
-        stroke="hsl(var(--foreground))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M117 22h16M133 22h-5"
-        stroke="hsl(var(--accent))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M129 19l-4 8h-4l4-8h4zM117 22l-1 3h3l-2-3z"
-        fill="hsl(var(--accent))"
-      ></path>
-      <path
-        d="M112 28l-2 4h13l2-4H112zM128 17h-9l-2 5h13l-2-5z"
-        fill="hsl(var(--foreground))"
-      ></path>
-      <path
-        d="M110 32l-3 4h19l2-4H110zM107 41l5-5-3-4-5 5 3 4z"
-        fill="hsl(var(--foreground))"
-      ></path>
-      <path
-        d="M128 17l-3-5-4 4 3 5 4-4zM107 41l-2 3h22l-2-3H107z"
-        fill="hsl(var(--foreground))"
-      ></path>
-      <path
-        d="M114 12l3-6-4-3-3 6 4 3z"
-        stroke="hsl(var(--foreground))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M109 4l4 2-2 4-4-2 2-4z"
-        fill="hsl(var(--foreground))"
-        stroke="hsl(var(--foreground))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M93 16h15"
-        stroke="hsl(var(--accent))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M102 11h-3"
-        stroke="hsl(var(--accent))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M48 29H36"
-        stroke="hsl(var(--accent))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M40 22H38"
-        stroke="hsl(var(--accent))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M62 25H50"
-        stroke="hsl(var(--accent))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M89 27h-6"
-        stroke="hsl(var(--accent))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
-      <path
-        d="M75 19H62"
-        stroke="hsl(var(--accent))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      ></path>
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="19" cy="18" r="3" />
+      <path d="M12 18h-3.5" />
+      <path d="M19 18h-2" />
+      <path d="M10 4h3l2 4" />
+      <path d="M6 18v-5h10.5" />
+      <path d="M10 9L6.5 13" />
+      <path d="m10 4-2 4" />
     </svg>
 );
