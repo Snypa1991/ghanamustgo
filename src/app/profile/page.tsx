@@ -7,9 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Edit } from 'lucide-react';
+import { Edit, Store } from 'lucide-react';
 import VehicleDetails from '@/components/vehicle-details';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import Link from 'next/link';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -65,15 +65,15 @@ export default function ProfilePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="font-headline">Vendor Information</CardTitle>
-                        <CardDescription>Manage your store and product listings.</CardDescription>
+                        <CardDescription>Manage your store and product listings from the marketplace.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                       <Alert>
-                            <AlertTitle>Coming Soon!</AlertTitle>
-                            <AlertDescription>
-                                The vendor dashboard for managing your virtual storefront is under construction.
-                            </AlertDescription>
-                       </Alert>
+                        <Link href="/marketplace">
+                            <Button className="w-full">
+                                <Store className="mr-2 h-4 w-4" />
+                                Manage Your Listings
+                            </Button>
+                       </Link>
                     </CardContent>
                 </Card>
             )}

@@ -6,32 +6,27 @@ import { Badge } from '@/components/ui/badge';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Mock data has been removed. This page is now a template for real data.
-const restaurant = { id: '1', name: 'Restaurant Name', cuisine: 'Cuisine', rating: 0.0, deliveryTime: 'N/A', imageId: 'restaurant-1' };
-const menuItems: any[] = [];
+// In a real app, you would fetch this data. For the prototype, we use sample data.
+const allRestaurants = [
+  { id: '1', name: 'Jollof King', cuisine: 'Ghanaian', rating: 4.8, deliveryTime: '30-45 min', imageId: 'restaurant-1' },
+  { id: '2', name: 'The Cozy Corner', cuisine: 'Cafe', rating: 4.5, deliveryTime: '20-30 min', imageId: 'restaurant-2' },
+  { id: '3', name: 'Aunty Mary\'s Kitchen', cuisine: 'Local', rating: 4.9, deliveryTime: '40-55 min', imageId: 'restaurant-3' },
+];
+
+const allMenuItems = [
+    {id: 'm1', restaurantId: '1', name: 'Jollof with Grilled Chicken', description: 'The classic, smoky and delicious.', price: '15.00', imageId: 'food-1' },
+    {id: 'm2', restaurantId: '1', name: 'Banku and Tilapia', description: 'Served with fresh hot pepper.', price: '20.00', imageId: 'food-3' },
+    {id: 'm3', restaurantId: '1', name: 'Waakye Special', description: 'With all the trimmings.', price: '12.00', imageId: 'food-4' },
+    {id: 'm4', restaurantId: '2', name: 'Iced Coffee', description: 'Freshly brewed and chilled.', price: '5.00', imageId: 'food-5' },
+    {id: 'm5', restaurantId: '2', name: 'Meat Pie', description: 'A savory and filling pastry.', price: '3.00', imageId: 'food-6' },
+    {id: 'm6', restaurantId: '3', name: 'Fufu with Light Soup', description: 'A Sunday special, available daily.', price: '18.00', imageId: 'food-2' },
+];
+
 
 export default function RestaurantDetailPage({ params }: { params: { id: string } }) {
+  const restaurant = allRestaurants.find(r => r.id === params.id) || { id: '0', name: 'Restaurant Not Found', cuisine: 'N/A', rating: 0.0, deliveryTime: 'N/A', imageId: '' };
+  const menuItems = allMenuItems.filter(m => m.restaurantId === params.id);
   const restaurantImage = PlaceHolderImages.find(p => p.id === restaurant.imageId);
-
-  // In a real app, you would fetch restaurant and menu data based on `params.id`
-  // const [restaurant, setRestaurant] = useState(null);
-  // const [menuItems, setMenuItems] = useState([]);
-  // const [loading, setLoading] = useState(true);
-  //
-  // useEffect(() => {
-  //   fetch(`/api/restaurants/${params.id}`)
-  //     .then(res => res.json())
-  //     .then(data => {
-  //       setRestaurant(data.restaurant);
-  //       setMenuItems(data.menuItems);
-  //       setLoading(false);
-  //     })
-  // }, [params.id]);
-  //
-  // if(loading) {
-  //  return <p>Loading...</p>
-  // }
-
 
   return (
     <div>

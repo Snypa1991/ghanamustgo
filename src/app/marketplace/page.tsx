@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-const items: any[] = [
-  // { id: '1', name: 'Traditional Kente Cloth', price: '150.00', imageId: 'marketplace-item-1' },
-  // { id: '2', name: 'Handmade Leather Sandals', price: '45.00', imageId: 'marketplace-item-2' },
-  // { id: '3', name: 'Beaded Jewelry Set', price: '75.00', imageId: 'marketplace-item-3' },
-  // { id: '4', name: 'Carved Wooden Mask', price: '90.00', imageId: 'marketplace-item-1' }, // Re-using for variety
+const items = [
+  { id: '1', name: 'Traditional Kente Cloth', price: '150.00', imageId: 'marketplace-item-1' },
+  { id: '2', name: 'Handmade Leather Sandals', price: '45.00', imageId: 'marketplace-item-2' },
+  { id: '3', name: 'Beaded Jewelry Set', price: '75.00', imageId: 'marketplace-item-3' },
+  { id: '4', name: 'Carved Wooden Mask', price: '90.00', imageId: 'marketplace-item-4' },
 ];
 
 export default function MarketplacePage() {

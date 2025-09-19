@@ -6,11 +6,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-const restaurants: any[] = [
-  // { id: '1', name: 'Jollof King', cuisine: 'Ghanaian', rating: 4.8, deliveryTime: '30-45 min', imageId: 'restaurant-1' },
-  // { id: '2', name: 'The Cozy Corner', cuisine: 'Cafe', rating: 4.5, deliveryTime: '20-30 min', imageId: 'restaurant-2' },
-  // { id: '3', name: 'Aunty Mary\'s Kitchen', cuisine: 'Local', rating: 4.9, deliveryTime: '40-55 min', imageId: 'restaurant-3' },
-  // { id: '4', name: 'Continental Bites', cuisine: 'International', rating: 4.6, deliveryTime: '35-50 min', imageId: 'restaurant-1' }, // Re-using
+const restaurants = [
+  { id: '1', name: 'Jollof King', cuisine: 'Ghanaian', rating: 4.8, deliveryTime: '30-45 min', imageId: 'restaurant-1' },
+  { id: '2', name: 'The Cozy Corner', cuisine: 'Cafe', rating: 4.5, deliveryTime: '20-30 min', imageId: 'restaurant-2' },
+  { id: '3', name: 'Aunty Mary\'s Kitchen', cuisine: 'Local', rating: 4.9, deliveryTime: '40-55 min', imageId: 'restaurant-3' },
+  { id: '4', name: 'Continental Bites', cuisine: 'International', rating: 4.6, deliveryTime: '35-50 min', imageId: 'restaurant-4' },
 ];
 
 export default function RestaurantsPage() {

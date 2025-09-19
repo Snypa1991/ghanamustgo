@@ -38,6 +38,12 @@
       "imageHint": "street food"
     },
     {
+      "id": "restaurant-4",
+      "description": "An upscale continental restaurant interior.",
+      "imageUrl": "https://picsum.photos/seed/restaurant4/400/300",
+      "imageHint": "restaurant interior"
+    },
+    {
       "id": "food-1",
       "description": "A delicious plate of Jollof rice with chicken.",
       "imageUrl": "https://picsum.photos/seed/food1/200/200",
@@ -60,6 +66,18 @@
       "description": "Waakye served with shito, gari, and spaghetti.",
       "imageUrl": "https://picsum.photos/seed/food4/200/200",
       "imageHint": "waakye"
+    },
+    {
+      "id": "food-5",
+      "description": "A tall glass of iced coffee.",
+      "imageUrl": "https://picsum.photos/seed/food5/200/200",
+      "imageHint": "iced coffee"
+    },
+    {
+      "id": "food-6",
+      "description": "A golden-brown baked meat pie.",
+      "imageUrl": "https://picsum.photos/seed/food6/200/200",
+      "imageHint": "meat pie"
     },
     {
       "id": "marketplace-item-1",

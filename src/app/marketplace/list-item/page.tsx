@@ -4,8 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Shield } from 'lucide-react';
+import ListingFeeSuggestion from '@/components/listing-fee-suggestion';
 
 export default function ListItemPage() {
   return (
@@ -16,11 +15,11 @@ export default function ListItemPage() {
         <p className="mt-2 text-lg text-muted-foreground">Sell your goods to the community.</p>
       </div>
 
-      <div className="max-w-2xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline">Item Details</CardTitle>
-                <CardDescription>Fill out the form below to list your item. Listing fees may apply.</CardDescription>
+                <CardDescription>Fill out the form below to list your item. You can use the AI tool to get a fee suggestion.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -40,20 +39,16 @@ export default function ListItemPage() {
                     <Input id="photos" type="file" multiple />
                 </div>
             </CardContent>
-             <CardFooter className="flex-col gap-4">
+             <CardFooter>
                  <Button className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                      <Tag className="mr-2 h-4 w-4" />
                      List Item for Sale
                  </Button>
-                 <Alert variant="default" className="w-full">
-                    <Shield className="h-4 w-4" />
-                    <AlertTitle className="font-bold">Did you know?</AlertTitle>
-                    <AlertDescription>
-                        Admins can use AI to suggest an optimal listing fee from the admin dashboard.
-                    </AlertDescription>
-                </Alert>
              </CardFooter>
         </Card>
+        <div className="w-full">
+            <ListingFeeSuggestion />
+        </div>
       </div>
     </div>
   );
