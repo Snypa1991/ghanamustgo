@@ -1,5 +1,7 @@
+
 "use client";
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut, Car, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,6 +29,7 @@ const navItems = [
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -52,7 +55,7 @@ export default function Header() {
 
         {/* Mobile Nav */}
         <div className="md:hidden">
-          <Sheet>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Menu className="h-6 w-6" />
@@ -62,7 +65,7 @@ export default function Header() {
             <SheetContent side="left">
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
-                  <Link href="/" className="flex items-center space-x-2">
+                  <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
                     <MopedIcon className="h-8 w-auto text-primary" />
                     <span className="font-bold font-headline text-2xl">Ghana Must Go</span>
                   </Link>
@@ -71,7 +74,11 @@ export default function Header() {
                   <ul className="space-y-4">
                     {navItems.map((item) => (
                       <li key={item.label}>
-                        <Link href={item.href} className="flex items-center space-x-3 text-lg font-medium text-foreground/80 hover:text-primary">
+                        <Link 
+                          href={item.href} 
+                          className="flex items-center space-x-3 text-lg font-medium text-foreground/80 hover:text-primary"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
                           <item.icon className="h-5 w-5" />
                           <span>{item.label}</span>
                         </Link>
@@ -83,23 +90,23 @@ export default function Header() {
                   {user ? (
                     <div className="space-y-2">
                        {user.role === 'admin' && (
-                         <Link href="/admin/dashboard">
+                         <Link href="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
                             <Button className="w-full justify-start" variant="ghost">
                                 <Shield className="mr-2 h-5 w-5" /> Admin Dashboard
                             </Button>
                         </Link>
                        )}
-                       <Link href="/profile">
+                       <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
                           <Button className="w-full justify-start" variant="ghost">
                             <UserCircle className="mr-2 h-5 w-5" /> My Profile
                           </Button>
                         </Link>
-                       <Button className="w-full justify-start" variant="ghost" onClick={logout}>
+                       <Button className="w-full justify-start" variant="ghost" onClick={() => { logout(); setIsMobileMenuOpen(false); }}>
                           <LogOut className="mr-2 h-5 w-5" /> Logout
                         </Button>
                     </div>
                   ) : (
-                    <Link href="/login">
+                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button className="w-full justify-start" variant="ghost">
                         <UserCircle className="mr-2 h-5 w-5" /> Login / Sign Up
                       </Button>
