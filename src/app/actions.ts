@@ -2,6 +2,7 @@
 
 import { optimizeRouteWithAI, OptimizeRouteWithAIInput } from '@/ai/flows/optimize-route-with-ai';
 import { suggestListingFee, SuggestListingFeeInput } from '@/ai/flows/suggest-listing-fee';
+import { summarizeReviews, SummarizeReviewsInput } from '@/ai/flows/summarize-reviews';
 
 export async function getOptimizedRoute(input: OptimizeRouteWithAIInput) {
   try {
@@ -20,5 +21,15 @@ export async function getSuggestedFee(input: SuggestListingFeeInput) {
   } catch (error) {
     console.error(error);
     return { success: false, error: "Failed to suggest a fee." };
+  }
+}
+
+export async function getReviewSummary(input: SummarizeReviewsInput) {
+  try {
+    const result = await summarizeReviews(input);
+    return { success: true, data: result };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Failed to summarize reviews." };
   }
 }

@@ -1,4 +1,3 @@
-// OptimizeRouteWithAI.ts
 'use server';
 
 /**
@@ -15,12 +14,6 @@ import {z} from 'genkit';
 const OptimizeRouteWithAIInputSchema = z.object({
   startLocation: z.string().describe('The starting location for the route.'),
   endLocation: z.string().describe('The destination location for the route.'),
-  currentTrafficConditions: z
-    .string()
-    .describe('Real-time traffic conditions along the route.'),
-  shortestPathAlgorithm: z
-    .string()
-    .describe('The shortest path algorithm to use (e.g., Dijkstra, A*).'),
 });
 export type OptimizeRouteWithAIInput = z.infer<typeof OptimizeRouteWithAIInputSchema>;
 
@@ -45,14 +38,12 @@ const prompt = ai.definePrompt({
   name: 'optimizeRouteWithAIPrompt',
   input: {schema: OptimizeRouteWithAIInputSchema},
   output: {schema: OptimizeRouteWithAIOutputSchema},
-  prompt: `You are an AI route optimization expert. Given the start and end locations, current traffic conditions, and the shortest path algorithm, provide the optimal route, estimated travel time, and estimated fuel savings.
+  prompt: `You are an AI route optimization expert for Accra, Ghana. Given the start and end locations, provide the optimal route using known shortcuts and real-time traffic patterns. Also provide the estimated travel time, and estimated fuel savings.
 
 Start Location: {{{startLocation}}}
 End Location: {{{endLocation}}}
-Current Traffic Conditions: {{{currentTrafficConditions}}}
-Shortest Path Algorithm: {{{shortestPathAlgorithm}}}
 
-Consider all factors to provide the best route.`,
+Base your route on typical traffic conditions for the current time of day. Provide the route as a series of clear, turn-by-turn directions.`,
 });
 
 const optimizeRouteWithAIFlow = ai.defineFlow(

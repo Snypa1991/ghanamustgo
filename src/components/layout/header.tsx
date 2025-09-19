@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut, Car } from 'lucide-react';
+import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut, Car, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { MopedIcon } from '@/components/icons';
@@ -42,6 +42,11 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+             {user?.role === 'admin' && (
+                <Link href="/admin/dashboard" className="transition-colors hover:text-primary text-primary font-bold">
+                  Dashboard
+                </Link>
+            )}
           </nav>
         </div>
 
@@ -77,6 +82,13 @@ export default function Header() {
                 <div className="p-4 mt-auto border-t">
                   {user ? (
                     <div className="space-y-2">
+                       {user.role === 'admin' && (
+                         <Link href="/admin/dashboard">
+                            <Button className="w-full justify-start" variant="ghost">
+                                <Shield className="mr-2 h-5 w-5" /> Admin Dashboard
+                            </Button>
+                        </Link>
+                       )}
                        <Link href="/profile">
                           <Button className="w-full justify-start" variant="ghost">
                             <UserCircle className="mr-2 h-5 w-5" /> My Profile
@@ -127,6 +139,11 @@ export default function Header() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                   {user.role === 'admin' && (
+                    <DropdownMenuItem asChild>
+                        <Link href="/admin/dashboard"><Shield className="mr-2 h-4 w-4" />Admin Dashboard</Link>
+                    </DropdownMenuItem>
+                   )}
                   <DropdownMenuItem asChild>
                     <Link href="/profile"><UserCircle className="mr-2 h-4 w-4" />Profile</Link>
                   </DropdownMenuItem>

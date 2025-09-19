@@ -5,6 +5,7 @@ import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/context/app-context';
+import { Analytics } from "@vercel/analytics/react"
 
 export const metadata: Metadata = {
   title: 'Ghana Must Go',
@@ -37,6 +38,7 @@ export default function RootLayout({
           <Footer />
           <Toaster />
         </AppProvider>
+        <Analytics />
       </body>
     </html>
   );

@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/suggest-listing-fee.ts';
 import '@/ai/flows/optimize-route-with-ai.ts';
+import '@/ai/flows/summarize-reviews.ts';

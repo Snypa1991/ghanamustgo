@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Map, Clock, Fuel, Loader2, Navigation } from 'lucide-react';
+import { Bot, Map, Clock, Fuel, Loader2, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -20,7 +20,7 @@ const formSchema = z.object({
 
 type RouteOptimizationFormValues = z.infer<typeof formSchema>;
 
-export default function RouteOptimization() {
+export default function AdminRouteOptimization() {
   const [result, setResult] = useState<OptimizeRouteWithAIOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,8 +28,8 @@ export default function RouteOptimization() {
   const form = useForm<RouteOptimizationFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      startLocation: '',
-      endLocation: '',
+      startLocation: 'Accra Mall',
+      endLocation: 'Labadi Beach',
     },
   });
 
@@ -49,8 +49,8 @@ export default function RouteOptimization() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="font-headline">Enter Your Route</CardTitle>
-        <CardDescription>Our AI will find the best path for you.</CardDescription>
+        <CardTitle className="font-headline flex items-center gap-2"><Bot /> AI Route Optimizer</CardTitle>
+        <CardDescription>Find the most efficient route between two points using AI analysis of traffic patterns.</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -61,7 +61,7 @@ export default function RouteOptimization() {
                 name="startLocation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Pickup Location</FormLabel>
+                    <FormLabel>Start Location</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Accra Mall" {...field} />
                     </FormControl>
@@ -74,7 +74,7 @@ export default function RouteOptimization() {
                 name="endLocation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Drop-off Location</FormLabel>
+                    <FormLabel>End Location</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Labadi Beach" {...field} />
                     </FormControl>
@@ -85,9 +85,9 @@ export default function RouteOptimization() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isLoading} className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+            <Button type="submit" disabled={isLoading} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
-              Find Ride & Optimize
+              Optimize Route
             </Button>
           </CardFooter>
         </form>
@@ -116,7 +116,7 @@ export default function RouteOptimization() {
             <Alert className="bg-primary/5">
               <Map className="h-5 w-5 text-primary" />
               <AlertTitle className="font-headline text-primary">Optimized Route</AlertTitle>
-              <AlertDescription>{result.optimizedRoute}</AlertDescription>
+              <AlertDescription className="whitespace-pre-wrap">{result.optimizedRoute}</AlertDescription>
             </Alert>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Card>
