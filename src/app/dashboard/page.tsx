@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { LayoutDashboard, Power } from 'lucide-react';
@@ -32,6 +32,17 @@ export default function DashboardPage() {
 
   const [isOnline, setIsOnline] = useState(false);
   const [currentPosition, setCurrentPosition] = useState<google.maps.LatLngLiteral | null>(null);
+
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
+
+  const onMapUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
+
 
   useEffect(() => {
     if (!user || (user.role !== 'biker' && user.role !== 'driver')) {
@@ -91,6 +102,8 @@ export default function DashboardPage() {
             fullscreenControl: false,
             zoomControl: false,
           }}
+          onLoad={onMapLoad}
+          onUnmount={onMapUnmount}
           className="absolute inset-0"
         >
           {currentPosition && partnerIcon && <Marker position={currentPosition} icon={partnerIcon} />}

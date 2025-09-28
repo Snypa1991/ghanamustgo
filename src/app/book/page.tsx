@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, Polyline, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
+import { useState, useMemo, useRef, useCallback } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import { Car, Package, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import RouteOptimization from '@/components/route-optimization';
@@ -35,6 +35,17 @@ export default function BookPage() {
   const [startLocation, setStartLocation] = useState<string>('');
   const [endLocation, setEndLocation] = useState<string>('');
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
+
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
+
+  const onMapUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
+
 
   const handleRouteUpdate = (start: string, end: string) => {
     setStartLocation(start);
@@ -115,7 +126,7 @@ export default function BookPage() {
                                 <ShieldCheck className="h-4 w-4" />
                                 <AlertTitle className="font-headline">Secure Payments</AlertTitle>
                                 <AlertDescription>
-                                    Your payment is held securely and only released to the rider upon your confirmation of successful delivery.
+                                    Your payment is held securely and only released to the biker upon your confirmation of successful delivery.
                                 </AlertDescription>
                             </Alert>
                          </CardFooter>
@@ -170,6 +181,8 @@ export default function BookPage() {
                             mapTypeControl: false,
                             fullscreenControl: false,
                         }}
+                        onLoad={onMapLoad}
+                        onUnmount={onMapUnmount}
                     >
                        {shouldRenderDirectionsService && (
                           <DirectionsService
@@ -205,4 +218,3 @@ export default function BookPage() {
     </div>
   );
 }
-
