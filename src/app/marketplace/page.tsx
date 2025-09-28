@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Store, Tag, ShoppingCart } from 'lucide-react';
@@ -34,27 +35,30 @@ export default function MarketplacePage() {
           {items.map((item) => {
             const image = PlaceHolderImages.find(p => p.id === item.imageId);
             return (
-              <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
-                {image && (
-                   <div className="relative aspect-[4/3] bg-muted">
-                      <Image
-                          src={image.imageUrl}
-                          alt={item.name}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          data-ai-hint={image.imageHint}
-                      />
-                   </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="font-headline text-lg truncate">{item.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold text-primary">${item.price}</p>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full">View Item</Button>
-                </CardFooter>
+              <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group flex flex-col">
+                <Link href={`/marketplace/${item.id}`} className="flex flex-col h-full">
+                  {image && (
+                    <div className="relative aspect-[4/3] bg-muted">
+                        <Image
+                            src={image.imageUrl}
+                            alt={item.name}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            data-ai-hint={image.imageHint}
+                        />
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="font-headline text-lg truncate">{item.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <p className="text-sm text-muted-foreground">Starting at</p>
+                    <p className="text-2xl font-bold text-primary">${item.price}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="outline" className="w-full">View Item & Bid</Button>
+                  </CardFooter>
+                </Link>
               </Card>
             );
           })}

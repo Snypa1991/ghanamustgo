@@ -1,3 +1,4 @@
+
 export type User = {
   id: string;
   name: string;
@@ -49,4 +50,20 @@ export const DUMMY_USERS: User[] = [
     password: 'password',
     role: 'unassigned',
   },
+];
+
+export type Bid = {
+  id: string;
+  itemId: string;
+  userId: string;
+  amount: number;
+  timestamp: string;
+};
+
+export const DUMMY_BIDS: Bid[] = [
+    { id: 'bid-1', itemId: '1', userId: 'user-2', amount: 155, timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString() },
+    { id: 'bid-2', itemId: '1', userId: 'user-3', amount: 160, timestamp: new Date(Date.now() - 1000 * 60 * 3).toISOString() },
+    { id: 'bid-3', itemId: '1', userId: 'user-1', amount: 165, timestamp: new Date(Date.now() - 1000 * 60 * 1).toISOString() },
+    { id: 'bid-4', itemId: '2', userId: 'user-1', amount: 48, timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
+    { id: 'bid-5', itemId: '2', userId: 'user-4', amount: 50, timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString() },
 ];
