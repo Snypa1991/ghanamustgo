@@ -77,7 +77,7 @@ export default function DashboardPage() {
     }
   }
 
-  const startRequestSimulator = () => {
+  const startRequestSimulator = useCallback(() => {
         if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
         requestIntervalRef.current = setInterval(() => {
             if (tripStatus === 'none') {
@@ -87,7 +87,7 @@ export default function DashboardPage() {
                 rideIndexRef.current++;
             }
         }, 10000); // Every 10 seconds
-    };
+    }, [tripStatus]);
 
     const stopRequestSimulator = () => {
         if (requestIntervalRef.current) {
@@ -105,8 +105,12 @@ export default function DashboardPage() {
   useEffect(() => {
     let watchId: number;
 
-    if (isOnline && navigator.geolocation) {
-      startRequestSimulator();
+    if (isOnline) {
+      // Start simulator only when there is no active trip
+      if (tripStatus === 'none') {
+        startRequestSimulator();
+      }
+
       // Get initial position and center the map
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -149,6 +153,7 @@ export default function DashboardPage() {
       stopRequestSimulator();
       setCurrentRideRequest(null);
       setTripStatus('none');
+      setDirections(null);
     }
 
     return () => {
@@ -157,7 +162,7 @@ export default function DashboardPage() {
       }
       stopRequestSimulator();
     };
-  }, [isOnline, userInteracted]);
+  }, [isOnline, userInteracted, startRequestSimulator, tripStatus]);
 
   const handleToggleOnline = () => {
     const newIsOnline = !isOnline;
@@ -170,6 +175,7 @@ export default function DashboardPage() {
   };
 
   const handleAcceptRide = () => {
+    stopRequestSimulator();
     setTripStatus('enroute-to-pickup');
   };
 
@@ -177,6 +183,13 @@ export default function DashboardPage() {
       setCurrentRideRequest(null);
       setTripStatus('none');
   };
+
+  const handleCompleteRide = useCallback(() => {
+    setDirections(null);
+    setCurrentRideRequest(null);
+    setTripStatus('none');
+    // The main useEffect will restart the simulator since tripStatus is 'none'
+  }, []);
 
   const directionsCallback = (
     response: google.maps.DirectionsResult | null,
@@ -351,15 +364,10 @@ export default function DashboardPage() {
                 status={tripStatus}
                 onAccept={handleAcceptRide}
                 onDecline={handleDeclineRide}
-                onComplete={() => {
-                  setDirections(null);
-                  setCurrentRideRequest(null);
-                  setTripStatus('none');
-                }}
+                onComplete={handleCompleteRide}
             />
          </div>
        )}
     </div>
   );
 }
-
