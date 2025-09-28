@@ -128,7 +128,7 @@ export default function BookPage() {
               <circle cx="24" cy="24" r="20" />
             </clipPath>
           </defs>
-          <circle cx="24" cy="24" r="22" fill="white" />
+          <circle cx="24" cy="24" r="22" fill="white" stroke="hsl(var(--primary))" stroke-width="2"/>
           <image href="${imageUrl}" x="4" y="4" width="40" height="40" clip-path="url(#circle-clip)" />
         </svg>`;
       
@@ -323,3 +323,5 @@ export default function BookPage() {
     </div>
   );
 }
+
+    
