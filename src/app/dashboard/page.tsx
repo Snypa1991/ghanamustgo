@@ -173,9 +173,9 @@ export default function DashboardPage() {
             onDragStart={onUserInteraction}
             onZoomChanged={onUserInteraction}
           >
-            {currentPosition && partnerIcon && isOnline && (
+            {isOnline && currentPosition && (
               <>
-                <Marker position={currentPosition} icon={partnerIcon} />
+                {partnerIcon && <Marker position={currentPosition} icon={partnerIcon} />}
                 <Circle
                     center={currentPosition}
                     radius={2000} // 2km radius
