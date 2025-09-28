@@ -4,14 +4,14 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-import { Power, Crosshair, Car } from 'lucide-react';
+import { Power, Crosshair } from 'lucide-react';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MopedIcon } from '@/components/icons';
 import { DUMMY_RIDES, Ride } from '@/lib/dummy-data';
 import RideRequestCard from '@/components/ride-request-card';
+import RideHistory from '@/components/ride-history';
 
 const containerStyle = {
   width: '100%',
@@ -206,6 +206,7 @@ export default function DashboardPage() {
   const handleDeclineRide = () => {
       setCurrentRideRequest(null);
       setTripStatus('none');
+      startRequestSimulator();
   };
   
   const handleStartTrip = () => {
@@ -218,7 +219,7 @@ export default function DashboardPage() {
     setCurrentRideRequest(null);
     setTripStatus('none');
     setIsCompleting(false);
-    // The main useEffect will restart the simulator since tripStatus is 'none'
+    // The main useEffect will restart the simulator since tripStatus is 'none' and isOnline is true
   }, []);
 
   const directionsCallback = (
@@ -253,7 +254,7 @@ export default function DashboardPage() {
     };
 
     if (user.role === 'biker') {
-        // Moped Icon SVG Path
+        // Moped Icon SVG Path from lucide-react
         const svgPath = 'M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM8 19h8M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2zM5 11v-5h8M11 6L7 4M13 11V4h-2';
         return {
             ...commonOptions,
@@ -263,7 +264,7 @@ export default function DashboardPage() {
     }
 
     if (user.role === 'driver') {
-        // Simple car icon
+        // Simple car icon from google maps symbols
         return {
             ...commonOptions,
             path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
@@ -286,8 +287,8 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] w-full">
-      <div className="absolute inset-0">
+    <div>
+      <div className="relative h-[60vh] w-full">
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={containerStyle}
@@ -347,47 +348,52 @@ export default function DashboardPage() {
         ) : (
           <Skeleton className="h-full w-full" />
         )}
-      </div>
 
-      <div className="absolute top-4 right-4 z-10">
-        <button
-            onClick={handleToggleOnline}
-            className={cn(
-                "relative inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors shadow-lg",
-                isOnline ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
-            )}
-            aria-label={isOnline ? 'Go Offline' : 'Go Online'}
-        >
-            <Power className="h-6 w-6 text-white" />
-        </button>
-      </div>
+        <div className="absolute top-4 right-4 z-10">
+          <button
+              onClick={handleToggleOnline}
+              className={cn(
+                  "relative inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors shadow-lg",
+                  isOnline ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+              )}
+              aria-label={isOnline ? 'Go Offline' : 'Go Online'}
+          >
+              <Power className="h-6 w-6 text-white" />
+          </button>
+        </div>
 
-       {isLoaded && isOnline && userInteracted && (
-          <div className="absolute bottom-28 right-4 z-10">
-            <Button
-              size="icon"
-              className="rounded-full shadow-lg"
-              onClick={handleRecenter}
-              aria-label="Recenter map"
-            >
-              <Crosshair className="h-5 w-5" />
-            </Button>
+        {isLoaded && isOnline && userInteracted && (
+            <div className="absolute bottom-4 right-4 z-10">
+              <Button
+                size="icon"
+                className="rounded-full shadow-lg"
+                onClick={handleRecenter}
+                aria-label="Recenter map"
+              >
+                <Crosshair className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
+        
+        {tripStatus !== 'none' && currentRideRequest && (
+          <div className="absolute bottom-4 left-4 right-4 z-10 sm:left-auto sm:w-full sm:max-w-sm">
+              <RideRequestCard 
+                  ride={currentRideRequest}
+                  status={tripStatus}
+                  onAccept={handleAcceptRide}
+                  onDecline={handleDeclineRide}
+                  onStartTrip={handleStartTrip}
+                  onComplete={handleCompleteRide}
+                  isCompleting={isCompleting}
+              />
           </div>
         )}
-      
-       {tripStatus !== 'none' && currentRideRequest && (
-         <div className="absolute bottom-4 left-4 right-4 z-10 sm:left-auto sm:w-full sm:max-w-sm">
-            <RideRequestCard 
-                ride={currentRideRequest}
-                status={tripStatus}
-                onAccept={handleAcceptRide}
-                onDecline={handleDeclineRide}
-                onStartTrip={handleStartTrip}
-                onComplete={handleCompleteRide}
-                isCompleting={isCompleting}
-            />
-         </div>
-       )}
+      </div>
+
+      <div className="container py-8">
+          <RideHistory />
+      </div>
+
     </div>
   );
 }
