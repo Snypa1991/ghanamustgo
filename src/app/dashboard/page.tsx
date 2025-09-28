@@ -6,8 +6,6 @@ import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { Power } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -98,25 +96,27 @@ export default function DashboardPage() {
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] w-full">
-      {isLoaded ? (
-        <GoogleMap
-          mapContainerStyle={containerStyle}
-          center={currentPosition || center}
-          zoom={15}
-          options={{
-            streetViewControl: false,
-            mapTypeControl: false,
-            fullscreenControl: false,
-            zoomControl: false,
-          }}
-          onLoad={onMapLoad}
-          onUnmount={onMapUnmount}
-        >
-          {currentPosition && partnerIcon && <Marker position={currentPosition} icon={partnerIcon} />}
-        </GoogleMap>
-      ) : (
-        <Skeleton className="absolute inset-0" />
-      )}
+      <div className="absolute inset-0">
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={currentPosition || center}
+            zoom={15}
+            options={{
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: false,
+              zoomControl: false,
+            }}
+            onLoad={onMapLoad}
+            onUnmount={onMapUnmount}
+          >
+            {currentPosition && partnerIcon && <Marker position={currentPosition} icon={partnerIcon} />}
+          </GoogleMap>
+        ) : (
+          <Skeleton className="h-full w-full" />
+        )}
+      </div>
 
       <div className="absolute top-0 left-0 right-0 p-4">
         <Card className="max-w-md mx-auto">
