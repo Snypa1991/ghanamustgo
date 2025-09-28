@@ -60,7 +60,7 @@ export default function Home() {
             Rides, deliveries, food, and local goods—all in one app. Akwaaba to Ghana Must Go.
           </p>
           <div className="mt-8 flex gap-4">
-            <Link href="/book">
+            <Link href={user ? "/book" : "/signup"}>
                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   {user ? "Book a Service" : "Get Started"}
               </Button>
