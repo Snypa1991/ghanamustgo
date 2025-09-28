@@ -4,22 +4,20 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Ride } from '@/lib/dummy-data';
-import { Check, Dot, MapPin, X, Loader2, Flag } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
-type TripStatus = 'none' | 'requesting' | 'enroute-to-pickup' | 'enroute-to-destination';
-
+import { Check, Dot, MapPin, X, Loader2, Flag, Navigation } from 'lucide-react';
+import type { TripStatus } from '@/app/dashboard/page';
 
 interface RideRequestCardProps {
     ride: Ride;
     status: TripStatus;
     onAccept: () => void;
     onDecline: () => void;
+    onStartTrip: () => void;
     onComplete: () => void;
     isCompleting: boolean;
 }
 
-export default function RideRequestCard({ ride, status, onAccept, onDecline, onComplete, isCompleting }: RideRequestCardProps) {
+export default function RideRequestCard({ ride, status, onAccept, onDecline, onStartTrip, onComplete, isCompleting }: RideRequestCardProps) {
     if (status === 'requesting') {
          return (
             <Card className="shadow-2xl animate-in fade-in-0 zoom-in-95">
@@ -55,26 +53,50 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onC
         );
     }
     
-    // For enroute-to-pickup and enroute-to-destination
-    return (
-         <Card className="shadow-2xl bg-green-50 border-green-200">
-            <CardHeader>
-                <CardTitle className="font-headline text-green-800">Trip Accepted</CardTitle>
-                <CardDescription>En-route to pickup at {ride.startLocation}</CardDescription>
-            </CardHeader>
-            <CardContent>
-                 {isCompleting ? (
-                    <div className="flex items-center justify-center text-green-700">
-                        <Loader2 className="h-6 w-6 animate-spin mr-2"/>
-                        <p>Completing trip...</p>
-                    </div>
-                 ) : (
-                    <div className="flex items-center justify-center text-green-700">
-                        <Check className="h-6 w-6 mr-2"/>
-                        <p>Navigating to passenger...</p>
-                    </div>
-                 )}
-            </CardContent>
-        </Card>
-    );
+    if (status === 'enroute-to-pickup') {
+         return (
+             <Card className="shadow-2xl">
+                <CardHeader>
+                    <CardTitle className="font-headline">En-Route to Passenger</CardTitle>
+                    <CardDescription>Navigate to the pickup location at <span className="font-semibold text-foreground">{ride.startLocation}</span>.</CardDescription>
+                </CardHeader>
+                 <CardFooter>
+                    <Button className="w-full" onClick={onStartTrip} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                        <Navigation className="mr-2 h-4 w-4" /> Arrived / Start Trip
+                    </Button>
+                </CardFooter>
+            </Card>
+        )
+    }
+
+    if (status === 'enroute-to-destination') {
+        return (
+            <Card className="shadow-2xl bg-green-50 border-green-200">
+                <CardHeader>
+                    <CardTitle className="font-headline text-green-800">Trip in Progress</CardTitle>
+                    <CardDescription>Heading to destination at <span className="font-semibold text-green-900">{ride.endLocation}</span>.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {isCompleting ? (
+                        <div className="flex items-center justify-center text-green-700">
+                            <Loader2 className="h-6 w-6 animate-spin mr-2"/>
+                            <p>Completing trip...</p>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center text-green-700">
+                            <Check className="h-6 w-6 mr-2"/>
+                            <p>Navigating to destination...</p>
+                        </div>
+                    )}
+                </CardContent>
+                 <CardFooter>
+                    <Button className="w-full" variant="destructive" onClick={onComplete}>
+                        End Trip
+                    </Button>
+                </CardFooter>
+            </Card>
+        );
+    }
+
+    return null;
 }

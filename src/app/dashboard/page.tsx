@@ -24,7 +24,7 @@ const center = {
   lng: -0.1870
 };
 
-type TripStatus = 'none' | 'requesting' | 'enroute-to-pickup' | 'enroute-to-destination';
+export type TripStatus = 'none' | 'requesting' | 'enroute-to-pickup' | 'enroute-to-destination';
 
 
 export default function DashboardPage() {
@@ -167,7 +167,8 @@ export default function DashboardPage() {
 
     useEffect(() => {
         let timeoutId: NodeJS.Timeout | null = null;
-        if (tripStatus === 'enroute-to-pickup') {
+        // Only start the final completion timer when enroute to destination
+        if (tripStatus === 'enroute-to-destination') {
             // Simulate the trip duration
             timeoutId = setTimeout(() => {
                 setIsCompleting(true);
@@ -198,12 +199,18 @@ export default function DashboardPage() {
 
   const handleAcceptRide = () => {
     stopRequestSimulator();
+    setDirections(null); // Clear previous directions
     setTripStatus('enroute-to-pickup');
   };
 
   const handleDeclineRide = () => {
       setCurrentRideRequest(null);
       setTripStatus('none');
+  };
+  
+  const handleStartTrip = () => {
+    setDirections(null); // Clear pickup directions
+    setTripStatus('enroute-to-destination');
   };
 
   const handleCompleteRide = useCallback(() => {
@@ -307,7 +314,7 @@ export default function DashboardPage() {
             onDragStart={onUserInteraction}
             onZoomChanged={onUserInteraction}
           >
-             {shouldRenderDirections && directionsOrigin && directionsDestination && (
+             {shouldRenderDirections && directionsOrigin && directionsDestination && !directions && (
                 <DirectionsService
                     options={{
                         destination: directionsDestination,
@@ -375,6 +382,7 @@ export default function DashboardPage() {
                 status={tripStatus}
                 onAccept={handleAcceptRide}
                 onDecline={handleDeclineRide}
+                onStartTrip={handleStartTrip}
                 onComplete={handleCompleteRide}
                 isCompleting={isCompleting}
             />
