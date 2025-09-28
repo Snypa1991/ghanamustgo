@@ -51,27 +51,46 @@ export default function DashboardPage() {
   
   useEffect(() => {
     let watchId: number;
+
     if (isOnline && navigator.geolocation) {
-      // Get initial position
-      navigator.geolocation.getCurrentPosition(position => {
-        const { latitude, longitude } = position.coords;
-        setCurrentPosition({ lat: latitude, lng: longitude });
-      });
+      // Get initial position and center the map
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const newPos = { lat: latitude, lng: longitude };
+          setCurrentPosition(newPos);
+          if (mapRef.current) {
+            mapRef.current.panTo(newPos);
+          }
+        },
+        (error) => {
+          console.error("Error getting initial position:", error);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+
       // Watch for position changes
-      watchId = navigator.geolocation.watchPosition((position) => {
-        const { latitude, longitude } = position.coords;
-        setCurrentPosition({ lat: latitude, lng: longitude });
-      }, 
-      (error) => {
-        console.error("Geolocation error:", error);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      });
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const newPos = { lat: latitude, lng: longitude };
+          setCurrentPosition(newPos);
+          // Smoothly pan the map to the new position
+          if (mapRef.current) {
+            mapRef.current.panTo(newPos);
+          }
+        },
+        (error) => {
+          console.error("Geolocation watch error:", error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
     } else {
-        setCurrentPosition(null);
+      setCurrentPosition(null);
     }
 
     return () => {
