@@ -118,7 +118,7 @@ export default function DashboardPage() {
             <CardTitle className="font-headline flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <LayoutDashboard />
-                {user.name}'s Dashboard
+                {user.name}
               </div>
               <div className="flex items-center space-x-2">
                 <Switch 
