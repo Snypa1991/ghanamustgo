@@ -120,7 +120,7 @@ export default function LoginPage() {
         </Form>
         <CardContent>
             <div className="text-center text-xs text-muted-foreground mb-2">Quick Logins</div>
-            <div className="flex justify-center flex-wrap gap-2 text-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
                 <Button variant="outline" size="sm" onClick={() => {
                     form.setValue('email', 'new@example.com');
                     form.setValue('password', 'password');

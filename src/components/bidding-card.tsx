@@ -15,6 +15,7 @@ import { DUMMY_USERS, DUMMY_BIDS, Bid, User } from '@/lib/dummy-data';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import PaymentButton from './payment-button';
+import { ScrollArea } from './ui/scroll-area';
 
 interface BiddingCardProps {
     itemId: string;
@@ -135,27 +136,29 @@ export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps)
 
                 <div className="space-y-4">
                     <h4 className="font-semibold">Recent Bids</h4>
-                    <ul className="space-y-3 max-h-48 overflow-y-auto pr-2">
-                        {bids.map(bid => {
-                            const bidder = getBidder(bid.userId);
-                            return (
-                                <li key={bid.id} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Avatar className="h-8 w-8">
-                                            <AvatarImage src={`https://picsum.photos/seed/${bidder?.email}/100/100`} />
-                                            <AvatarFallback>{bidder?.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="text-sm font-medium">{bidder?.name} {bid.userId === user?.id && '(You)'}</p>
-                                            <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(bid.timestamp), { addSuffix: true })}</p>
-                                        </div>
-                                    </div>
-                                    <p className="font-bold text-sm">${bid.amount.toFixed(2)}</p>
-                                </li>
-                            )
-                        })}
-                         <li className="text-center text-sm text-muted-foreground pt-2">Starting Price: ${startingPrice.toFixed(2)}</li>
-                    </ul>
+                    <ScrollArea className="h-48">
+                      <ul className="space-y-3 pr-4">
+                          {bids.map(bid => {
+                              const bidder = getBidder(bid.userId);
+                              return (
+                                  <li key={bid.id} className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                          <Avatar className="h-8 w-8">
+                                              <AvatarImage src={`https://picsum.photos/seed/${bidder?.email}/100/100`} />
+                                              <AvatarFallback>{bidder?.name.charAt(0)}</AvatarFallback>
+                                          </Avatar>
+                                          <div>
+                                              <p className="text-sm font-medium truncate">{bidder?.name} {bid.userId === user?.id && '(You)'}</p>
+                                              <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(bid.timestamp), { addSuffix: true })}</p>
+                                          </div>
+                                      </div>
+                                      <p className="font-bold text-sm">${bid.amount.toFixed(2)}</p>
+                                  </li>
+                              )
+                          })}
+                           <li className="text-center text-sm text-muted-foreground pt-2">Starting Price: ${startingPrice.toFixed(2)}</li>
+                      </ul>
+                    </ScrollArea>
                 </div>
             </CardContent>
         </Card>

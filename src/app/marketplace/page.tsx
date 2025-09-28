@@ -16,14 +16,14 @@ const items = [
 export default function MarketplacePage() {
   return (
     <div className="container py-12">
-      <div className="flex justify-between items-center mb-12">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
         <div className="text-left">
           <Store className="h-12 w-12 text-primary" />
           <h1 className="mt-4 text-4xl font-bold font-headline">Marketplace</h1>
           <p className="mt-2 text-lg text-muted-foreground">Discover unique items from local artisans and sellers.</p>
         </div>
         <Link href="/marketplace/list-item">
-            <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+            <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} className="w-full sm:w-auto">
                 <Tag className="mr-2 h-4 w-4" />
                 Sell Your Item
             </Button>
