@@ -44,6 +44,7 @@ export default function DashboardPage() {
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
 
   const requestIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const requestTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const rideIndexRef = useRef(0);
 
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -52,7 +53,10 @@ export default function DashboardPage() {
   useEffect(() => {
     const storedIsOnline = localStorage.getItem('ghana-must-go-isOnline');
     if (storedIsOnline) {
-      setIsOnline(JSON.parse(storedIsOnline));
+      const savedIsOnline = JSON.parse(storedIsOnline);
+      if (savedIsOnline) {
+        setIsOnline(true);
+      }
     }
   }, []);
 
@@ -87,7 +91,7 @@ export default function DashboardPage() {
                 setTripStatus('requesting');
                 rideIndexRef.current++;
             }
-        }, 10000); // Every 10 seconds
+        }, 12000); // 12 seconds to give a small buffer after a request times out
     }, [tripStatus]);
 
     const stopRequestSimulator = () => {
@@ -96,6 +100,17 @@ export default function DashboardPage() {
             requestIntervalRef.current = null;
         }
     };
+
+    const handleDeclineRide = useCallback(() => {
+      if (requestTimeoutRef.current) {
+        clearTimeout(requestTimeoutRef.current);
+        requestTimeoutRef.current = null;
+      }
+      setCurrentRideRequest(null);
+      setTripStatus('none');
+      // The main useEffect will restart the simulator since tripStatus is 'none' and isOnline is true
+  }, []);
+
 
   useEffect(() => {
     if (!user || (user.role !== 'biker' && user.role !== 'driver')) {
@@ -107,12 +122,10 @@ export default function DashboardPage() {
     let watchId: number;
 
     if (isOnline) {
-      // Start simulator only when there is no active trip
       if (tripStatus === 'none') {
         startRequestSimulator();
       }
 
-      // Get initial position and center the map
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -123,68 +136,61 @@ export default function DashboardPage() {
             mapRef.current.setZoom(15);
           }
         },
-        (error) => {
-          console.error("Error getting initial position:", error);
-        },
+        (error) => console.error("Error getting initial position:", error),
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
 
-      // Watch for position changes
       watchId = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           const newPos = { lat: latitude, lng: longitude };
           setCurrentPosition(newPos);
-          // Smoothly pan the map to the new position only if user has not interacted
           if (mapRef.current && !userInteracted) {
             mapRef.current.panTo(newPos);
           }
         },
-        (error) => {
-          console.error("Geolocation watch error:", error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0,
-        }
+        (error) => console.error("Geolocation watch error:", error),
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0, }
       );
     } else {
       setCurrentPosition(null);
       stopRequestSimulator();
+      if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
       setCurrentRideRequest(null);
       setTripStatus('none');
       setDirections(null);
     }
 
     return () => {
-      if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-      }
+      if (watchId) navigator.geolocation.clearWatch(watchId);
       stopRequestSimulator();
+      if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
     };
   }, [isOnline, userInteracted, startRequestSimulator, tripStatus]);
 
     useEffect(() => {
-        let timeoutId: NodeJS.Timeout | null = null;
-        // Only start the final completion timer when enroute to destination
+        let tripTimer: NodeJS.Timeout | null = null;
         if (tripStatus === 'enroute-to-destination') {
-            // Simulate the trip duration
-            timeoutId = setTimeout(() => {
+            tripTimer = setTimeout(() => {
                 setIsCompleting(true);
-                // Simulate the finalization of the trip
                 setTimeout(() => {
                     handleCompleteRide();
-                }, 2000); // 2 seconds to show "completing"
-            }, 15000); // 15 seconds trip duration
+                }, 2000); 
+            }, 15000); 
+        }
+
+        if (tripStatus === 'requesting') {
+            if(requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
+            requestTimeoutRef.current = setTimeout(() => {
+                handleDeclineRide();
+            }, 10000); // 10-second timer for the request
         }
 
         return () => {
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
+            if (tripTimer) clearTimeout(tripTimer);
+            if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
         };
-    }, [tripStatus]);
+    }, [tripStatus, handleDeclineRide]);
 
 
   const handleToggleOnline = () => {
@@ -193,24 +199,22 @@ export default function DashboardPage() {
     localStorage.setItem('ghana-must-go-isOnline', JSON.stringify(newIsOnline));
     
     if (newIsOnline) {
-      setUserInteracted(false); // Enable auto-pan when going online
+      setUserInteracted(false); 
     }
   };
 
   const handleAcceptRide = () => {
+    if (requestTimeoutRef.current) {
+        clearTimeout(requestTimeoutRef.current);
+        requestTimeoutRef.current = null;
+    }
     stopRequestSimulator();
-    setDirections(null); // Clear previous directions
+    setDirections(null); 
     setTripStatus('enroute-to-pickup');
-  };
-
-  const handleDeclineRide = () => {
-      setCurrentRideRequest(null);
-      setTripStatus('none');
-      startRequestSimulator();
   };
   
   const handleStartTrip = () => {
-    setDirections(null); // Clear pickup directions
+    setDirections(null); 
     setTripStatus('enroute-to-destination');
   };
 
@@ -219,7 +223,6 @@ export default function DashboardPage() {
     setCurrentRideRequest(null);
     setTripStatus('none');
     setIsCompleting(false);
-    // The main useEffect will restart the simulator since tripStatus is 'none' and isOnline is true
   }, []);
 
   const directionsCallback = (
@@ -254,7 +257,6 @@ export default function DashboardPage() {
     };
 
     if (user.role === 'biker') {
-        // Moped Icon SVG Path from lucide-react
         const svgPath = 'M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM8 19h8M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2zM5 11v-5h8M11 6L7 4M13 11V4h-2';
         return {
             ...commonOptions,
@@ -264,7 +266,6 @@ export default function DashboardPage() {
     }
 
     if (user.role === 'driver') {
-        // Simple car icon from google maps symbols
         return {
             ...commonOptions,
             path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
@@ -300,14 +301,8 @@ export default function DashboardPage() {
               fullscreenControl: false,
               zoomControl: true,
               styles: [
-                  {
-                      featureType: "poi",
-                      stylers: [{ visibility: "off" }],
-                  },
-                  {
-                      featureType: "transit",
-                      stylers: [{ visibility: "off" }],
-                  },
+                  { featureType: "poi", stylers: [{ visibility: "off" }], },
+                  { featureType: "transit", stylers: [{ visibility: "off" }], },
               ]
             }}
             onLoad={onMapLoad}
@@ -330,7 +325,7 @@ export default function DashboardPage() {
                 <DirectionsRenderer
                     options={{
                         directions: directions,
-                        suppressMarkers: true, // We'll use our own markers
+                        suppressMarkers: true,
                         polylineOptions: {
                         strokeColor: 'hsl(var(--primary))',
                         strokeOpacity: 0.8,
@@ -397,3 +392,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

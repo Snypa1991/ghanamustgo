@@ -1,11 +1,13 @@
 
 "use client";
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Ride } from '@/lib/dummy-data';
-import { Check, Dot, MapPin, X, Loader2, Flag, Navigation } from 'lucide-react';
+import { Check, MapPin, X, Loader2, Flag, Navigation } from 'lucide-react';
 import type { TripStatus } from '@/app/dashboard/page';
+import { Progress } from './ui/progress';
 
 interface RideRequestCardProps {
     ride: Ride;
@@ -18,6 +20,26 @@ interface RideRequestCardProps {
 }
 
 export default function RideRequestCard({ ride, status, onAccept, onDecline, onStartTrip, onComplete, isCompleting }: RideRequestCardProps) {
+    const [progress, setProgress] = useState(100);
+
+    useEffect(() => {
+        if (status === 'requesting') {
+            setProgress(100);
+            const interval = setInterval(() => {
+                setProgress(prev => {
+                    if (prev <= 0) {
+                        clearInterval(interval);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 100); // Update every 100ms for a 10s timer
+
+            return () => clearInterval(interval);
+        }
+    }, [status]);
+
+
     if (status === 'requesting') {
          return (
             <Card className="shadow-2xl animate-in fade-in-0 zoom-in-95">
@@ -40,6 +62,7 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
                             <span className="font-medium">To:</span> {ride.endLocation}
                         </div>
                     </div>
+                     <Progress value={progress} className="w-full h-1 mt-4" />
                 </CardContent>
                 <CardFooter className="grid grid-cols-2 gap-4">
                     <Button variant="outline" size="lg" onClick={onDecline}>
@@ -83,14 +106,15 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
                             <p>Completing trip...</p>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center text-green-700">
-                            <Check className="h-6 w-6 mr-2"/>
+                         <div className="flex items-center justify-center text-green-700">
+                            <Navigation className="h-6 w-6 mr-2"/>
                             <p>Navigating to destination...</p>
                         </div>
                     )}
                 </CardContent>
                  <CardFooter>
-                    <Button className="w-full" variant="destructive" onClick={onComplete}>
+                    <Button className="w-full" variant="destructive" onClick={onComplete} disabled={isCompleting}>
+                        {isCompleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Flag className="mr-2 h-4 w-4" />}
                         End Trip
                     </Button>
                 </CardFooter>
@@ -100,3 +124,5 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
 
     return null;
 }
+
+    
