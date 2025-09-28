@@ -4,11 +4,12 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, Circle } from '@react-google-maps/api';
-import { Power, Crosshair } from 'lucide-react';
+import { Power, Crosshair, Car } from 'lucide-react';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { MopedIcon } from '@/components/icons';
 
 const containerStyle = {
   width: '100%',
@@ -74,7 +75,7 @@ export default function DashboardPage() {
           const { latitude, longitude } = position.coords;
           const newPos = { lat: latitude, lng: longitude };
           setCurrentPosition(newPos);
-          if (mapRef.current) {
+          if (mapRef.current && !userInteracted) {
             mapRef.current.panTo(newPos);
             mapRef.current.setZoom(15);
           }
@@ -118,27 +119,38 @@ export default function DashboardPage() {
   }, [isOnline, userInteracted]);
 
   const partnerIcon = useMemo(() => {
-    if (user && isLoaded) {
-      const imageUrl = `https://picsum.photos/seed/${user.email}/40/40`;
-      const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-          <defs>
-            <clipPath id="circle-clip">
-              <circle cx="24" cy="24" r="20" />
-            </clipPath>
-          </defs>
-          <circle cx="24" cy="24" r="22" fill="white" stroke="hsl(var(--primary))" stroke-width="2"/>
-          <image href="${imageUrl}" x="4" y="4" width="40" height="40" clip-path="url(#circle-clip)" />
-        </svg>`;
-      
-      return {
-        url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
-        scaledSize: new window.google.maps.Size(48, 48),
-        anchor: new window.google.maps.Point(24, 24),
-      };
+    if (!isLoaded || !user) return undefined;
+  
+    const commonOptions = {
+        fillColor: 'hsl(var(--primary))',
+        fillOpacity: 1,
+        strokeColor: 'white',
+        strokeWeight: 2,
+        scale: 1.5,
+        anchor: new window.google.maps.Point(12, 12),
+    };
+
+    if (user.role === 'biker') {
+        return {
+            ...commonOptions,
+            path: 'M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM8 19h8M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2zM5 11v-5h8M11 6L7 4M13 11V4h-2',
+            rotation: 0,
+            scale: 1,
+        };
     }
+
+    if (user.role === 'driver') {
+        return {
+            ...commonOptions,
+            path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW, // Using a car-like symbol
+            scale: 6,
+            rotation: 0
+        };
+    }
+    
     return undefined;
   }, [user, isLoaded]);
+  
 
   if (!user || (user.role !== 'biker' && user.role !== 'driver')) {
     return <div className="flex items-center justify-center min-h-screen">Redirecting...</div>;
@@ -227,5 +239,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
