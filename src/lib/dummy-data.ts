@@ -81,7 +81,7 @@ export type Ride = {
 };
 
 
-export const DUMMY_RIDES: Ride[] = [
+export let DUMMY_RIDES: Ride[] = [
   {
     id: 'ride-1',
     userId: 'user-1',

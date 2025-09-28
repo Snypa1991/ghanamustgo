@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [tripStatus, setTripStatus] = useState<TripStatus>('none');
   const [isCompleting, setIsCompleting] = useState(false);
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
+  const [historyVersion, setHistoryVersion] = useState(0);
 
   const requestIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const requestTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -100,15 +101,33 @@ export default function DashboardPage() {
             requestIntervalRef.current = null;
         }
     };
+    
+  const handleCompleteRide = useCallback(() => {
+    if (currentRideRequest) {
+        const completedRide: Ride = {
+            ...currentRideRequest,
+            id: `ride-${Date.now()}`,
+            date: new Date().toISOString(),
+            status: 'completed',
+        };
+        DUMMY_RIDES.unshift(completedRide);
+        setHistoryVersion(v => v + 1); // Trigger re-render of RideHistory
+    }
 
-    const handleDeclineRide = useCallback(() => {
+    setDirections(null);
+    setCurrentRideRequest(null);
+    setTripStatus('none');
+    setIsCompleting(false);
+  }, [currentRideRequest]);
+
+
+  const handleDeclineRide = useCallback(() => {
       if (requestTimeoutRef.current) {
         clearTimeout(requestTimeoutRef.current);
         requestTimeoutRef.current = null;
       }
       setCurrentRideRequest(null);
       setTripStatus('none');
-      // The main useEffect will restart the simulator since tripStatus is 'none' and isOnline is true
   }, []);
 
 
@@ -190,7 +209,7 @@ export default function DashboardPage() {
             if (tripTimer) clearTimeout(tripTimer);
             if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
         };
-    }, [tripStatus, handleDeclineRide]);
+    }, [tripStatus, handleDeclineRide, handleCompleteRide]);
 
 
   const handleToggleOnline = () => {
@@ -218,12 +237,6 @@ export default function DashboardPage() {
     setTripStatus('enroute-to-destination');
   };
 
-  const handleCompleteRide = useCallback(() => {
-    setDirections(null);
-    setCurrentRideRequest(null);
-    setTripStatus('none');
-    setIsCompleting(false);
-  }, []);
 
   const directionsCallback = (
     response: google.maps.DirectionsResult | null,
@@ -386,11 +399,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="container py-8">
-          <RideHistory />
+          <RideHistory key={historyVersion} />
       </div>
 
     </div>
   );
 }
-
-    
