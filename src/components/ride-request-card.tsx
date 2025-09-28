@@ -4,10 +4,12 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Ride } from '@/lib/dummy-data';
-import { Check, MapPin, X, Loader2, Flag, Navigation } from 'lucide-react';
+import { Ride, User, DUMMY_USERS } from '@/lib/dummy-data';
+import { Check, MapPin, X, Loader2, Flag, Navigation, User as UserIcon } from 'lucide-react';
 import type { TripStatus } from '@/app/dashboard/page';
 import { Progress } from './ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Separator } from './ui/separator';
 
 interface RideRequestCardProps {
     ride: Ride;
@@ -21,6 +23,12 @@ interface RideRequestCardProps {
 
 export default function RideRequestCard({ ride, status, onAccept, onDecline, onStartTrip, onComplete, isCompleting }: RideRequestCardProps) {
     const [progress, setProgress] = useState(100);
+    const [passenger, setPassenger] = useState<User | null>(null);
+
+    useEffect(() => {
+        const user = DUMMY_USERS.find(u => u.id === ride.userId) || null;
+        setPassenger(user);
+    }, [ride.userId]);
 
     useEffect(() => {
         if (status === 'requesting') {
@@ -46,7 +54,20 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">New Ride Request</CardTitle>
                     <div className="flex items-center justify-between pt-2">
-                        <CardDescription>A new trip is available nearby.</CardDescription>
+                        <div className="flex items-center gap-2">
+                            {passenger && (
+                                <>
+                                    <Avatar className="h-10 w-10">
+                                        <AvatarImage src={`https://picsum.photos/seed/${passenger.email}/100/100`} />
+                                        <AvatarFallback>{passenger.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-semibold">{passenger.name}</p>
+                                        <p className="text-xs text-muted-foreground">New Request</p>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                         <p className="text-2xl font-bold text-primary">${ride.fare.toFixed(2)}</p>
                     </div>
                 </CardHeader>
@@ -76,6 +97,28 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
         );
     }
     
+    const TripDetails = () => (
+        <div className="p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                     {passenger && (
+                        <>
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src={`https://picsum.photos/seed/${passenger.email}/100/100`} />
+                                <AvatarFallback>{passenger.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="text-sm font-semibold">{passenger.name}</p>
+                                <p className="text-xs text-muted-foreground">Passenger</p>
+                            </div>
+                        </>
+                    )}
+                </div>
+                <p className="text-lg font-bold text-primary">${ride.fare.toFixed(2)}</p>
+            </div>
+        </div>
+    );
+
     if (status === 'enroute-to-pickup') {
          return (
              <Card className="shadow-2xl">
@@ -83,6 +126,9 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
                     <CardTitle className="font-headline">En-Route to Passenger</CardTitle>
                     <CardDescription>Navigate to the pickup location at <span className="font-semibold text-foreground">{ride.startLocation}</span>.</CardDescription>
                 </CardHeader>
+                <CardContent>
+                    <TripDetails />
+                </CardContent>
                  <CardFooter>
                     <Button className="w-full" onClick={onStartTrip} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                         <Navigation className="mr-2 h-4 w-4" /> Arrived / Start Trip
@@ -106,10 +152,7 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
                             <p>Completing trip...</p>
                         </div>
                     ) : (
-                         <div className="flex items-center justify-center text-green-700">
-                            <Navigation className="h-6 w-6 mr-2"/>
-                            <p>Navigating to destination...</p>
-                        </div>
+                        <TripDetails />
                     )}
                 </CardContent>
                  <CardFooter>
@@ -124,5 +167,3 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
 
     return null;
 }
-
-    
