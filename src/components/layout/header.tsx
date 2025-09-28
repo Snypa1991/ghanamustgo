@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut, Car, Shield } from 'lucide-react';
+import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut, Car, Shield, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { GhanaMustGoIcon, MopedIcon } from '@/components/icons';
@@ -18,16 +18,24 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-
-const navItems = [
+const defaultNavItems = [
   { href: '/book', icon: Car, label: 'Book' },
   { href: '/restaurants', icon: UtensilsCrossed, label: 'Food' },
   { href: '/marketplace', icon: Store, label: 'Market' },
 ];
 
+const partnerNavItems = [
+    { href: '/profile', icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/restaurants', icon: UtensilsCrossed, label: 'Food' },
+    { href: '/marketplace', icon: Store, label: 'Market' },
+];
+
 export default function Header() {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const isPartner = user?.role === 'biker' || user?.role === 'driver';
+  const navItems = isPartner ? partnerNavItems : defaultNavItems;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
