@@ -10,6 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { MopedIcon } from '@/components/icons';
+import { DUMMY_RIDES, Ride } from '@/lib/dummy-data';
+import RideRequestCard from '@/components/ride-request-card';
 
 const containerStyle = {
   width: '100%',
@@ -33,6 +35,11 @@ export default function DashboardPage() {
   const [isOnline, setIsOnline] = useState(false);
   const [currentPosition, setCurrentPosition] = useState<google.maps.LatLngLiteral | null>(null);
   const [userInteracted, setUserInteracted] = useState(false);
+  const [currentRideRequest, setCurrentRideRequest] = useState<Ride | null>(null);
+  const [tripStatus, setTripStatus] = useState<'none' | 'requesting' | 'accepted'>('none');
+
+  const requestIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const rideIndexRef = useRef(0);
 
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -66,6 +73,24 @@ export default function DashboardPage() {
     }
   }
 
+  const startRequestSimulator = () => {
+        if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
+        requestIntervalRef.current = setInterval(() => {
+            if (tripStatus === 'none') {
+                const nextRide = DUMMY_RIDES[rideIndexRef.current % DUMMY_RIDES.length];
+                setCurrentRideRequest(nextRide);
+                setTripStatus('requesting');
+                rideIndexRef.current++;
+            }
+        }, 10000); // Every 10 seconds
+    };
+
+    const stopRequestSimulator = () => {
+        if (requestIntervalRef.current) {
+            clearInterval(requestIntervalRef.current);
+            requestIntervalRef.current = null;
+        }
+    };
 
   useEffect(() => {
     if (!user || (user.role !== 'biker' && user.role !== 'driver')) {
@@ -77,6 +102,7 @@ export default function DashboardPage() {
     let watchId: number;
 
     if (isOnline && navigator.geolocation) {
+      startRequestSimulator();
       // Get initial position and center the map
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -117,12 +143,16 @@ export default function DashboardPage() {
     } else {
       setCurrentPosition(null);
       setUserInteracted(false);
+      stopRequestSimulator();
+      setCurrentRideRequest(null);
+      setTripStatus('none');
     }
 
     return () => {
       if (watchId) {
         navigator.geolocation.clearWatch(watchId);
       }
+      stopRequestSimulator();
     };
   }, [isOnline, userInteracted]);
 
@@ -136,6 +166,20 @@ export default function DashboardPage() {
     } else {
       setUserInteracted(true); // Disable auto-pan when going offline
     }
+  };
+
+  const handleAcceptRide = () => {
+    setTripStatus('accepted');
+    // Simulate ride completion
+    setTimeout(() => {
+        setCurrentRideRequest(null);
+        setTripStatus('none');
+    }, 5000); // Ride "completes" after 5 seconds
+  };
+
+  const handleDeclineRide = () => {
+      setCurrentRideRequest(null);
+      setTripStatus('none');
   };
 
   const partnerIcon = useMemo(() => {
@@ -251,6 +295,17 @@ export default function DashboardPage() {
             </Button>
           </div>
         )}
+      
+       {tripStatus !== 'none' && currentRideRequest && (
+         <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:w-full sm:max-w-sm">
+            <RideRequestCard 
+                ride={currentRideRequest}
+                status={tripStatus}
+                onAccept={handleAcceptRide}
+                onDecline={handleDeclineRide}
+            />
+         </div>
+       )}
     </div>
   );
 }
