@@ -199,8 +199,7 @@ export default function DashboardPage() {
       <div className="absolute top-0 left-0 right-0 p-4">
         <Card className="max-w-md mx-auto">
           <CardHeader>
-            <CardTitle className="font-headline flex items-center justify-between">
-              <span>{user.name}</span>
+            <CardTitle className="font-headline flex items-center justify-end">
               <div className="flex items-center space-x-2">
                 <span className={cn("text-sm font-semibold", isOnline ? 'text-green-600' : 'text-red-600')}>
                     {isOnline ? 'Online' : 'Offline'}
