@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { GoogleMap, useJsApiLoader, Marker, Circle } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, Circle, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import { Power, Crosshair, Car } from 'lucide-react';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,6 +24,9 @@ const center = {
   lng: -0.1870
 };
 
+type TripStatus = 'none' | 'requesting' | 'enroute-to-pickup' | 'enroute-to-destination';
+
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -36,7 +39,8 @@ export default function DashboardPage() {
   const [currentPosition, setCurrentPosition] = useState<google.maps.LatLngLiteral | null>(null);
   const [userInteracted, setUserInteracted] = useState(false);
   const [currentRideRequest, setCurrentRideRequest] = useState<Ride | null>(null);
-  const [tripStatus, setTripStatus] = useState<'none' | 'requesting' | 'accepted'>('none');
+  const [tripStatus, setTripStatus] = useState<TripStatus>('none');
+  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
 
   const requestIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const rideIndexRef = useRef(0);
@@ -169,17 +173,32 @@ export default function DashboardPage() {
   };
 
   const handleAcceptRide = () => {
-    setTripStatus('accepted');
-    // Simulate ride completion
-    setTimeout(() => {
-        setCurrentRideRequest(null);
-        setTripStatus('none');
-    }, 5000); // Ride "completes" after 5 seconds
+    setTripStatus('enroute-to-pickup');
   };
 
   const handleDeclineRide = () => {
       setCurrentRideRequest(null);
       setTripStatus('none');
+  };
+
+  const directionsCallback = (
+    response: google.maps.DirectionsResult | null,
+    status: google.maps.DirectionsStatus
+  ) => {
+    if (status === 'OK' && response) {
+      setDirections(response);
+       if (mapRef.current) {
+        const bounds = new google.maps.LatLngBounds();
+        response.routes[0].legs.forEach(leg => {
+          leg.steps.forEach(step => {
+            step.path.forEach(path => bounds.extend(path));
+          });
+        });
+        mapRef.current.fitBounds(bounds);
+      }
+    } else {
+      console.error(`Directions request failed due to ${status}`);
+    }
   };
 
   const partnerIcon = useMemo(() => {
@@ -219,6 +238,11 @@ export default function DashboardPage() {
     return <div className="flex items-center justify-center min-h-screen">Redirecting...</div>;
   }
 
+  const shouldRenderDirections = isLoaded && currentRideRequest && currentPosition && (tripStatus === 'enroute-to-pickup' || tripStatus === 'enroute-to-destination');
+  const directionsOrigin = tripStatus === 'enroute-to-pickup' ? currentPosition : currentRideRequest?.startLocation;
+  const directionsDestination = tripStatus === 'enroute-to-pickup' ? currentRideRequest?.startLocation : currentRideRequest?.endLocation;
+
+
   return (
     <div className="relative min-h-[calc(100vh-4rem)] w-full">
       <div className="absolute inset-0">
@@ -248,22 +272,49 @@ export default function DashboardPage() {
             onDragStart={onUserInteraction}
             onZoomChanged={onUserInteraction}
           >
-            {isOnline && currentPosition && (
-              <>
-                {partnerIcon && <Marker position={currentPosition} icon={partnerIcon} />}
-                <Circle
-                    center={currentPosition}
-                    radius={2000} // 2km radius
+             {shouldRenderDirections && directionsOrigin && directionsDestination && (
+                <DirectionsService
                     options={{
+                        destination: directionsDestination,
+                        origin: directionsOrigin,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                    }}
+                    callback={directionsCallback}
+                />
+            )}
+
+            {directions && tripStatus !== 'none' && (
+                <DirectionsRenderer
+                    options={{
+                        directions: directions,
+                        suppressMarkers: true, // We'll use our own markers
+                        polylineOptions: {
                         strokeColor: 'hsl(var(--primary))',
                         strokeOpacity: 0.8,
-                        strokeWeight: 1,
-                        fillColor: 'hsl(var(--primary))',
-                        fillOpacity: 0.1,
+                        strokeWeight: 6
+                        }
                     }}
                 />
-              </>
             )}
+
+            {currentPosition && partnerIcon && tripStatus !== 'enroute-to-destination' && (
+              <Marker position={currentPosition} icon={partnerIcon} />
+            )}
+            
+            {isOnline && currentPosition && tripStatus === 'none' && (
+              <Circle
+                  center={currentPosition}
+                  radius={2000} // 2km radius
+                  options={{
+                      strokeColor: 'hsl(var(--primary))',
+                      strokeOpacity: 0.8,
+                      strokeWeight: 1,
+                      fillColor: 'hsl(var(--primary))',
+                      fillOpacity: 0.1,
+                  }}
+              />
+            )}
+            
           </GoogleMap>
         ) : (
           <Skeleton className="h-full w-full" />
@@ -303,6 +354,11 @@ export default function DashboardPage() {
                 status={tripStatus}
                 onAccept={handleAcceptRide}
                 onDecline={handleDeclineRide}
+                onComplete={() => {
+                  setDirections(null);
+                  setCurrentRideRequest(null);
+                  setTripStatus('none');
+                }}
             />
          </div>
        )}
