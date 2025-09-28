@@ -36,6 +36,14 @@ export default function DashboardPage() {
 
   const mapRef = useRef<google.maps.Map | null>(null);
 
+  // Load online status from localStorage on initial render
+  useEffect(() => {
+    const storedIsOnline = localStorage.getItem('ghana-must-go-isOnline');
+    if (storedIsOnline) {
+      setIsOnline(JSON.parse(storedIsOnline));
+    }
+  }, []);
+
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
   }, []);
@@ -118,6 +126,18 @@ export default function DashboardPage() {
     };
   }, [isOnline, userInteracted]);
 
+  const handleToggleOnline = () => {
+    const newIsOnline = !isOnline;
+    setIsOnline(newIsOnline);
+    localStorage.setItem('ghana-must-go-isOnline', JSON.stringify(newIsOnline));
+    
+    if (newIsOnline) {
+      setUserInteracted(false); // Enable auto-pan when going online
+    } else {
+      setUserInteracted(true); // Disable auto-pan when going offline
+    }
+  };
+
   const partnerIcon = useMemo(() => {
     if (!isLoaded || !user) return undefined;
   
@@ -126,23 +146,22 @@ export default function DashboardPage() {
         fillOpacity: 1,
         strokeColor: 'white',
         strokeWeight: 2,
-        scale: 1.5,
         anchor: new window.google.maps.Point(12, 12),
     };
 
     if (user.role === 'biker') {
+        const svgPath = 'M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM8 19h8M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2zM5 11v-5h8M11 6L7 4M13 11V4h-2';
         return {
             ...commonOptions,
-            path: 'M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM8 19h8M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2zM5 11v-5h8M11 6L7 4M13 11V4h-2',
-            rotation: 0,
-            scale: 1,
+            path: svgPath,
+            scale: 1.2,
         };
     }
 
     if (user.role === 'driver') {
         return {
             ...commonOptions,
-            path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW, // Using a car-like symbol
+            path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
             scale: 6,
             rotation: 0
         };
@@ -209,11 +228,7 @@ export default function DashboardPage() {
 
       <div className="absolute top-4 right-4 z-10">
         <button
-            onClick={() => {
-                setIsOnline(!isOnline);
-                if(isOnline) setUserInteracted(true); // if going offline, disable auto-pan
-                else setUserInteracted(false); // if going online, enable auto-pan
-            }}
+            onClick={handleToggleOnline}
             className={cn(
                 "relative inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors shadow-lg",
                 isOnline ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
