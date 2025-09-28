@@ -75,7 +75,7 @@ export default function DashboardPage() {
   }, [isOnline]);
 
   const partnerIcon = useMemo(() => {
-    if (user) {
+    if (user && isLoaded) {
       return {
         url: `https://picsum.photos/seed/${user.email}/60/60`,
         scaledSize: new google.maps.Size(60, 60),
@@ -83,7 +83,7 @@ export default function DashboardPage() {
       };
     }
     return undefined;
-  }, [user]);
+  }, [user, isLoaded]);
 
   if (!user || (user.role !== 'biker' && user.role !== 'driver')) {
     return <div className="flex items-center justify-center min-h-screen">Redirecting...</div>;

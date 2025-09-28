@@ -69,7 +69,7 @@ export default function BookPage() {
   }, [isLoaded, startLocation, endLocation, directions]);
 
   const startMarkerIcon = useMemo(() => {
-    if (user) {
+    if (user && isLoaded) {
       return {
         url: `https://picsum.photos/seed/${user.email}/40/40`,
         scaledSize: new google.maps.Size(40, 40),
@@ -77,7 +77,7 @@ export default function BookPage() {
       };
     }
     return undefined;
-  }, [user]);
+  }, [user, isLoaded]);
 
 
   return (
