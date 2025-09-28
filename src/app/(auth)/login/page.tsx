@@ -48,6 +48,8 @@ export default function LoginPage() {
       });
       if (user.role === 'unassigned') {
         router.push('/role-selection');
+      } else if (user.role === 'admin') {
+        router.push('/admin/dashboard');
       } else {
         router.push('/profile');
       }
