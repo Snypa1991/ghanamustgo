@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [userInteracted, setUserInteracted] = useState(false);
   const [currentRideRequest, setCurrentRideRequest] = useState<Ride | null>(null);
   const [tripStatus, setTripStatus] = useState<TripStatus>('none');
+  const [isCompleting, setIsCompleting] = useState(false);
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
 
   const requestIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -164,6 +165,27 @@ export default function DashboardPage() {
     };
   }, [isOnline, userInteracted, startRequestSimulator, tripStatus]);
 
+    useEffect(() => {
+        let timeoutId: NodeJS.Timeout | null = null;
+        if (tripStatus === 'enroute-to-pickup') {
+            // Simulate the trip duration
+            timeoutId = setTimeout(() => {
+                setIsCompleting(true);
+                // Simulate the finalization of the trip
+                setTimeout(() => {
+                    handleCompleteRide();
+                }, 2000); // 2 seconds to show "completing"
+            }, 15000); // 15 seconds trip duration
+        }
+
+        return () => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
+    }, [tripStatus]);
+
+
   const handleToggleOnline = () => {
     const newIsOnline = !isOnline;
     setIsOnline(newIsOnline);
@@ -188,6 +210,7 @@ export default function DashboardPage() {
     setDirections(null);
     setCurrentRideRequest(null);
     setTripStatus('none');
+    setIsCompleting(false);
     // The main useEffect will restart the simulator since tripStatus is 'none'
   }, []);
 
@@ -223,6 +246,7 @@ export default function DashboardPage() {
     };
 
     if (user.role === 'biker') {
+        // Moped Icon SVG Path
         const svgPath = 'M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM8 19h8M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2zM5 11v-5h8M11 6L7 4M13 11V4h-2';
         return {
             ...commonOptions,
@@ -232,6 +256,7 @@ export default function DashboardPage() {
     }
 
     if (user.role === 'driver') {
+        // Simple car icon
         return {
             ...commonOptions,
             path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
@@ -307,7 +332,7 @@ export default function DashboardPage() {
                 />
             )}
 
-            {currentPosition && partnerIcon && tripStatus !== 'enroute-to-destination' && (
+            {currentPosition && partnerIcon && (
               <Marker position={currentPosition} icon={partnerIcon} />
             )}
             
@@ -351,11 +376,10 @@ export default function DashboardPage() {
                 onAccept={handleAcceptRide}
                 onDecline={handleDeclineRide}
                 onComplete={handleCompleteRide}
+                isCompleting={isCompleting}
             />
          </div>
        )}
     </div>
   );
 }
-
-    

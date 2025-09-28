@@ -16,31 +16,10 @@ interface RideRequestCardProps {
     onAccept: () => void;
     onDecline: () => void;
     onComplete: () => void;
+    isCompleting: boolean;
 }
 
-export default function RideRequestCard({ ride, status, onAccept, onDecline, onComplete }: RideRequestCardProps) {
-    const [isCompleting, setIsCompleting] = useState(false);
-
-    useEffect(() => {
-        let timeoutId: NodeJS.Timeout;
-        if (status === 'enroute-to-pickup') {
-            setIsCompleting(true);
-            // Simulate arriving at pickup and then completing trip
-            timeoutId = setTimeout(() => {
-               onComplete();
-               setIsCompleting(false);
-            }, 15000); // 15 seconds to simulate entire trip for demo
-        }
-
-        return () => {
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
-        }
-
-    }, [status, onComplete]);
-
-
+export default function RideRequestCard({ ride, status, onAccept, onDecline, onComplete, isCompleting }: RideRequestCardProps) {
     if (status === 'requesting') {
          return (
             <Card className="shadow-2xl animate-in fade-in-0 zoom-in-95">
