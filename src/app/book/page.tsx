@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MopedIcon } from '@/components/icons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/context/app-context';
 
 const containerStyle = {
   width: '100%',
@@ -29,6 +30,7 @@ export default function BookPage() {
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
   });
+  const { user } = useAuth();
 
   const [startLocation, setStartLocation] = useState<string>('');
   const [endLocation, setEndLocation] = useState<string>('');
@@ -54,6 +56,17 @@ export default function BookPage() {
   const shouldRenderDirectionsService = useMemo(() => {
     return isLoaded && startLocation && endLocation && !directions;
   }, [isLoaded, startLocation, endLocation, directions]);
+
+  const startMarkerIcon = useMemo(() => {
+    if (user) {
+      return {
+        url: `https://picsum.photos/seed/${user.email}/40/40`,
+        scaledSize: new google.maps.Size(40, 40),
+        anchor: new google.maps.Point(20, 20),
+      };
+    }
+    return undefined;
+  }, [user]);
 
 
   return (
@@ -178,7 +191,7 @@ export default function BookPage() {
                           />
                         )}
 
-                        {!directions && startLocation && <Marker position={{ lat: 5.6395, lng: -0.1719 }} label="A" />}
+                        {!directions && startLocation && <Marker position={{ lat: 5.6395, lng: -0.1719 }} icon={startMarkerIcon} />}
                         {!directions && endLocation && <Marker position={{ lat: 5.5562, lng: -0.1451 }} label="B" />}
                         
                     </GoogleMap>
