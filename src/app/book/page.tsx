@@ -73,11 +73,22 @@ export default function BookPage() {
   
   const startMarkerIcon = useMemo(() => {
     if (user && isLoaded) {
+      const imageUrl = `https://picsum.photos/seed/${user.email}/40/40`;
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+          <defs>
+            <clipPath id="circle-clip">
+              <circle cx="24" cy="24" r="20" />
+            </clipPath>
+          </defs>
+          <circle cx="24" cy="24" r="22" fill="white" />
+          <image href="${imageUrl}" x="4" y="4" width="40" height="40" clip-path="url(#circle-clip)" />
+        </svg>`;
+      
       return {
-        url: `https://picsum.photos/seed/${user.email}/40/40`,
-        scaledSize: new window.google.maps.Size(40, 40),
-        anchor: new window.google.maps.Point(20, 20),
-        origin: new window.google.maps.Point(0, 0),
+        url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+        scaledSize: new window.google.maps.Size(48, 48),
+        anchor: new window.google.maps.Point(24, 24),
       };
     }
     return undefined;

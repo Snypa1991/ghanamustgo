@@ -83,12 +83,23 @@ export default function DashboardPage() {
 
   const partnerIcon = useMemo(() => {
     if (user && isLoaded) {
-        return {
-            url: `https://picsum.photos/seed/${user.email}/60/60`,
-            scaledSize: new window.google.maps.Size(40, 40),
-            anchor: new window.google.maps.Point(20, 20),
-            origin: new window.google.maps.Point(0, 0),
-        };
+      const imageUrl = `https://picsum.photos/seed/${user.email}/60/60`;
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60">
+          <defs>
+            <clipPath id="circle-clip">
+              <circle cx="30" cy="30" r="26" />
+            </clipPath>
+          </defs>
+          <circle cx="30" cy="30" r="28" fill="white" stroke="hsl(var(--primary))" stroke-width="2"/>
+          <image href="${imageUrl}" x="4" y="4" width="52" height="52" clip-path="url(#circle-clip)" />
+        </svg>`;
+      
+      return {
+        url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+        scaledSize: new window.google.maps.Size(60, 60),
+        anchor: new window.google.maps.Point(30, 30),
+      };
     }
     return undefined;
   }, [user, isLoaded]);
@@ -109,7 +120,17 @@ export default function DashboardPage() {
               streetViewControl: false,
               mapTypeControl: false,
               fullscreenControl: false,
-              zoomControl: false,
+              zoomControl: true,
+              styles: [
+                  {
+                      featureType: "poi",
+                      stylers: [{ visibility: "off" }],
+                  },
+                  {
+                      featureType: "transit",
+                      stylers: [{ visibility: "off" }],
+                  },
+              ]
             }}
             onLoad={onMapLoad}
             onUnmount={onMapUnmount}
