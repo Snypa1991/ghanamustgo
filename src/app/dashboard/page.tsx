@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, Circle } from '@react-google-maps/api';
 import { Power } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/app-context';
@@ -114,7 +114,22 @@ export default function DashboardPage() {
             onLoad={onMapLoad}
             onUnmount={onMapUnmount}
           >
-            {currentPosition && partnerIcon && <Marker position={currentPosition} icon={partnerIcon} />}
+            {currentPosition && partnerIcon && (
+              <>
+                <Marker position={currentPosition} icon={partnerIcon} />
+                <Circle
+                    center={currentPosition}
+                    radius={100}
+                    options={{
+                        strokeColor: 'hsl(var(--primary))',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 1,
+                        fillColor: 'hsl(var(--primary))',
+                        fillOpacity: 0.2,
+                    }}
+                />
+              </>
+            )}
           </GoogleMap>
         ) : (
           <Skeleton className="h-full w-full" />
