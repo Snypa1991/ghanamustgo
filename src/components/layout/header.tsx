@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Package, UtensilsCrossed, Store, UserCircle, Menu, LogOut, Car, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { GhanaMustGoIcon, MopedIcon } from '@/components/icons';
 import { useAuth } from '@/context/app-context';
 import {
@@ -60,13 +60,14 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0">
-              <div className="flex flex-col h-full">
-                <div className="p-4 border-b">
+               <SheetHeader className="p-4 border-b">
+                 <SheetTitle className="sr-only">Main Menu</SheetTitle>
                   <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
                     <GhanaMustGoIcon className="h-12 w-auto text-primary" />
                     <span className="font-bold font-headline text-2xl">Ghana Must Go</span>
                   </Link>
-                </div>
+                </SheetHeader>
+              <div className="flex flex-col h-full">
                 <nav className="flex-grow p-4">
                   <ul className="space-y-4">
                     {navItems.map((item) => (
