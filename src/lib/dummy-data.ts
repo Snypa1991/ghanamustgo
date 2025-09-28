@@ -78,6 +78,9 @@ export type Ride = {
   fare: number;
   date: string;
   status: 'completed' | 'cancelled';
+  rating?: number;
+  review?: string;
+  reviewBy?: 'rider' | 'partner';
 };
 
 
@@ -91,6 +94,9 @@ export let DUMMY_RIDES: Ride[] = [
     fare: 15.00,
     date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
     status: 'completed',
+    rating: 5,
+    review: 'Kofi was a fast and safe rider. Got me to my destination in no time!',
+    reviewBy: 'rider',
   },
   {
     id: 'ride-2',
@@ -101,6 +107,9 @@ export let DUMMY_RIDES: Ride[] = [
     fare: 25.00,
     date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
     status: 'completed',
+    rating: 4,
+    review: 'Ama was a great passenger. Friendly and polite.',
+    reviewBy: 'partner'
   },
     {
     id: 'ride-3',
@@ -119,7 +128,7 @@ export let DUMMY_RIDES: Ride[] = [
     startLocation: 'Kotoka International Airport',
     endLocation: 'Movenpick Ambassador Hotel',
     fare: 30.00,
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
+    date: new Date(Date.now() - 1000 * 60 * 60 * 7).toISOString(),
     status: 'cancelled',
   },
   {
@@ -131,5 +140,8 @@ export let DUMMY_RIDES: Ride[] = [
     fare: 10.00,
     date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
     status: 'completed',
+    rating: 5,
+    review: 'Very pleasant trip.',
+    reviewBy: 'partner',
   },
 ];
