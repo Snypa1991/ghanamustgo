@@ -7,6 +7,7 @@ interface AppContextType {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
+  updateUser: (user: User) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -37,8 +38,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const updateUser = (userData: User) => {
+    // This function updates the user in the context and localStorage.
+    // In a real app, this would likely be part of a more complex state management
+    // logic that also pushes updates to a backend.
+    localStorage.setItem('ghana-must-go-user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
+
   return (
-    <AppContext.Provider value={{ user, login, logout }}>
+    <AppContext.Provider value={{ user, login, logout, updateUser }}>
       {children}
     </AppContext.Provider>
   );

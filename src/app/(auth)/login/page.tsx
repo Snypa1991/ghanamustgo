@@ -46,7 +46,11 @@ export default function LoginPage() {
         title: 'Login Successful',
         description: `Akwaaba, ${user.name}!`,
       });
-      router.push('/profile');
+      if (user.role === 'unassigned') {
+        router.push('/role-selection');
+      } else {
+        router.push('/profile');
+      }
     } else {
       toast({
         variant: 'destructive',
@@ -112,6 +116,10 @@ export default function LoginPage() {
         <CardContent>
             <div className="text-center text-xs text-muted-foreground mb-2">Quick Logins</div>
             <div className="flex justify-center flex-wrap gap-2 text-sm">
+                <Button variant="outline" size="sm" onClick={() => {
+                    form.setValue('email', 'new@example.com');
+                    form.setValue('password', 'password');
+                }}>New User</Button>
                 <Button variant="outline" size="sm" onClick={() => {
                     form.setValue('email', 'customer@example.com');
                     form.setValue('password', 'password');
