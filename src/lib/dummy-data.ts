@@ -4,7 +4,7 @@ export type User = {
   name: string;
   email: string;
   password?: string; // Should not be sent to client in a real app
-  role: 'customer' | 'rider' | 'admin' | 'driver' | 'vendor' | 'unassigned';
+  role: 'customer' | 'biker' | 'admin' | 'driver' | 'vendor' | 'unassigned';
 };
 
 export const DUMMY_USERS: User[] = [
@@ -17,10 +17,10 @@ export const DUMMY_USERS: User[] = [
   },
   {
     id: 'user-2',
-    name: 'Kofi Rider',
-    email: 'rider@example.com',
+    name: 'Kofi Biker',
+    email: 'biker@example.com',
     password: 'password',
-    role: 'rider',
+    role: 'biker',
   },
    {
     id: 'user-4',

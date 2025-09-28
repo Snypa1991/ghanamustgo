@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -124,9 +125,9 @@ export default function LoginPage() {
                     form.setValue('password', 'password');
                 }}>Customer</Button>
                 <Button variant="outline" size="sm" onClick={() => {
-                    form.setValue('email', 'rider@example.com');
+                    form.setValue('email', 'biker@example.com');
                     form.setValue('password', 'password');
-                }}>Rider</Button>
+                }}>Biker</Button>
                  <Button variant="outline" size="sm" onClick={() => {
                     form.setValue('email', 'driver@example.com');
                     form.setValue('password', 'password');

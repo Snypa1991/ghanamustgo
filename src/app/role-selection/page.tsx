@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -12,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/app-context';
 import { User as UserType } from '@/lib/dummy-data';
 
-type Role = 'customer' | 'rider' | 'vendor' | 'driver';
+type Role = 'customer' | 'biker' | 'vendor' | 'driver';
 
 const roles: {name: Role, title: string, description: string, icon: React.ElementType}[] = [
     {
@@ -23,7 +24,7 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
     },
     {
         name: 'driver',
-        title: 'Driver or Rider',
+        title: 'Driver or Biker',
         description: 'Offer rides and delivery services.',
         icon: Car,
     },
@@ -42,7 +43,7 @@ export default function RoleSelectionPage() {
 
   useEffect(() => {
     // If no user is logged in, or user already has a role, redirect them.
-    if (!user || (user.role !== 'unassigned' && user.role !== 'customer' && user.role !== 'driver' && user.role !== 'vendor' && user.role !== 'rider' ) ) {
+    if (!user || (user.role !== 'unassigned' && user.role !== 'customer' && user.role !== 'driver' && user.role !== 'vendor' && user.role !== 'biker' ) ) {
       router.push('/login');
     }
   }, [user, router]);

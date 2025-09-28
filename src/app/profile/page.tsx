@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useAuth } from '@/context/app-context';
@@ -29,7 +30,7 @@ export default function ProfilePage() {
     );
   }
 
-  const isPartner = user.role === 'rider' || user.role === 'driver';
+  const isPartner = user.role === 'biker' || user.role === 'driver';
 
   return (
     <div className="container py-12">

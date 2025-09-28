@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -12,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { checkImage } from '@/app/actions';
 
 interface VehicleDetailsProps {
-    role: 'rider' | 'driver';
+    role: 'biker' | 'driver';
 }
 
 export default function VehicleDetails({ role }: VehicleDetailsProps) {
@@ -44,7 +45,7 @@ export default function VehicleDetails({ role }: VehicleDetailsProps) {
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
-                    {role === 'rider' ? <MopedIcon className="h-6 w-6"/> : <Car/>}
+                    {role === 'biker' ? <MopedIcon className="h-6 w-6"/> : <Car/>}
                     Vehicle Information
                 </CardTitle>
                 <CardDescription>
@@ -59,7 +60,7 @@ export default function VehicleDetails({ role }: VehicleDetailsProps) {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="vehicle-model">Vehicle Make & Model</Label>
-                        <Input id="vehicle-model" placeholder={role === 'rider' ? "Honda CB125F" : "Toyota Vitz"} />
+                        <Input id="vehicle-model" placeholder={role === 'biker' ? "Honda CB125F" : "Toyota Vitz"} />
                     </div>
                 </div>
                  <div className="space-y-2">

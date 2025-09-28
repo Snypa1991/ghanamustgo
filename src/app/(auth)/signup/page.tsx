@@ -25,7 +25,7 @@ const roles = [
     },
     {
         name: 'partner' as Role,
-        title: 'Rider or Driver',
+        title: 'Biker or Driver',
         description: 'Offer rides and delivery services.',
         icon: Car,
     },
