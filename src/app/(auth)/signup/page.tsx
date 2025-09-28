@@ -14,12 +14,12 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { checkImage } from '@/app/actions';
 
-type Role = 'customer' | 'partner' | 'vendor';
+type Role = 'personal' | 'partner' | 'vendor';
 
 const roles = [
     {
-        name: 'customer' as Role,
-        title: 'Customer',
+        name: 'personal' as Role,
+        title: 'Personal',
         description: 'Book rides, order food, and shop.',
         icon: User,
     },
@@ -39,7 +39,7 @@ const roles = [
 
 export default function SignupPage() {
   const [step, setStep] = useState(1);
-  const [selectedRole, setSelectedRole] = useState<Role>('customer');
+  const [selectedRole, setSelectedRole] = useState<Role>('personal');
   const [isCheckingImage, setIsCheckingImage] = useState(false);
   const [blurResult, setBlurResult] = useState<{ isBlurry: boolean, reasoning: string } | null>(null);
 
@@ -89,7 +89,7 @@ export default function SignupPage() {
                 </CardHeader>
                 <CardContent>
                     <RadioGroup 
-                        defaultValue="customer" 
+                        defaultValue="personal" 
                         className="grid gap-4"
                         onValueChange={(value: Role) => setSelectedRole(value)}
                     >
@@ -134,7 +134,7 @@ export default function SignupPage() {
                     <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
                     <CardTitle className="mt-4 font-headline text-2xl">Create Your Account</CardTitle>
                     <CardDescription>
-                        You are signing up as a <span className="font-bold text-primary">{selectedRoleInfo?.title}</span>.
+                        You are signing up for a <span className="font-bold text-primary">{selectedRoleInfo?.title}</span> account.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-4">

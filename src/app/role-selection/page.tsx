@@ -13,12 +13,12 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/app-context';
 import { User as UserType } from '@/lib/dummy-data';
 
-type Role = 'customer' | 'biker' | 'vendor' | 'driver';
+type Role = 'personal' | 'biker' | 'vendor' | 'driver';
 
 const roles: {name: Role, title: string, description: string, icon: React.ElementType}[] = [
     {
-        name: 'customer',
-        title: 'Customer',
+        name: 'personal',
+        title: 'Personal',
         description: 'Book rides, order food, and shop.',
         icon: User,
     },
@@ -39,11 +39,11 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
 export default function RoleSelectionPage() {
   const { user, updateUser } = useAuth();
   const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<Role>('customer');
+  const [selectedRole, setSelectedRole] = useState<Role>('personal');
 
   useEffect(() => {
     // If no user is logged in, or user already has a role, redirect them.
-    if (!user || (user.role !== 'unassigned' && user.role !== 'customer' && user.role !== 'driver' && user.role !== 'vendor' && user.role !== 'biker' ) ) {
+    if (!user || (user.role !== 'unassigned' && user.role !== 'personal' && user.role !== 'driver' && user.role !== 'vendor' && user.role !== 'biker' ) ) {
       router.push('/login');
     }
   }, [user, router]);
@@ -71,7 +71,7 @@ export default function RoleSelectionPage() {
         </CardHeader>
         <CardContent>
             <RadioGroup
-                defaultValue="customer"
+                defaultValue="personal"
                 className="grid gap-4"
                 onValueChange={(value: Role) => setSelectedRole(value)}
             >
