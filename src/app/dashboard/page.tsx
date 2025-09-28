@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { GoogleMap, useJsApiLoader, Marker, Circle, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import { Power, Crosshair, Car } from 'lucide-react';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -311,20 +311,6 @@ export default function DashboardPage() {
               <Marker position={currentPosition} icon={partnerIcon} />
             )}
             
-            {isOnline && currentPosition && tripStatus === 'none' && (
-              <Circle
-                  center={currentPosition}
-                  radius={2000} // 2km radius
-                  options={{
-                      strokeColor: 'hsl(var(--primary))',
-                      strokeOpacity: 0.8,
-                      strokeWeight: 1,
-                      fillColor: 'hsl(var(--primary))',
-                      fillOpacity: 0.1,
-                  }}
-              />
-            )}
-            
           </GoogleMap>
         ) : (
           <Skeleton className="h-full w-full" />
@@ -371,3 +357,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
