@@ -43,7 +43,9 @@ export default function RouteOptimization({ onRouteUpdate }: RouteOptimizationPr
   const endLocation = watch('endLocation');
 
   useEffect(() => {
-    onRouteUpdate?.(startLocation, endLocation);
+    if (onRouteUpdate) {
+        onRouteUpdate(startLocation, endLocation);
+    }
   }, [startLocation, endLocation, onRouteUpdate]);
 
 
@@ -165,3 +167,5 @@ export default function RouteOptimization({ onRouteUpdate }: RouteOptimizationPr
     </div>
   );
 }
+
+    

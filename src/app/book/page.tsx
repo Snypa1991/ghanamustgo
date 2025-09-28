@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-import { Car, Package, ShieldCheck, ArrowLeft, Search, Mic } from 'lucide-react';
+import { Car, MapPin, Loader2, Navigation } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,17 +12,13 @@ import { Label } from '@/components/ui/label';
 import { MopedIcon } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/app-context';
-import { cn } from '@/lib/utils';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetDescription,
-  SheetFooter
-} from "@/components/ui/sheet"
-
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { getOptimizedRoute } from '@/app/actions';
+import type { OptimizeRouteWithAIOutput } from '@/ai/flows/optimize-route-with-ai';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const containerStyle = {
   width: '100%',
@@ -35,18 +31,42 @@ const center = {
   lng: -0.1870
 };
 
+const formSchema = z.object({
+  startLocation: z.string().min(1, 'Start location is required'),
+  endLocation: z.string().min(1, 'End location is required'),
+});
+
+type RouteOptimizationFormValues = z.infer<typeof formSchema>;
+
+
 export default function BookPage() {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
   });
   const { user } = useAuth();
-
-  const [startLocation, setStartLocation] = useState<string>('');
-  const [endLocation, setEndLocation] = useState<string>('');
+  
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
+  const [step, setStep] = useState<'details' | 'selection'>('details');
+  const [ridePrices, setRidePrices] = useState({ okada: 0, taxi: 0 });
+
+  const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const mapRef = useRef<google.maps.Map | null>(null);
+
+  const form = useForm<RouteOptimizationFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      startLocation: 'East Legon, American House',
+      endLocation: '',
+    },
+  });
+
+  const { watch } = form;
+  const startLocation = watch('startLocation');
+  const endLocation = watch('endLocation');
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -62,14 +82,41 @@ export default function BookPage() {
   ) => {
     if (status === 'OK' && response) {
       setDirections(response);
+
+      const distanceInKm = response.routes[0].legs[0].distance?.value ?? 0 / 1000;
+      // Simple pricing model for prototype
+      setRidePrices({
+          okada: Math.max(5, distanceInKm * 1.5),
+          taxi: Math.max(10, distanceInKm * 2.5),
+      })
     } else {
       console.error(`Directions request failed due to ${status}`);
     }
   };
+  
+  async function onSubmit(values: RouteOptimizationFormValues) {
+    setIsLoading(true);
+    setAiError(null);
+    setAiResult(null);
+
+    // Get directions from Google Maps
+    setDirections(null); // Reset directions to trigger DirectionsService
+    
+    // Get AI optimization
+    const response = await getOptimizedRoute(values);
+    if (response.success && response.data) {
+      setAiResult(response.data);
+    } else {
+      setAiError(response.error || 'An unknown error occurred.');
+    }
+    
+    setIsLoading(false);
+    setStep('selection');
+  }
 
   const shouldRenderDirectionsService = useMemo(() => {
-    return isLoaded && startLocation && endLocation && !directions;
-  }, [isLoaded, startLocation, endLocation, directions]);
+    return isLoaded && startLocation && endLocation;
+  }, [isLoaded, startLocation, endLocation]);
   
   const startMarkerIcon = useMemo(() => {
     if (user && isLoaded) {
@@ -109,12 +156,12 @@ export default function BookPage() {
             streetViewControl: false,
             mapTypeControl: false,
             fullscreenControl: false,
-            zoomControl: false,
+            zoomControl: true,
           }}
           onLoad={onMapLoad}
           onUnmount={onUnmount}
         >
-          {shouldRenderDirectionsService && (
+          {shouldRenderDirectionsService && !directions && (
             <DirectionsService
               options={{
                 destination: endLocation,
@@ -131,8 +178,9 @@ export default function BookPage() {
                 directions: directions,
                 suppressMarkers: true,
                 polylineOptions: {
-                  strokeColor: '#000000',
-                  strokeWeight: 4
+                  strokeColor: 'hsl(var(--primary))',
+                  strokeOpacity: 0.8,
+                  strokeWeight: 6
                 }
               }}
             />
@@ -148,11 +196,11 @@ export default function BookPage() {
              <Marker 
                 position={directions.routes[0].legs[0].end_location} 
                 icon={{
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 8,
-                    fillColor: "#EA4335",
+                    path: window.google.maps.SymbolPath.CIRCLE,
+                    scale: 10,
+                    fillColor: "hsl(var(--primary))",
                     fillOpacity: 1,
-                    strokeWeight: 2,
+                    strokeWeight: 3,
                     strokeColor: "white",
                 }}
              />
@@ -163,78 +211,117 @@ export default function BookPage() {
         <Skeleton className="absolute inset-0" />
       )}
 
-      <div className="absolute top-4 left-4 right-4 bg-background p-3 rounded-lg shadow-lg flex items-center gap-2">
-        <Button variant="ghost" size="icon">
-          <ArrowLeft />
-        </Button>
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input 
-            placeholder="Where to?" 
-            className="pl-10 text-base"
-            value={endLocation}
-            onChange={(e) => setEndLocation(e.target.value)}
-            onFocus={() => {
-              // Set a default start location when user focuses on destination
-              if (!startLocation) {
-                 setStartLocation('East Legon, American House');
-              }
-            }}
-          />
-        </div>
-        <Button variant="ghost" size="icon">
-          <Mic />
-        </Button>
-      </div>
-        
-      <Sheet open={true} onOpenChange={()=>{}}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] p-0" hideClose>
-          <div className="p-6">
-            <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full mx-auto mb-4" />
-             <SheetHeader>
-               <SheetTitle className="text-2xl font-bold font-headline text-center">Choose a ride</SheetTitle>
-               <SheetDescription className="text-center">Select a vehicle that suits your needs.</SheetDescription>
-             </SheetHeader>
-          </div>
+      <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-auto sm:right-8 sm:w-full sm:max-w-sm">
+        <Card className="shadow-2xl">
+          {step === 'details' && (
+            <>
+              <CardHeader>
+                <CardTitle className="font-headline text-2xl">Where to?</CardTitle>
+                <CardDescription>Enter your pickup and drop-off locations.</CardDescription>
+              </CardHeader>
+               <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <CardContent className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="startLocation"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Pickup Location</FormLabel>
+                                <div className="relative">
+                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <FormControl>
+                                      <Input placeholder="e.g., Accra Mall" {...field} className="pl-9" />
+                                    </FormControl>
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="endLocation"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Drop-off Location</FormLabel>
+                                <div className="relative">
+                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <FormControl>
+                                      <Input placeholder="e.g., Labadi Beach" {...field} className="pl-9" />
+                                    </FormControl>
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                    </CardContent>
+                    <CardFooter>
+                        <Button type="submit" disabled={isLoading} className="w-full h-11" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
+                            Find Ride
+                        </Button>
+                    </CardFooter>
+                </form>
+              </Form>
+            </>
+          )}
 
-          <div className="p-6 pt-0">
-             <RadioGroup defaultValue="okada" className="grid grid-cols-1 gap-4">
-                  <Label
-                      htmlFor="okada"
-                      className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                      <div className='flex items-center gap-4'>
-                        <MopedIcon className="h-10 w-10 text-primary" />
-                        <div>
-                          <p className="font-bold text-lg">Okada</p>
-                          <p className="text-sm text-muted-foreground">Quick & affordable</p>
-                        </div>
-                      </div>
-                      <p className="text-lg font-bold">$15.00</p>
-                      <RadioGroupItem value="okada" id="okada" className="sr-only" />
-                  </Label>
-                  <Label
-                      htmlFor="car"
-                      className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                      <div className='flex items-center gap-4'>
-                        <Car className="h-10 w-10 text-primary" />
-                        <div>
-                          <p className="font-bold text-lg">Taxi</p>
-                          <p className="text-sm text-muted-foreground">Comfortable & private</p>
-                        </div>
-                      </div>
-                      <p className="text-lg font-bold">$25.00</p>
-                       <RadioGroupItem value="car" id="car" className="sr-only" />
-                  </Label>
-              </RadioGroup>
-          </div>
-          
-          <SheetFooter className="p-6 pt-0 bg-background sticky bottom-0">
-              <Button size="lg" className="w-full h-12 text-lg">Book Ride</Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
+          {step === 'selection' && (
+            <>
+                <CardHeader>
+                    <CardTitle className="text-2xl font-bold font-headline text-center">Choose a ride</CardTitle>
+                    <CardDescription className="text-center">Select a vehicle that suits your needs.</CardDescription>
+                </CardHeader>
+
+                <CardContent>
+                    {aiResult && (
+                       <Alert className="mb-4 bg-primary/5">
+                          <CardTitle className="text-sm font-headline text-primary">AI-Optimized Route</CardTitle>
+                          <AlertDescription className="text-xs">{aiResult.optimizedRoute} (Est: {aiResult.estimatedTravelTime})</AlertDescription>
+                        </Alert>
+                    )}
+                     <RadioGroup defaultValue="okada" className="grid grid-cols-1 gap-4">
+                        <Label
+                            htmlFor="okada"
+                            className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        >
+                            <div className='flex items-center gap-4'>
+                                <MopedIcon className="h-10 w-10 text-primary" />
+                                <div>
+                                <p className="font-bold text-lg">Okada</p>
+                                <p className="text-sm text-muted-foreground">Quick & affordable</p>
+                                </div>
+                            </div>
+                            <p className="text-lg font-bold">GH₵{ridePrices.okada.toFixed(2)}</p>
+                            <RadioGroupItem value="okada" id="okada" className="sr-only" />
+                        </Label>
+                        <Label
+                            htmlFor="car"
+                            className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        >
+                            <div className='flex items-center gap-4'>
+                                <Car className="h-10 w-10 text-primary" />
+                                <div>
+                                <p className="font-bold text-lg">Taxi</p>
+                                <p className="text-sm text-muted-foreground">Comfortable & private</p>
+                                </div>
+                            </div>
+                            <p className="text-lg font-bold">GH₵{ridePrices.taxi.toFixed(2)}</p>
+                            <RadioGroupItem value="car" id="car" className="sr-only" />
+                        </Label>
+                    </RadioGroup>
+                </CardContent>
+                <CardFooter className="flex-col gap-3">
+                    <Button size="lg" className="w-full h-12 text-lg">Book Ride</Button>
+                    <Button variant="link" onClick={() => setStep('details')}>Back</Button>
+                </CardFooter>
+            </>
+          )}
+
+        </Card>
+      </div>
     </div>
   );
 }
+
+    
