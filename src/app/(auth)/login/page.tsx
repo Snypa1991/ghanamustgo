@@ -54,7 +54,7 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
       else {
-        router.push('/profile');
+        router.push('/book');
       }
     } else {
       toast({
@@ -106,7 +106,7 @@ export default function LoginPage() {
               />
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button type="submit" className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+              <Button type="submit" className="w-full">
                 Sign In
               </Button>
               <div className="text-center text-sm">

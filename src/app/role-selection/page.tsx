@@ -53,7 +53,14 @@ export default function RoleSelectionPage() {
         // In a real app, this would be an API call to the backend.
         const updatedUser: UserType = { ...user, role: selectedRole };
         updateUser(updatedUser);
-        router.push('/profile');
+        
+        if (selectedRole === 'user') {
+          router.push('/book');
+        } else if (selectedRole === 'driver' || selectedRole === 'biker') {
+          router.push('/dashboard');
+        } else {
+          router.push('/profile');
+        }
     }
   };
 
@@ -97,8 +104,8 @@ export default function RoleSelectionPage() {
             </RadioGroup>
         </CardContent>
         <CardFooter className="flex-col gap-4">
-             <Button className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} onClick={handleRoleSelection}>
-                Continue to Profile
+             <Button className="w-full" onClick={handleRoleSelection}>
+                Continue
             </Button>
         </CardFooter>
       </Card>
