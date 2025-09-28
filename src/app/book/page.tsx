@@ -1,28 +1,74 @@
+
+"use client";
+
 import Image from 'next/image';
-import { Package, MapPin, Car } from 'lucide-react';
+import { MapPin, Car, Package } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import RouteOptimization from '@/components/route-optimization';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ShieldCheck } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MopedIcon } from '@/components/icons';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ShieldCheck } from 'lucide-react';
 
-export default function DispatchPackagePage() {
+export default function BookPage() {
   const mapImage = PlaceHolderImages.find(p => p.id === 'map-background');
 
   return (
     <div className="container py-12">
       <div className="text-center mb-12">
         <Package className="mx-auto h-12 w-12 text-primary" />
-        <h1 className="mt-4 text-4xl font-bold font-headline">Dispatch a Package</h1>
-        <p className="mt-2 text-lg text-muted-foreground">Secure and efficient delivery, powered by AI.</p>
+        <h1 className="mt-4 text-4xl font-bold font-headline">Book a Service</h1>
+        <p className="mt-2 text-lg text-muted-foreground">Rides and deliveries, all in one place.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <div className="space-y-8">
-            <RouteOptimization />
+            <Tabs defaultValue="ride" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="ride">
+                        <Car className="mr-2 h-4 w-4" />
+                        Book a Ride
+                    </TabsTrigger>
+                    <TabsTrigger value="dispatch">
+                        <Package className="mr-2 h-4 w-4" />
+                        Send a Package
+                    </TabsTrigger>
+                </TabsList>
+                <TabsContent value="ride" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline">Your Trip Details</CardTitle>
+                             <CardDescription>Our AI will find the best path for you.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <RouteOptimization />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="dispatch" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline">Your Delivery Details</CardTitle>
+                             <CardDescription>Secure and efficient delivery, powered by AI.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <RouteOptimization />
+                        </CardContent>
+                         <CardFooter>
+                             <Alert>
+                                <ShieldCheck className="h-4 w-4" />
+                                <AlertTitle className="font-headline">Secure Payments</AlertTitle>
+                                <AlertDescription>
+                                    Your payment is held securely and only released to the rider upon your confirmation of successful delivery.
+                                </AlertDescription>
+                            </Alert>
+                         </CardFooter>
+                    </Card>
+                </TabsContent>
+            </Tabs>
              <Card>
                 <CardHeader>
                     <CardTitle className="font-headline">Choose Vehicle</CardTitle>
@@ -52,19 +98,12 @@ export default function DispatchPackagePage() {
                     </RadioGroup>
                 </CardContent>
             </Card>
-            <Alert>
-                <ShieldCheck className="h-4 w-4" />
-                <AlertTitle className="font-headline">Secure Payments</AlertTitle>
-                <AlertDescription>
-                    Your payment is held securely and only released to the rider upon your confirmation of successful delivery.
-                </AlertDescription>
-            </Alert>
         </div>
 
         <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle className="font-headline">Live Tracking</CardTitle>
-            <CardDescription>Monitor your package's journey (simulation).</CardDescription>
+            <CardDescription>Monitor your journey or package in real-time (simulation).</CardDescription>
           </CardHeader>
           <CardContent>
             {mapImage && (
@@ -79,17 +118,17 @@ export default function DispatchPackagePage() {
                  <div className="absolute top-1/4 left-1/4 animate-pulse">
                     <MapPin className="h-8 w-8 text-blue-500" />
                     <div className="absolute -bottom-5 left-1/2 -translate-x-1/2">
-                        <span className="text-xs bg-black/50 text-white p-1 rounded">Pickup</span>
+                        <span className="text-xs bg-black/50 text-white p-1 rounded">Start</span>
                     </div>
                 </div>
                  <div className="absolute bottom-1/4 right-1/4 animate-pulse">
                     <MapPin className="h-8 w-8 text-green-500" />
                      <div className="absolute -bottom-5 left-1/2 -translate-x-1/2">
-                        <span className="text-xs bg-black/50 text-white p-1 rounded">Dropoff</span>
+                        <span className="text-xs bg-black/50 text-white p-1 rounded">End</span>
                     </div>
                 </div>
                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 animate-pulse">
-                    <Package className="h-8 w-8 text-primary" />
+                    <Car className="h-8 w-8 text-primary" />
                 </div>
               </div>
             )}

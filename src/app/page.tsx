@@ -8,25 +8,11 @@ import { MopedIcon } from '@/components/icons';
 
 const features = [
   {
-    title: 'Book an Okada',
-    description: 'Fast, reliable rides to get you where you need to be.',
-    icon: MopedIcon,
-    href: '/book-ride',
-    cta: 'Book Now',
-  },
-  {
-    title: 'Book a Taxi',
-    description: 'Comfortable and private car rides for your trips.',
+    title: 'Book a Ride or Dispatch',
+    description: 'Fast, reliable rides and deliveries to get you where you need to be.',
     icon: Car,
-    href: '/book-taxi',
+    href: '/book',
     cta: 'Book Now',
-  },
-  {
-    title: 'Dispatch a Package',
-    description: 'Secure and timely delivery for your packages.',
-    icon: Package,
-    href: '/dispatch-package',
-    cta: 'Send Package',
   },
   {
     title: 'Order Food',
@@ -69,7 +55,7 @@ export default function Home() {
             Rides, deliveries, food, and local goods—all in one app. Akwaaba to Ghana Must Go.
           </p>
           <div className="mt-8 flex gap-4">
-            <Link href="/book-ride">
+            <Link href="/book">
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 Get Started
               </Button>

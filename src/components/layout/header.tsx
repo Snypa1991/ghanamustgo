@@ -20,9 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 const navItems = [
-  { href: '/book-ride', icon: MopedIcon, label: 'Okada' },
-  { href: '/book-taxi', icon: Car, label: 'Taxi' },
-  { href: '/dispatch-package', icon: Package, label: 'Dispatch' },
+  { href: '/book', icon: Car, label: 'Book' },
   { href: '/restaurants', icon: UtensilsCrossed, label: 'Food' },
   { href: '/marketplace', icon: Store, label: 'Market' },
 ];
