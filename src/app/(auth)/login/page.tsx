@@ -82,7 +82,7 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="personal@example.com" {...field} />
+                      <Input placeholder="user@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,9 +123,9 @@ export default function LoginPage() {
                     form.setValue('password', 'password');
                 }}>New User</Button>
                 <Button variant="outline" size="sm" onClick={() => {
-                    form.setValue('email', 'personal@example.com');
+                    form.setValue('email', 'user@example.com');
                     form.setValue('password', 'password');
-                }}>Personal</Button>
+                }}>User</Button>
                 <Button variant="outline" size="sm" onClick={() => {
                     form.setValue('email', 'biker@example.com');
                     form.setValue('password', 'password');

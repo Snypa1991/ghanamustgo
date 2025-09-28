@@ -14,12 +14,12 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { checkImage } from '@/app/actions';
 
-type Role = 'personal' | 'partner' | 'vendor';
+type Role = 'user' | 'partner' | 'vendor';
 
 const roles = [
     {
-        name: 'personal' as Role,
-        title: 'Personal',
+        name: 'user' as Role,
+        title: 'User',
         description: 'Book rides, order food, and shop.',
         icon: User,
     },
@@ -39,7 +39,7 @@ const roles = [
 
 export default function SignupPage() {
   const [step, setStep] = useState(1);
-  const [selectedRole, setSelectedRole] = useState<Role>('personal');
+  const [selectedRole, setSelectedRole] = useState<Role>('user');
   const [isCheckingImage, setIsCheckingImage] = useState(false);
   const [blurResult, setBlurResult] = useState<{ isBlurry: boolean, reasoning: string } | null>(null);
 
@@ -89,7 +89,7 @@ export default function SignupPage() {
                 </CardHeader>
                 <CardContent>
                     <RadioGroup 
-                        defaultValue="personal" 
+                        defaultValue="user" 
                         className="grid gap-4"
                         onValueChange={(value: Role) => setSelectedRole(value)}
                     >
