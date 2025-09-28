@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState } from 'react';
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { useState, useMemo } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, Polyline, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import { Car, Package, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import RouteOptimization from '@/components/route-optimization';
@@ -30,16 +30,30 @@ export default function BookPage() {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
   });
 
-  const [startLocation, setStartLocation] = useState(null);
-  const [endLocation, setEndLocation] = useState(null);
+  const [startLocation, setStartLocation] = useState<string>('');
+  const [endLocation, setEndLocation] = useState<string>('');
+  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
 
-  // In a real app, you would geocode the addresses from RouteOptimization
-  // to get lat/lng coordinates. For this prototype, we'll use placeholder coords.
   const handleRouteUpdate = (start: string, end: string) => {
-    // Dummy geocoding
-    if (start) setStartLocation({ lat: 5.6395, lng: -0.1719 }); // e.g., Accra Mall
-    if (end) setEndLocation({ lat: 5.5562, lng: -0.1451 }); // e.g., Labadi Beach
+    setStartLocation(start);
+    setEndLocation(end);
+    setDirections(null); // Clear previous directions
   };
+
+  const directionsCallback = (
+    response: google.maps.DirectionsResult | null,
+    status: google.maps.DirectionsStatus
+  ) => {
+    if (status === 'OK' && response) {
+      setDirections(response);
+    } else {
+      console.error(`Directions request failed due to ${status}`);
+    }
+  };
+
+  const shouldRenderDirectionsService = useMemo(() => {
+    return isLoaded && startLocation && endLocation && !directions;
+  }, [isLoaded, startLocation, endLocation, directions]);
 
 
   return (
@@ -144,8 +158,29 @@ export default function BookPage() {
                             fullscreenControl: false,
                         }}
                     >
-                        {startLocation && <Marker position={startLocation} label="A" />}
-                        {endLocation && <Marker position={endLocation} label="B" />}
+                       {shouldRenderDirectionsService && (
+                          <DirectionsService
+                            options={{
+                              destination: endLocation,
+                              origin: startLocation,
+                              travelMode: google.maps.TravelMode.DRIVING,
+                            }}
+                            callback={directionsCallback}
+                          />
+                        )}
+
+                        {directions && (
+                          <DirectionsRenderer
+                            options={{
+                              directions: directions,
+                              suppressMarkers: true, // We can use our own markers
+                            }}
+                          />
+                        )}
+
+                        {!directions && startLocation && <Marker position={{ lat: 5.6395, lng: -0.1719 }} label="A" />}
+                        {!directions && endLocation && <Marker position={{ lat: 5.5562, lng: -0.1451 }} label="B" />}
+                        
                     </GoogleMap>
                 ) : (
                     <Skeleton className="w-full h-full" />
@@ -157,3 +192,4 @@ export default function BookPage() {
     </div>
   );
 }
+

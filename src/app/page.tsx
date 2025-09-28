@@ -1,10 +1,14 @@
+
+"use client"
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Package, UtensilsCrossed, Store, ArrowRight, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { MopedIcon } from '@/components/icons';
+import { useAuth } from '@/context/app-context';
+
 
 const features = [
   {
@@ -31,6 +35,7 @@ const features = [
 ];
 
 export default function Home() {
+  const { user } = useAuth();
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-image');
 
   return (
@@ -56,8 +61,8 @@ export default function Home() {
           </p>
           <div className="mt-8 flex gap-4">
             <Link href="/book">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                Get Started
+               <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                  {user ? "Book a Service" : "Get Started"}
               </Button>
             </Link>
             <Link href="#features">
