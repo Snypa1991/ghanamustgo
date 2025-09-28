@@ -118,7 +118,7 @@ export default function DashboardPage() {
             <CardTitle className="font-headline flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <LayoutDashboard />
-                {user.role === 'biker' ? 'Biker' : 'Driver'} Dashboard
+                {user.name}'s Dashboard
               </div>
               <div className="flex items-center space-x-2">
                 <Switch 
