@@ -72,12 +72,13 @@ export default function RouteOptimization({ onRouteUpdate }: RouteOptimizationPr
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Pickup Location</FormLabel>
-                    <div className="flex gap-2">
+                    <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <FormControl>
-                          <Input placeholder="e.g., Accra Mall" {...field} />
+                          <Input placeholder="e.g., Accra Mall" {...field} className="pl-9" />
                         </FormControl>
-                        <Button variant="outline" type="button" onClick={() => form.setValue('startLocation', 'East Legon, American House')}>
-                            <MapPin className="mr-2 h-4 w-4" /> Use Current
+                        <Button variant="ghost" size="sm" type="button" onClick={() => form.setValue('startLocation', 'East Legon, American House')} className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-xs px-2">
+                             Use Current
                         </Button>
                     </div>
                     <FormMessage />
@@ -90,12 +91,13 @@ export default function RouteOptimization({ onRouteUpdate }: RouteOptimizationPr
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Drop-off Location</FormLabel>
-                     <div className="flex gap-2">
+                     <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <FormControl>
-                          <Input placeholder="e.g., Labadi Beach" {...field} />
+                          <Input placeholder="e.g., Labadi Beach" {...field} className="pl-9" />
                         </FormControl>
-                         <Button variant="outline" type="button" onClick={() => form.setValue('endLocation', 'Osu Oxford Street')}>
-                            <MapPin className="mr-2 h-4 w-4" /> Pin on map
+                         <Button variant="ghost" size="sm" type="button" onClick={() => form.setValue('endLocation', 'Osu Oxford Street')} className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-xs px-2">
+                             Pin on map
                         </Button>
                     </div>
                     <FormMessage />
