@@ -77,6 +77,7 @@ export default function BookPage() {
         url: `https://picsum.photos/seed/${user.email}/40/40`,
         scaledSize: new window.google.maps.Size(40, 40),
         anchor: new window.google.maps.Point(20, 20),
+        origin: new window.google.maps.Point(0, 0),
       };
     }
     return undefined;
@@ -129,14 +130,7 @@ export default function BookPage() {
            {directions && directions.routes[0]?.legs[0]?.start_location && (
              <Marker 
                 position={directions.routes[0].legs[0].start_location} 
-                icon={{
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 8,
-                    fillColor: "#4285F4",
-                    fillOpacity: 1,
-                    strokeWeight: 2,
-                    strokeColor: "white",
-                }}
+                icon={startMarkerIcon}
              />
            )}
            {directions && directions.routes[0]?.legs[0]?.end_location && (
