@@ -5,7 +5,6 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, Circle } from '@react-google-maps/api';
 import { Power, Crosshair } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -196,39 +195,21 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="absolute top-0 left-0 right-0 p-4">
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle className="font-headline flex items-center justify-end">
-              <div className="flex items-center space-x-2">
-                <span className={cn("text-sm font-semibold", isOnline ? 'text-green-600' : 'text-red-600')}>
-                    {isOnline ? 'Online' : 'Offline'}
-                </span>
-                <button
-                    onClick={() => {
-                        setIsOnline(!isOnline);
-                        if(isOnline) setUserInteracted(true); // if going offline, disable auto-pan
-                        else setUserInteracted(false); // if going online, enable auto-pan
-                    }}
-                    className={cn(
-                        "relative inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors",
-                        isOnline ? "bg-green-600" : "bg-red-600"
-                    )}
-                    aria-label={isOnline ? 'Go Offline' : 'Go Online'}
-                >
-                    <Power className="h-5 w-5 text-white" />
-                </button>
-               </div>
-            </CardTitle>
-          </CardHeader>
-           {isOnline && (
-             <CardContent>
-                <div className="p-3 rounded-md bg-green-50 border border-green-200 text-center text-sm text-green-800">
-                    You are online and visible for new requests within a 2km radius.
-                </div>
-             </CardContent>
-           )}
-        </Card>
+      <div className="absolute top-4 right-4 z-10">
+        <button
+            onClick={() => {
+                setIsOnline(!isOnline);
+                if(isOnline) setUserInteracted(true); // if going offline, disable auto-pan
+                else setUserInteracted(false); // if going online, enable auto-pan
+            }}
+            className={cn(
+                "relative inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors shadow-lg",
+                isOnline ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+            )}
+            aria-label={isOnline ? 'Go Offline' : 'Go Online'}
+        >
+            <Power className="h-6 w-6 text-white" />
+        </button>
       </div>
 
        {isLoaded && isOnline && userInteracted && (
