@@ -80,15 +80,18 @@ export default function DashboardPage() {
   }, [isOnline]);
 
   const partnerIcon = useMemo(() => {
-    if (user && isLoaded) {
+    if (isLoaded) {
       return {
-        url: `https://picsum.photos/seed/${user.email}/60/60`,
-        scaledSize: new window.google.maps.Size(60, 60),
-        anchor: new window.google.maps.Point(30, 30),
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: "hsl(var(--primary))",
+        fillOpacity: 1,
+        strokeWeight: 2,
+        strokeColor: "white",
       };
     }
     return undefined;
-  }, [user, isLoaded]);
+  }, [isLoaded]);
 
   if (!user || (user.role !== 'biker' && user.role !== 'driver')) {
     return <div className="flex items-center justify-center min-h-screen">Redirecting...</div>;
