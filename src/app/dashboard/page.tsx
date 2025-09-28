@@ -104,7 +104,6 @@ export default function DashboardPage() {
           }}
           onLoad={onMapLoad}
           onUnmount={onMapUnmount}
-          className="absolute inset-0"
         >
           {currentPosition && partnerIcon && <Marker position={currentPosition} icon={partnerIcon} />}
         </GoogleMap>
