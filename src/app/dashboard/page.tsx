@@ -70,6 +70,8 @@ export default function DashboardPage() {
         timeout: 5000,
         maximumAge: 0
       });
+    } else {
+        setCurrentPosition(null);
     }
 
     return () => {
@@ -114,18 +116,18 @@ export default function DashboardPage() {
             onLoad={onMapLoad}
             onUnmount={onMapUnmount}
           >
-            {currentPosition && partnerIcon && (
+            {currentPosition && partnerIcon && isOnline && (
               <>
                 <Marker position={currentPosition} icon={partnerIcon} />
                 <Circle
                     center={currentPosition}
-                    radius={100}
+                    radius={2000} // 2km radius
                     options={{
                         strokeColor: 'hsl(var(--primary))',
                         strokeOpacity: 0.8,
                         strokeWeight: 1,
                         fillColor: 'hsl(var(--primary))',
-                        fillOpacity: 0.2,
+                        fillOpacity: 0.1,
                     }}
                 />
               </>
@@ -161,7 +163,7 @@ export default function DashboardPage() {
            {isOnline && (
              <CardContent>
                 <div className="p-3 rounded-md bg-green-50 border border-green-200 text-center text-sm text-green-800">
-                    You are online and visible for new requests. Your location is being tracked.
+                    You are online and visible for new requests within a 2km radius.
                 </div>
              </CardContent>
            )}
