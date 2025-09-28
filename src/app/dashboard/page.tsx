@@ -146,7 +146,6 @@ export default function DashboardPage() {
       );
     } else {
       setCurrentPosition(null);
-      setUserInteracted(false);
       stopRequestSimulator();
       setCurrentRideRequest(null);
       setTripStatus('none');
@@ -167,8 +166,6 @@ export default function DashboardPage() {
     
     if (newIsOnline) {
       setUserInteracted(false); // Enable auto-pan when going online
-    } else {
-      setUserInteracted(true); // Disable auto-pan when going offline
     }
   };
 
@@ -335,7 +332,7 @@ export default function DashboardPage() {
       </div>
 
        {isLoaded && isOnline && userInteracted && (
-          <div className="absolute bottom-28 right-4">
+          <div className="absolute bottom-28 right-4 z-10">
             <Button
               size="icon"
               className="rounded-full shadow-lg"
@@ -348,7 +345,7 @@ export default function DashboardPage() {
         )}
       
        {tripStatus !== 'none' && currentRideRequest && (
-         <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:w-full sm:max-w-sm">
+         <div className="absolute bottom-4 left-4 right-4 z-10 sm:left-auto sm:w-full sm:max-w-sm">
             <RideRequestCard 
                 ride={currentRideRequest}
                 status={tripStatus}
@@ -365,3 +362,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
