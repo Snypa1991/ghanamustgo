@@ -3,7 +3,7 @@
 
 import Image from 'next/image';
 import { MapPin, Car, Package } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import RouteOptimization from '@/components/route-optimization';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
