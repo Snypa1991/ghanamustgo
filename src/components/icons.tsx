@@ -7,22 +7,23 @@ export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
       {...props}
     >
       <defs>
-        <pattern id="gmg-pattern" viewBox="0 0 24 24" width="15%" height="20%" patternContentUnits="userSpaceOnUse">
-            <path d="M0 0h12v12H0z" fill="#CE1126"/>
-            <path d="M12 0h12v12H12z" fill="#fff"/>
-            <path d="M0 12h12v12H0z" fill="#fff"/>
-            <path d="M12 12h12v12H12z" fill="#006B3F"/>
+        <pattern id="gmg-pattern" viewBox="0 0 24 24" width="20%" height="25%" patternContentUnits="userSpaceOnUse">
+          <path d="M0 0h12v12H0z" fill="#CE1126"/>
+          <path d="M12 0h12v12H12z" fill="#fff"/>
+          <path d="M0 12h12v12H0z" fill="#fff"/>
+          <path d="M12 12h12v12H12z" fill="#003087"/>
         </pattern>
       </defs>
 
-      <g transform="translate(10, 0)">
-        {/* Bag shape */}
-        <path d="M10 20 L0 30 H70 L60 20 H10 Z" fill="#CE1126"/>
-        <path d="M60 20 L50 70 H20 L10 20 Z" fill="url(#gmg-pattern)"/>
-        <path d="M30 20 Q35 10 40 20" stroke="black" strokeWidth="2" fill="none"/>
+      <g transform="translate(10, 10)">
+        {/* Bag Body */}
+        <path d="M12 25L8 30 H62 L58 25 H12Z" fill="#CE1126"/>
+        <path d="M58 25 L50 65 H20 L12 25 Z" fill="url(#gmg-pattern)"/>
+        {/* Handles */}
+        <path d="M28 25L30 18 H40 L42 25" stroke="black" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
       </g>
       
-      <g transform="translate(85, 0)">
+      <g transform="translate(75, 5)">
         <text
             x="0"
             y="35"
