@@ -40,11 +40,11 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <div className="mr-4 hidden md:flex">
+        <div className="flex-1 md:flex-none md:mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <GhanaMustGoIcon className="h-12 w-auto text-primary" />
           </Link>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             {navItems.map((item) => (
               <Link key={item.label} href={item.href} className="transition-colors hover:text-primary">
                 {item.label}
@@ -124,13 +124,8 @@ export default function Header() {
           </Sheet>
         </div>
         
-        <div className="flex flex-1 items-center justify-center md:justify-end">
-          <div className="md:hidden">
-            <Link href="/" className="flex items-center space-x-2">
-              <GhanaMustGoIcon className="h-12 w-auto text-primary" />
-            </Link>
-          </div>
-          <nav className="hidden md:flex items-center space-x-2">
+        <div className="flex flex-1 items-center justify-end">
+          <nav className="flex items-center space-x-2">
             {user ? (
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -172,7 +167,7 @@ export default function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <Link href="/login">
                   <Button variant="outline" size="sm">
                     Login
@@ -183,7 +178,7 @@ export default function Header() {
                     Sign Up
                   </Button>
                 </Link>
-              </>
+              </div>
             )}
           </nav>
         </div>
