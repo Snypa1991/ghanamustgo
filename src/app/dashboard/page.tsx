@@ -4,11 +4,12 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, Circle } from '@react-google-maps/api';
-import { Power } from 'lucide-react';
+import { Power, Crosshair } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 const containerStyle = {
   width: '100%',
@@ -31,6 +32,7 @@ export default function DashboardPage() {
 
   const [isOnline, setIsOnline] = useState(false);
   const [currentPosition, setCurrentPosition] = useState<google.maps.LatLngLiteral | null>(null);
+  const [userInteracted, setUserInteracted] = useState(false);
 
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -41,6 +43,20 @@ export default function DashboardPage() {
   const onMapUnmount = useCallback(() => {
     mapRef.current = null;
   }, []);
+
+  const onUserInteraction = () => {
+    if (!userInteracted) {
+        setUserInteracted(true);
+    }
+  }
+
+  const handleRecenter = () => {
+    if (mapRef.current && currentPosition) {
+        mapRef.current.panTo(currentPosition);
+        mapRef.current.setZoom(15);
+        setUserInteracted(false);
+    }
+  }
 
 
   useEffect(() => {
@@ -61,6 +77,7 @@ export default function DashboardPage() {
           setCurrentPosition(newPos);
           if (mapRef.current) {
             mapRef.current.panTo(newPos);
+            mapRef.current.setZoom(15);
           }
         },
         (error) => {
@@ -75,8 +92,8 @@ export default function DashboardPage() {
           const { latitude, longitude } = position.coords;
           const newPos = { lat: latitude, lng: longitude };
           setCurrentPosition(newPos);
-          // Smoothly pan the map to the new position
-          if (mapRef.current) {
+          // Smoothly pan the map to the new position only if user has not interacted
+          if (mapRef.current && !userInteracted) {
             mapRef.current.panTo(newPos);
           }
         },
@@ -91,6 +108,7 @@ export default function DashboardPage() {
       );
     } else {
       setCurrentPosition(null);
+      setUserInteracted(false);
     }
 
     return () => {
@@ -98,7 +116,7 @@ export default function DashboardPage() {
         navigator.geolocation.clearWatch(watchId);
       }
     };
-  }, [isOnline]);
+  }, [isOnline, userInteracted]);
 
   const partnerIcon = useMemo(() => {
     if (user && isLoaded) {
@@ -133,8 +151,8 @@ export default function DashboardPage() {
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={containerStyle}
-            center={currentPosition || center}
-            zoom={15}
+            center={center}
+            zoom={12}
             options={{
               streetViewControl: false,
               mapTypeControl: false,
@@ -153,6 +171,8 @@ export default function DashboardPage() {
             }}
             onLoad={onMapLoad}
             onUnmount={onMapUnmount}
+            onDragStart={onUserInteraction}
+            onZoomChanged={onUserInteraction}
           >
             {currentPosition && partnerIcon && isOnline && (
               <>
@@ -186,7 +206,11 @@ export default function DashboardPage() {
                     {isOnline ? 'Online' : 'Offline'}
                 </span>
                 <button
-                    onClick={() => setIsOnline(!isOnline)}
+                    onClick={() => {
+                        setIsOnline(!isOnline);
+                        if(isOnline) setUserInteracted(true); // if going offline, disable auto-pan
+                        else setUserInteracted(false); // if going online, enable auto-pan
+                    }}
                     className={cn(
                         "relative inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors",
                         isOnline ? "bg-green-600" : "bg-red-600"
@@ -207,6 +231,19 @@ export default function DashboardPage() {
            )}
         </Card>
       </div>
+
+       {isLoaded && isOnline && userInteracted && (
+          <div className="absolute bottom-28 right-4">
+            <Button
+              size="icon"
+              className="rounded-full shadow-lg"
+              onClick={handleRecenter}
+              aria-label="Recenter map"
+            >
+              <Crosshair className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
     </div>
   );
 }
