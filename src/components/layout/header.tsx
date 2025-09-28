@@ -25,7 +25,7 @@ const defaultNavItems = [
 ];
 
 const partnerNavItems = [
-    { href: '/profile', icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/restaurants', icon: UtensilsCrossed, label: 'Food' },
     { href: '/marketplace', icon: Store, label: 'Market' },
 ];
@@ -154,6 +154,11 @@ export default function Header() {
                    {user.role === 'admin' && (
                     <DropdownMenuItem asChild>
                         <Link href="/admin/dashboard"><Shield className="mr-2 h-4 w-4" />Admin Dashboard</Link>
+                    </DropdownMenuItem>
+                   )}
+                   {isPartner && (
+                     <DropdownMenuItem asChild>
+                        <Link href="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Link>
                     </DropdownMenuItem>
                    )}
                   <DropdownMenuItem asChild>

@@ -50,7 +50,10 @@ export default function LoginPage() {
         router.push('/role-selection');
       } else if (user.role === 'admin') {
         router.push('/admin/dashboard');
-      } else {
+      } else if (user.role === 'biker' || user.role === 'driver') {
+        router.push('/dashboard');
+      }
+      else {
         router.push('/profile');
       }
     } else {
