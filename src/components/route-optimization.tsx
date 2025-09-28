@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,7 +21,11 @@ const formSchema = z.object({
 
 type RouteOptimizationFormValues = z.infer<typeof formSchema>;
 
-export default function RouteOptimization() {
+interface RouteOptimizationProps {
+  onRouteUpdate?: (startLocation: string, endLocation: string) => void;
+}
+
+export default function RouteOptimization({ onRouteUpdate }: RouteOptimizationProps) {
   const [result, setResult] = useState<OptimizeRouteWithAIOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +37,15 @@ export default function RouteOptimization() {
       endLocation: '',
     },
   });
+
+  const { watch } = form;
+  const startLocation = watch('startLocation');
+  const endLocation = watch('endLocation');
+
+  useEffect(() => {
+    onRouteUpdate?.(startLocation, endLocation);
+  }, [startLocation, endLocation, onRouteUpdate]);
+
 
   async function onSubmit(values: RouteOptimizationFormValues) {
     setIsLoading(true);
@@ -47,14 +61,10 @@ export default function RouteOptimization() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="font-headline">Enter Your Route</CardTitle>
-        <CardDescription>Our AI will find the best path for you.</CardDescription>
-      </CardHeader>
+    <div className="w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 !p-0">
              <div className="grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
@@ -67,7 +77,7 @@ export default function RouteOptimization() {
                           <Input placeholder="e.g., Accra Mall" {...field} />
                         </FormControl>
                         <Button variant="outline" type="button" onClick={() => form.setValue('startLocation', 'East Legon, American House')}>
-                            <MapPin className="mr-2 h-4 w-4" /> Pin on map
+                            <MapPin className="mr-2 h-4 w-4" /> Use Current
                         </Button>
                     </div>
                     <FormMessage />
@@ -94,7 +104,7 @@ export default function RouteOptimization() {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="mt-4 !p-0">
             <Button type="submit" disabled={isLoading} className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
               Find Ride & Optimize
@@ -104,7 +114,7 @@ export default function RouteOptimization() {
       </Form>
 
       {isLoading && (
-         <div className="p-6 pt-0">
+         <div className="p-6 pt-4">
              <div className="flex items-center justify-center rounded-md border border-dashed p-8">
                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
                  <p className="ml-4 text-muted-foreground">AI is optimizing...</p>
@@ -113,7 +123,7 @@ export default function RouteOptimization() {
       )}
 
       {error && (
-        <div className="p-6 pt-0">
+        <div className="p-6 pt-4">
             <Alert variant="destructive">
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
@@ -122,7 +132,7 @@ export default function RouteOptimization() {
       )}
       
       {result && (
-        <div className="p-6 pt-0 space-y-4">
+        <div className="p-6 pt-4 space-y-4">
             <Alert className="bg-primary/5">
               <Map className="h-5 w-5 text-primary" />
               <AlertTitle className="font-headline text-primary">Optimized Route</AlertTitle>
@@ -150,6 +160,6 @@ export default function RouteOptimization() {
             </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
