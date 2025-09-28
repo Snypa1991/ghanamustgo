@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import { Car, Package, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -180,6 +180,7 @@ export default function BookPage() {
                             streetViewControl: false,
                             mapTypeControl: false,
                             fullscreenControl: false,
+                            zoomControl: false,
                         }}
                         onLoad={onMapLoad}
                         onUnmount={onMapUnmount}
