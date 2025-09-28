@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Edit, Store } from 'lucide-react';
 import VehicleDetails from '@/components/vehicle-details';
 import Link from 'next/link';
+import RideHistory from '@/components/ride-history';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -78,6 +79,8 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
             )}
+
+            <RideHistory />
 
         </div>
     </div>

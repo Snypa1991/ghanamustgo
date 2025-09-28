@@ -67,3 +67,69 @@ export const DUMMY_BIDS: Bid[] = [
     { id: 'bid-4', itemId: '2', userId: 'user-1', amount: 48, timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
     { id: 'bid-5', itemId: '2', userId: 'user-4', amount: 50, timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString() },
 ];
+
+
+export type Ride = {
+  id: string;
+  userId: string;
+  driverId: string;
+  startLocation: string;
+  endLocation: string;
+  fare: number;
+  date: string;
+  status: 'completed' | 'cancelled';
+};
+
+
+export const DUMMY_RIDES: Ride[] = [
+  {
+    id: 'ride-1',
+    userId: 'user-1',
+    driverId: 'user-2', // Kofi Biker
+    startLocation: 'Accra Mall',
+    endLocation: 'East Legon, American House',
+    fare: 15.00,
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
+    status: 'completed',
+  },
+  {
+    id: 'ride-2',
+    userId: 'user-1',
+    driverId: 'user-4', // Adjoa Driver
+    startLocation: 'Labadi Beach',
+    endLocation: 'Osu Oxford Street',
+    fare: 25.00,
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
+    status: 'completed',
+  },
+    {
+    id: 'ride-3',
+    userId: 'user-6',
+    driverId: 'user-2', // Kofi Biker
+    startLocation: 'University of Ghana',
+    endLocation: 'A&C Mall',
+    fare: 12.00,
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+    status: 'completed',
+  },
+   {
+    id: 'ride-4',
+    userId: 'user-1',
+    driverId: 'user-2', // Kofi Biker
+    startLocation: 'Kotoka International Airport',
+    endLocation: 'Movenpick Ambassador Hotel',
+    fare: 30.00,
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
+    status: 'cancelled',
+  },
+  {
+    id: 'ride-5',
+    userId: 'user-6',
+    driverId: 'user-4', // Adjoa Driver
+    startLocation: 'Independence Square',
+    endLocation: 'Jamestown Lighthouse',
+    fare: 10.00,
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
+    status: 'completed',
+  },
+];
