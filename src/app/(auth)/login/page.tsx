@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/app-context';
 import { DUMMY_USERS } from '@/lib/dummy-data';
+import { useEffect } from 'react';
 
 const formSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -25,7 +26,7 @@ type LoginFormValues = z.infer<typeof formSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, user: loggedInUser } = useAuth();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
@@ -34,6 +35,21 @@ export default function LoginPage() {
       password: '',
     },
   });
+
+  useEffect(() => {
+    if (loggedInUser) {
+      if (loggedInUser.role === 'unassigned') {
+        router.push('/role-selection');
+      } else if (loggedInUser.role === 'admin') {
+        router.push('/admin/dashboard');
+      } else if (loggedInUser.role === 'biker' || loggedInUser.role === 'driver') {
+        router.push('/dashboard');
+      } else {
+        router.push('/book');
+      }
+    }
+  }, [loggedInUser, router]);
+
 
   function onSubmit(values: LoginFormValues) {
     const user = DUMMY_USERS.find(
@@ -46,16 +62,7 @@ export default function LoginPage() {
         title: 'Login Successful',
         description: `Akwaaba, ${user.name}!`,
       });
-      if (user.role === 'unassigned') {
-        router.push('/role-selection');
-      } else if (user.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else if (user.role === 'biker' || user.role === 'driver') {
-        router.push('/dashboard');
-      }
-      else {
-        router.push('/book');
-      }
+      // The useEffect above will handle redirection.
     } else {
       toast({
         variant: 'destructive',
@@ -64,6 +71,15 @@ export default function LoginPage() {
       });
     }
   }
+  
+  if (loggedInUser) {
+    return (
+        <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+            <p>Redirecting...</p>
+        </div>
+    );
+  }
+
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
