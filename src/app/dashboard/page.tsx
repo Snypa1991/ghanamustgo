@@ -4,12 +4,13 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-import { LayoutDashboard, Power } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 const containerStyle = {
   width: '100%',
@@ -52,7 +53,13 @@ export default function DashboardPage() {
   
   useEffect(() => {
     let watchId: number;
-    if (isOnline) {
+    if (isOnline && navigator.geolocation) {
+      // Get initial position
+      navigator.geolocation.getCurrentPosition(position => {
+        const { latitude, longitude } = position.coords;
+        setCurrentPosition({ lat: latitude, lng: longitude });
+      });
+      // Watch for position changes
       watchId = navigator.geolocation.watchPosition((position) => {
         const { latitude, longitude } = position.coords;
         setCurrentPosition({ lat: latitude, lng: longitude });
@@ -78,8 +85,8 @@ export default function DashboardPage() {
     if (user && isLoaded) {
       return {
         url: `https://picsum.photos/seed/${user.email}/60/60`,
-        scaledSize: new google.maps.Size(60, 60),
-        anchor: new google.maps.Point(30, 30),
+        scaledSize: new window.google.maps.Size(60, 60),
+        anchor: new window.google.maps.Point(30, 30),
       };
     }
     return undefined;
@@ -115,21 +122,21 @@ export default function DashboardPage() {
         <Card className="max-w-md mx-auto">
           <CardHeader>
             <CardTitle className="font-headline flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <LayoutDashboard />
-                {user.name}
-              </div>
+              <span>{user.name}</span>
               <div className="flex items-center space-x-2">
-                <Switch 
-                    id="online-status"
-                    checked={isOnline}
-                    onCheckedChange={setIsOnline} 
-                    aria-label={isOnline ? 'Go Offline' : 'Go Online'}
-                />
-                <Label htmlFor="online-status" className={`font-bold transition-colors ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
-                    <Power className="inline-block mr-1 h-4 w-4" />
+                <span className={cn("text-sm font-semibold", isOnline ? 'text-green-600' : 'text-red-600')}>
                     {isOnline ? 'Online' : 'Offline'}
-                </Label>
+                </span>
+                <button
+                    onClick={() => setIsOnline(!isOnline)}
+                    className={cn(
+                        "relative inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+                        isOnline ? "bg-green-600" : "bg-red-600"
+                    )}
+                    aria-label={isOnline ? 'Go Offline' : 'Go Online'}
+                >
+                    <Power className="h-5 w-5 text-white" />
+                </button>
                </div>
             </CardTitle>
           </CardHeader>

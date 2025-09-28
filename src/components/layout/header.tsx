@@ -112,11 +112,18 @@ export default function Header() {
                         </Button>
                     </div>
                   ) : (
-                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button className="w-full justify-start" variant="ghost">
-                        <UserCircle className="mr-2 h-5 w-5" /> Login / Sign Up
-                      </Button>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link href="/login" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button className="w-full" variant="outline">
+                          Login
+                        </Button>
+                      </Link>
+                      <Link href="/signup" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                          Sign Up
+                        </Button>
+                      </Link>
+                    </div>
                   )}
                 </div>
               </div>
@@ -125,7 +132,7 @@ export default function Header() {
         </div>
         
         <div className="flex flex-1 items-center justify-end">
-          <nav className="flex items-center space-x-2">
+          <nav className="hidden md:flex items-center space-x-2">
             {user ? (
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
