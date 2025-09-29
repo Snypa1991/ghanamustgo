@@ -1,4 +1,3 @@
-
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -11,6 +10,7 @@ interface AppContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
+  switchUserForTesting: (user: User) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -60,8 +60,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const switchUserForTesting = (newUser: User) => {
+    firebaseSignOut(auth).catch(error => console.error("Error signing out during user switch:", error));
+    setUser(newUser);
+  };
+
   return (
-    <AppContext.Provider value={{ user, login, logout, loading }}>
+    <AppContext.Provider value={{ user, login, logout, loading, switchUserForTesting }}>
       {children}
     </AppContext.Provider>
   );
