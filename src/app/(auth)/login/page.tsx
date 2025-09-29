@@ -1,62 +1,36 @@
 
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { GhanaMustGoIcon, MopedIcon } from '@/components/icons';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { GhanaMustGoIcon } from '@/components/icons';
 import { useAuth } from '@/context/app-context';
-import { DUMMY_USERS, User as UserType } from '@/lib/dummy-data';
-import { Loader2, User, Car, Store, Shield } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-type Role = 'user' | 'biker' | 'driver' | 'vendor' | 'admin';
 
-const roles: {name: Role, title: string, description: string, icon: React.ElementType, user: UserType | undefined}[] = [
-    {
-        name: 'user',
-        title: 'User',
-        description: 'Book rides and shop.',
-        icon: User,
-        user: DUMMY_USERS.find(u => u.role === 'user')
-    },
-    {
-        name: 'biker',
-        title: 'Biker',
-        description: 'Offer okada & dispatch.',
-        icon: MopedIcon,
-        user: DUMMY_USERS.find(u => u.role === 'biker')
-    },
-    {
-        name: 'driver',
-        title: 'Driver',
-        description: 'Offer taxi rides.',
-        icon: Car,
-        user: DUMMY_USERS.find(u => u.role === 'driver')
-    },
-    {
-        name: 'vendor',
-        title: 'Vendor',
-        description: 'Sell on the marketplace.',
-        icon: Store,
-        user: DUMMY_USERS.find(u => u.role === 'vendor')
-    },
-    {
-        name: 'admin',
-        title: 'Admin',
-        description: 'Manage the platform.',
-        icon: Shield,
-        user: DUMMY_USERS.find(u => u.role === 'admin')
-    }
-];
+const formSchema = z.object({
+  email: z.string().email('Invalid email address.'),
+  password: z.string().min(1, 'Password is required.'),
+});
+
+type LoginFormValues = z.infer<typeof formSchema>;
+
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const { user, loading, switchUserForTesting } = useAuth();
+  const { user, login, loading } = useAuth();
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirect if user is ALREADY logged in and not loading.
   useEffect(() => {
     if (!loading && user) {
        if (user.role === 'admin') {
@@ -73,12 +47,30 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
   
-  const handleTestUserLogin = async (testUser: UserType) => {
-    toast({
-      title: 'Switching User...',
-      description: `Logging in as ${testUser.name} (${testUser.role})`,
-    });
-    await switchUserForTesting(testUser);
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const handleLogin = async (values: LoginFormValues) => {
+    setIsSubmitting(true);
+    const result = await login(values.email, values.password);
+    if (result.success) {
+      toast({
+        title: 'Login Successful',
+        description: 'Welcome back!',
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: result.error || 'Please check your credentials and try again.',
+      });
+    }
+    setIsSubmitting(false);
   };
 
   if (loading || user) {
@@ -91,40 +83,54 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
-      <Card className="w-full max-w-2xl">
+      <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />
-          <CardTitle className="mt-4 font-headline text-2xl">Akwaaba</CardTitle>
+          <CardTitle className="mt-4 font-headline text-2xl">Akwaaba Back</CardTitle>
           <CardDescription>
-            Choose a test account to log in.
+            Sign in to your account to continue.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {roles.map((role) => (
-              role.user && (
-                <button
-                    key={role.name}
-                    onClick={() => handleTestUserLogin(role.user!)}
-                    className="text-left border p-4 rounded-lg hover:bg-accent/50 hover:border-primary transition-all flex items-start space-x-4"
-                    disabled={loading}
-                >
-                    <role.icon className="h-8 w-8 text-primary mt-1" />
-                    <div>
-                        <p className="font-bold text-lg">{role.title}</p>
-                        <p className="text-sm text-muted-foreground">{role.description}</p>
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleLogin)}>
+                <CardContent className="grid gap-4">
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl><Input placeholder="user@example.com" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </CardContent>
+                <CardFooter className="flex-col gap-4">
+                    <Button type="submit" className="w-full" disabled={isSubmitting}>
+                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Sign In
+                    </Button>
+                     <div className="text-center text-sm">
+                        Don't have an account?{' '}
+                        <Link href="/signup" className="underline text-primary hover:text-primary/80">
+                        Sign up here
+                        </Link>
                     </div>
-                </button>
-              )
-            ))}
-        </CardContent>
-         <CardContent className="text-center text-sm pt-6">
-            <p>
-                Need to create a new account?{' '}
-                <Link href="/signup" className="underline text-primary hover:text-primary/80">
-                  Sign up here
-                </Link>
-            </p>
-        </CardContent>
+                </CardFooter>
+            </form>
+        </Form>
       </Card>
     </div>
   );
