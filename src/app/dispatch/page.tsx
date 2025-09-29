@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { Loader2, Package, Bot, CheckCircle, Navigation } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -50,7 +50,7 @@ export default function DispatchPage() {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-    libraries: ['places']
+    libraries: ['places', 'geometry']
   });
   const { user } = useAuth();
   const { toast } = useToast();
@@ -235,6 +235,7 @@ export default function DispatchPage() {
                         onPinLocation={setPinningLocation}
                         onSubmit={() => {}} 
                         isLoading={false}
+                        submitButtonText="Get Delivery Fee"
                     />
                     <FormField
                       control={form.control}

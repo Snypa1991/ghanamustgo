@@ -24,6 +24,7 @@ interface RouteOptimizationProps {
   onPinLocation: (locationType: 'start' | 'end') => void;
   onSubmit: (values: RouteOptimizationFormValues) => void;
   isLoading: boolean;
+  submitButtonText?: string;
 }
 
 export default function RouteOptimization({ 
@@ -32,7 +33,8 @@ export default function RouteOptimization({
     onRouteUpdate, 
     onPinLocation,
     onSubmit, 
-    isLoading 
+    isLoading,
+    submitButtonText = 'Find Ride'
 }: RouteOptimizationProps) {
   
   const form = useForm<RouteOptimizationFormValues>({
@@ -44,8 +46,6 @@ export default function RouteOptimization({
   });
 
   const { watch, setValue } = form;
-  const watchedStart = watch('startLocation');
-  const watchedEnd = watch('endLocation');
 
   // Update form fields when props change from the parent (e.g., after pinning on map)
   useEffect(() => {
@@ -64,24 +64,6 @@ export default function RouteOptimization({
     });
     return () => subscription.unsubscribe();
   }, [watch, onRouteUpdate]);
-
-  const handleGetCurrentLocation = () => {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                // In a real app, you'd use a geocoding service to convert coords to address
-                setValue('startLocation', `Current Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
-            },
-            () => {
-                alert('Could not get current location. Please enable location services.');
-            }
-        );
-    } else {
-        alert('Geolocation is not supported by this browser.');
-    }
-  };
-
 
   return (
     <div className="w-full">
@@ -129,12 +111,14 @@ export default function RouteOptimization({
               />
             </div>
           </div>
+          { onSubmit &&
           <div className="mt-4">
             <Button type="submit" disabled={isLoading} className="w-full h-11" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
-              Find Ride
+              {submitButtonText}
             </Button>
           </div>
+          }
         </form>
       </Form>
     </div>
