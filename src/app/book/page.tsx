@@ -57,6 +57,9 @@ export default function BookPage() {
   
   const [pinningLocation, setPinningLocation] = useState<PinningLocation>(null);
 
+  const [driverPosition, setDriverPosition] = useState<google.maps.LatLng | null>(null);
+  const animationRef = useRef<number>();
+
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
@@ -65,6 +68,9 @@ export default function BookPage() {
 
   const onUnmount = useCallback(() => {
     mapRef.current = null;
+    if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+    }
   }, []);
 
   const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
@@ -176,6 +182,7 @@ export default function BookPage() {
     setEndLocation('');
     setAiResult(null);
     setAiError(null);
+    setDriverPosition(null);
   }
 
 
@@ -191,13 +198,62 @@ export default function BookPage() {
   }, [step]);
 
 
+  useEffect(() => {
+    if (!directions || !isLoaded || (step !== 'enroute-to-pickup' && step !== 'enroute-to-destination')) {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      return;
+    }
+
+    const route = directions.routes[0];
+    if (!route) return;
+
+    let path: google.maps.LatLng[];
+    let duration: number;
+
+    if (step === 'enroute-to-pickup') {
+        // Simulate driver coming from a nearby point to the start location
+        const startLeg = route.legs[0];
+        const driverStartLat = startLeg.start_location.lat() + (Math.random() - 0.5) * 0.02;
+        const driverStartLng = startLeg.start_location.lng() + (Math.random() - 0.5) * 0.02;
+        const driverStartPoint = new window.google.maps.LatLng(driverStartLat, driverStartLng);
+        path = [driverStartPoint, startLeg.start_location];
+        duration = 10000; // 10 seconds to pickup
+    } else { // enroute-to-destination
+        path = route.overview_path;
+        duration = 15000; // 15 seconds to destination
+    }
+
+    let startTime: number;
+    const animate = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const progress = (timestamp - startTime) / duration;
+
+        if (progress < 1) {
+            const point = window.google.maps.geometry.spherical.interpolate(path[0], path[path.length - 1], progress);
+            setDriverPosition(point);
+            animationRef.current = requestAnimationFrame(animate);
+        } else {
+            setDriverPosition(path[path.length - 1]);
+        }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+        if (animationRef.current) {
+            cancelAnimationFrame(animationRef.current);
+        }
+    };
+}, [step, directions, isLoaded]);
+
+
   const handleRouteUpdate = (start: string, end: string) => {
     if (start !== startLocation) setStartLocation(start);
     if (end !== endLocation) setEndLocation(end);
   }
 
   const shouldRenderDirectionsService = useMemo(() => {
-    return isLoaded && startLocation && endLocation && (step === 'details' || step === 'selection');
+    return isLoaded && startLocation && endLocation && (step === 'details' || step === 'selection' || step === 'enroute-to-pickup' || step === 'enroute-to-destination');
   }, [isLoaded, startLocation, endLocation, step]);
   
   const startMarkerIcon = useMemo(() => {
@@ -294,6 +350,7 @@ export default function BookPage() {
             mapTypeControl: false,
             fullscreenControl: false,
             zoomControl: true,
+            gestureHandling: isTripInProgress ? 'none' : 'cooperative'
           }}
           onLoad={onMapLoad}
           onUnmount={onUnmount}
@@ -314,7 +371,7 @@ export default function BookPage() {
             <DirectionsRenderer
               options={{
                 directions: directions,
-                suppressMarkers: isTripInProgress,
+                suppressMarkers: true,
                 polylineOptions: {
                   strokeColor: 'hsl(var(--primary))',
                   strokeOpacity: 0.8,
@@ -336,11 +393,23 @@ export default function BookPage() {
                 icon={endMarkerIcon}
              />
            )}
-           {isTripInProgress && assignedDriver && directions?.routes[0]?.legs[0]?.start_location && (
+           {isTripInProgress && driverPosition && (
               <Marker
-                position={directions.routes[0].legs[0].start_location}
+                position={driverPosition}
                 icon={driverMarkerIcon}
               />
+           )}
+           {isTripInProgress && directions && directions.routes[0]?.legs[0]?.start_location && (
+                <Marker 
+                    position={directions.routes[0].legs[0].start_location} 
+                    icon={startMarkerIcon}
+                />
+            )}
+           {isTripInProgress && directions && directions.routes[0]?.legs[0]?.end_location && (
+             <Marker 
+                position={directions.routes[0].legs[0].end_location} 
+                icon={endMarkerIcon}
+             />
            )}
 
         </GoogleMap>
@@ -436,3 +505,6 @@ export default function BookPage() {
     </div>
   );
 }
+
+
+    
