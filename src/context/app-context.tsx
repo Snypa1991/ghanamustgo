@@ -4,7 +4,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, DUMMY_USERS } from '@/lib/dummy-data';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, User as FirebaseUser } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 
@@ -26,7 +26,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        // If there's an active Firebase user, find their corresponding app user data
         const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email) || {
              id: firebaseUser.uid,
              name: firebaseUser.displayName || 'New User',
@@ -35,7 +34,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
         };
         setUser(appUser);
       } else {
-        // If no Firebase user, clear the app user state
         setUser(null);
       }
       setLoading(false);
@@ -45,11 +43,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = async () => {
-    setLoading(true);
     await firebaseSignOut(auth);
-    // onAuthStateChanged will handle setting user to null
+    setUser(null); // Explicitly set user to null
     router.push('/login');
-    setLoading(false);
   };
   
   const redirectToDashboard = (targetUser: User) => {
@@ -69,33 +65,34 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const switchUserForTesting = async (newUser: User) => {
     setLoading(true);
     try {
-      // Sign out any previous user to ensure a clean state
-      if (auth.currentUser) {
-        await firebaseSignOut(auth);
-      }
-      
-      const appUser = DUMMY_USERS.find(u => u.email === newUser.email);
-
-      if (appUser && appUser.password) {
-          const userCredential = await signInWithEmailAndPassword(auth, appUser.email, appUser.password);
-          if (userCredential.user) {
-              // The onAuthStateChanged listener will fire and set the user state.
-              // We can then redirect.
-              redirectToDashboard(appUser);
+      if (auth.currentUser?.email !== newUser.email) {
+          await firebaseSignOut(auth);
+          if (newUser.password) {
+            await signInWithEmailAndPassword(auth, newUser.email, newUser.password);
+            // onAuthStateChanged will handle setting the user, so we don't setUser here.
+          } else {
+             throw new Error("Dummy user password not set.");
           }
-      } else {
-        throw new Error("Dummy user not found or password not set.");
       }
+      // Regardless of sign-in, we know the user and can redirect
+      // This is safe because onAuthStateChanged will have already fired if there was a change.
+      const finalUser = DUMMY_USERS.find(u => u.email === newUser.email)!;
+      setUser(finalUser);
+      redirectToDashboard(finalUser);
+      
     } catch (e) {
       console.error("Test user sign-in failed", e);
-      setLoading(false); // Stop loading on error
+      // Ensure loading is turned off and we are back at the login page.
+      await firebaseSignOut(auth);
+      setUser(null);
+      router.push('/login');
+    } finally {
+        // Set loading to false after a brief delay to allow state to propagate
+        setTimeout(() => setLoading(false), 100);
     }
-    // setLoading(false) will be handled by the onAuthStateChanged listener
   };
   
   const updateUser = (updatedUser: User) => {
-    // This is for client-side role updates for newly signed up users
-    // In a real app, this might trigger a backend update.
     setUser(updatedUser);
   }
 

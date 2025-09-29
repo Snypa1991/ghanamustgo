@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { GhanaMustGoIcon, MopedIcon } from '@/components/icons';
 import { useAuth } from '@/context/app-context';
@@ -9,7 +8,6 @@ import { DUMMY_USERS, User as UserType } from '@/lib/dummy-data';
 import { Loader2, User, Car, Store, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 type Role = 'user' | 'biker' | 'driver' | 'vendor' | 'admin';
 
@@ -54,13 +52,13 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
 export default function LoginPage() {
   const { toast } = useToast();
   const { loading, switchUserForTesting } = useAuth();
-  const router = useRouter();
-
+  
   const handleTestUserLogin = async (testUser: UserType) => {
     toast({
       title: 'Switching User...',
       description: `Logging in as ${testUser.name} (${testUser.role})`,
     });
+    // The switchUserForTesting function now handles redirection.
     await switchUserForTesting(testUser);
   };
 

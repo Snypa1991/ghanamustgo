@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/app-context';
 import { User as UserType } from '@/lib/dummy-data';
 
-type Role = 'user' | 'driver' | 'vendor';
+type Role = 'user' | 'driver' | 'vendor' | 'biker';
 
 const roles: {name: Role, title: string, description: string, icon: React.ElementType}[] = [
     {
@@ -37,16 +37,14 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
 ];
 
 export default function RoleSelectionPage() {
-  const { user, updateUser, loading } = useAuth();
+  const { user, updateUser, loading, logout } = useAuth();
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<Role>('user');
 
   useEffect(() => {
-    // If no user is logged in, redirect them.
     if (!loading && !user) {
       router.push('/login');
     }
-    // If user already has a role, redirect them away from this page.
     if (!loading && user && user.role !== 'unassigned') {
         if (user.role === 'admin') router.push('/admin/dashboard');
         else if (user.role === 'biker' || user.role === 'driver') router.push('/dashboard');
@@ -57,17 +55,16 @@ export default function RoleSelectionPage() {
 
   const handleRoleSelection = () => {
     if (user) {
-        // In a real app, this would be an API call to the backend to update user role in Firestore.
         // This is a simplification. A real app would need a clearer way
         // to distinguish between biker and driver during role selection.
-        const roleToSet = selectedRole;
+        const roleToSet: UserType['role'] = selectedRole === 'driver' ? 'driver' : selectedRole; // a bit of a hack for demo
         
         const updatedUser: UserType = { ...user, role: roleToSet };
-        updateUser(updatedUser);
+        updateUser(updatedUser); // Update the user in the context
         
         if (roleToSet === 'user') {
           router.push('/book');
-        } else if (roleToSet === 'driver') { // This covers biker too for now
+        } else if (roleToSet === 'driver' || roleToSet === 'biker') {
           router.push('/dashboard');
         } else if (roleToSet === 'vendor') {
             router.push('/vendor/dashboard');
@@ -124,6 +121,7 @@ export default function RoleSelectionPage() {
              <Button className="w-full" onClick={handleRoleSelection}>
                 Continue
             </Button>
+            <Button variant="link" size="sm" onClick={logout}>Not you? Log out</Button>
         </CardFooter>
       </Card>
     </div>
