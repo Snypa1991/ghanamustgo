@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-import { Car, MapPin, Loader2, Navigation } from 'lucide-react';
+import { Car, MapPin, Loader2, Navigation, Bot } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -60,7 +60,7 @@ export default function BookPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       startLocation: 'East Legon, American House',
-      endLocation: '',
+      endLocation: 'Osu Oxford Street',
     },
   });
 
@@ -83,7 +83,7 @@ export default function BookPage() {
     if (status === 'OK' && response) {
       setDirections(response);
 
-      const distanceInKm = response.routes[0].legs[0].distance?.value ?? 0 / 1000;
+      const distanceInKm = (response.routes[0].legs[0].distance?.value ?? 0) / 1000;
       // Simple pricing model for prototype
       setRidePrices({
           okada: Math.max(5, distanceInKm * 1.5),
@@ -283,7 +283,8 @@ export default function BookPage() {
                 <CardContent>
                     {aiResult && (
                        <Alert className="mb-4 bg-primary/5">
-                          <CardTitle className="text-sm font-headline text-primary">AI-Optimized Route</CardTitle>
+                          <Bot className="h-5 w-5 text-primary" />
+                          <AlertTitle className="text-sm font-headline text-primary">Smart Route Suggestion</AlertTitle>
                           <AlertDescription className="text-xs">{aiResult.optimizedRoute} (Est: {aiResult.estimatedTravelTime})</AlertDescription>
                         </Alert>
                     )}

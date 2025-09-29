@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -49,8 +50,8 @@ export default function AdminRouteOptimization() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2"><Bot /> AI Route Optimizer</CardTitle>
-        <CardDescription>Find the most efficient route between two points using AI analysis of traffic patterns.</CardDescription>
+        <CardTitle className="font-headline flex items-center gap-2"><Bot /> Smart Route Optimizer</CardTitle>
+        <CardDescription>Find the most efficient route between two points using analysis of traffic patterns.</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -97,7 +98,7 @@ export default function AdminRouteOptimization() {
          <div className="p-6 pt-0">
              <div className="flex items-center justify-center rounded-md border border-dashed p-8">
                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                 <p className="ml-4 text-muted-foreground">AI is optimizing...</p>
+                 <p className="ml-4 text-muted-foreground">Optimizing...</p>
              </div>
          </div>
       )}

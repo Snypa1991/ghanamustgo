@@ -9,12 +9,15 @@ interface AppContextType {
   login: (user: User) => void;
   logout: () => void;
   updateUser: (user: User) => void;
+  favorites: string[];
+  toggleFavorite: (restaurantId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('ghana-must-go-user');
@@ -27,6 +30,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('ghana-must-go-user');
       }
     }
+    
+    const storedFavorites = localStorage.getItem('ghana-must-go-favorites');
+    if(storedFavorites) {
+        try {
+            setFavorites(JSON.parse(storedFavorites));
+        } catch (error) {
+            console.error("Failed to parse favorites from localStorage", error);
+            localStorage.removeItem('ghana-must-go-favorites');
+        }
+    }
+
   }, []);
 
   const login = (userData: User) => {
@@ -40,16 +54,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const updateUser = (userData: User) => {
-    // This function updates the user in the context and localStorage.
-    // In a real app, this would likely be part of a more complex state management
-    // logic that also pushes updates to a backend.
     localStorage.setItem('ghana-must-go-user', JSON.stringify(userData));
     setUser(userData);
+  };
+  
+  const toggleFavorite = (restaurantId: string) => {
+    setFavorites(prevFavorites => {
+      const newFavorites = prevFavorites.includes(restaurantId)
+        ? prevFavorites.filter(id => id !== restaurantId)
+        : [...prevFavorites, restaurantId];
+        
+      localStorage.setItem('ghana-must-go-favorites', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
   };
 
 
   return (
-    <AppContext.Provider value={{ user, login, logout, updateUser }}>
+    <AppContext.Provider value={{ user, login, logout, updateUser, favorites, toggleFavorite }}>
       {children}
     </AppContext.Provider>
   );

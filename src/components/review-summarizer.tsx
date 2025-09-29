@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -61,7 +62,7 @@ export default function ReviewSummarizer() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2"><Bot /> AI Review Summarizer</CardTitle>
+        <CardTitle className="font-headline flex items-center gap-2"><Bot /> Smart Review Summarizer</CardTitle>
         <CardDescription>Paste raw customer reviews to get a structured summary, sentiment analysis, and key takeaways.</CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -107,7 +108,7 @@ export default function ReviewSummarizer() {
          <div className="p-6 pt-0">
              <div className="flex items-center justify-center rounded-md border border-dashed p-8">
                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                 <p className="ml-4 text-muted-foreground">AI is analyzing reviews...</p>
+                 <p className="ml-4 text-muted-foreground">Analyzing reviews...</p>
              </div>
          </div>
       )}
@@ -125,7 +126,7 @@ export default function ReviewSummarizer() {
         <div className="p-6 pt-0 space-y-4">
             <Alert className="bg-primary/5">
               <Star className="h-5 w-5 text-primary" />
-              <AlertTitle className="font-headline text-primary">AI Summary</AlertTitle>
+              <AlertTitle className="font-headline text-primary">Summary</AlertTitle>
               <AlertDescription>{result.summary}</AlertDescription>
             </Alert>
 

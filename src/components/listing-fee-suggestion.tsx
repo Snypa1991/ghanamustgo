@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -31,10 +32,10 @@ export default function ListingFeeSuggestion() {
   const form = useForm<ListingFeeFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      itemDescription: '',
-      itemValue: 100,
-      marketTrends: 'High demand for handmade goods',
-      competition: 'Few similar items listed, prices range from $80-$120',
+      itemDescription: 'Hand-woven Kente cloth, vibrant colors, 12 yards, authentic from the Ashanti region.',
+      itemValue: 150,
+      marketTrends: 'High demand for handmade and authentic African textiles, especially for cultural events.',
+      competition: 'Few similar items listed. Other Kente cloths are priced between $120 and $200 depending on complexity.',
     },
   });
 
@@ -56,9 +57,9 @@ export default function ListingFeeSuggestion() {
       <CardHeader>
         <div className="flex items-center gap-2">
             <Bot className="h-6 w-6 text-primary" />
-            <CardTitle className="font-headline">AI-Powered Listing Fee Suggestion</CardTitle>
+            <CardTitle className="font-headline">Smart Fee Suggestion</CardTitle>
         </div>
-        <CardDescription>Get an expert fee recommendation to sell your item quickly and profitably.</CardDescription>
+        <CardDescription>Get a fee recommendation to sell your item quickly and profitably.</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -131,7 +132,7 @@ export default function ListingFeeSuggestion() {
          <div className="p-6 pt-0">
              <div className="flex items-center justify-center rounded-md border border-dashed p-8">
                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                 <p className="ml-4 text-muted-foreground">AI is calculating...</p>
+                 <p className="ml-4 text-muted-foreground">Calculating...</p>
              </div>
          </div>
       )}
@@ -162,7 +163,7 @@ export default function ListingFeeSuggestion() {
             </Card>
             <Alert variant="default">
               <BrainCircuit className="h-4 w-4" />
-              <AlertTitle className="font-headline">AI Reasoning</AlertTitle>
+              <AlertTitle className="font-headline">Reasoning</AlertTitle>
               <AlertDescription>{result.reasoning}</AlertDescription>
             </Alert>
         </div>

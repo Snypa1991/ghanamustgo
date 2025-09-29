@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from 'react';
@@ -32,7 +33,7 @@ export default function AdminDashboardPage() {
       <div className="text-left mb-12">
         <Shield className="h-12 w-12 text-primary" />
         <h1 className="mt-4 text-4xl font-bold font-headline">Admin Dashboard</h1>
-        <p className="mt-2 text-lg text-muted-foreground">AI-Powered Tools & Platform Management</p>
+        <p className="mt-2 text-lg text-muted-foreground">Smart Tools & Platform Management</p>
       </div>
 
       <Tabs defaultValue="route-optimization" className="w-full">
