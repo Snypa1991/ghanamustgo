@@ -7,11 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { DUMMY_RIDES, DUMMY_USERS, Ride } from '@/lib/dummy-data';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
-import { Car, Dot, History, Moped, Star } from 'lucide-react';
+import { Car, Dot, History, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 import RideReviewDialog from './ride-review-dialog';
+import { MopedIcon } from './icons';
 
 export default function RideHistory() {
   const { user } = useAuth();
@@ -114,7 +115,7 @@ export default function RideHistory() {
                         </div>
                         <div className="text-right space-y-2 flex-shrink-0 sm:w-48 flex flex-col items-end">
                            <div className="flex items-center justify-end gap-2">
-                               {partnerRole === 'biker' ? <Moped className="h-5 w-5 text-muted-foreground" /> : <Car className="h-5 w-5 text-muted-foreground" />}
+                               {partnerRole === 'biker' ? <MopedIcon className="h-5 w-5 text-muted-foreground" /> : <Car className="h-5 w-5 text-muted-foreground" />}
                                 <p className="font-bold text-xl">${ride.fare.toFixed(2)}</p>
                             </div>
                             <Badge
