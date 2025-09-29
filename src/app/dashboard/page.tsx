@@ -156,7 +156,7 @@ export default function DashboardPage() {
           }
         },
         (error) => console.error("Error getting initial position:", error),
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
 
       watchId = navigator.geolocation.watchPosition(
