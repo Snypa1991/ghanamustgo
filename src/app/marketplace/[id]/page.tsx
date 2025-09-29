@@ -70,8 +70,8 @@ export default function MarketplaceItemPage({ params }: { params: { id: string }
                             );
                         })}
                     </CarouselContent>
-                    <CarouselPrevious className="left-2" />
-                    <CarouselNext className="right-2" />
+                    <CarouselPrevious className="left-2 sm:left-4" />
+                    <CarouselNext className="right-2 sm:right-4" />
                 </Carousel>
                 
                 <Card>

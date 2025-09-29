@@ -52,29 +52,6 @@ export default function DashboardPage() {
 
   const mapRef = useRef<google.maps.Map | null>(null);
   
-  // Refs to hold the latest state values to be used inside intervals
-  const tripStatusRef = useRef(tripStatus);
-  const currentPositionRef = useRef(currentPosition);
-  const radiusRef = useRef(radius);
-
-  useEffect(() => {
-    tripStatusRef.current = tripStatus;
-    currentPositionRef.current = currentPosition;
-    radiusRef.current = radius;
-  });
-
-
-  // Load online status from localStorage on initial render
-  useEffect(() => {
-    const storedIsOnline = localStorage.getItem('ghana-must-go-isOnline');
-    if (storedIsOnline) {
-      const savedIsOnline = JSON.parse(storedIsOnline);
-      if (savedIsOnline) {
-        setIsOnline(true);
-      }
-    }
-  }, []);
-
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
   }, []);
@@ -97,65 +74,64 @@ export default function DashboardPage() {
     }
   }
 
-  const startRequestSimulator = useCallback(() => {
+ const startRequestSimulator = useCallback(() => {
     if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
-    
+
     const generateRequest = () => {
-        if (tripStatusRef.current !== 'none' || !currentPositionRef.current || !isLoaded || !user) {
-            return;
-        }
-        
-        // Generate a random passenger
-        const passengers = DUMMY_USERS.filter(u => u.role === 'user' || u.role === 'unassigned');
-        const randomPassenger = passengers[Math.floor(Math.random() * passengers.length)];
+      const currentTripStatus = tripStatusRef.current;
+      const currentPos = currentPositionRef.current;
+      
+      if (currentTripStatus !== 'none' || !currentPos || !isLoaded || !user) {
+        return;
+      }
+      
+      const passengers = DUMMY_USERS.filter(u => u.role === 'user' || u.role === 'unassigned');
+      const randomPassenger = passengers[Math.floor(Math.random() * passengers.length)];
+      
+      const currentRadius = radiusRef.current;
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = Math.random() * currentRadius;
+      const earthRadius = 6371000;
 
-        // Generate a nearby pickup location within the radius
-        const angle = Math.random() * 2 * Math.PI;
-        const distance = Math.random() * radiusRef.current; // distance in meters
-        const earthRadius = 6371000; // meters
+      const lat1 = currentPos.lat * Math.PI / 180;
+      const lon1 = currentPos.lng * Math.PI / 180;
+      
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance / earthRadius) + Math.cos(lat1) * Math.sin(distance / earthRadius) * Math.cos(angle));
+      const lon2 = lon1 + Math.atan2(Math.sin(angle) * Math.sin(distance / earthRadius) * Math.cos(lat1), Math.cos(distance / earthRadius) - Math.sin(lat1) * Math.sin(lat2));
 
-        const lat1 = currentPositionRef.current.lat * Math.PI / 180;
-        const lon1 = currentPositionRef.current.lng * Math.PI / 180;
-        
-        const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance / earthRadius) + Math.cos(lat1) * Math.sin(distance / earthRadius) * Math.cos(angle));
-        const lon2 = lon1 + Math.atan2(Math.sin(angle) * Math.sin(distance / earthRadius) * Math.cos(lat1), Math.cos(distance / earthRadius) - Math.sin(lat1) * Math.sin(lat2));
+      const pickupLat = lat2 * 180 / Math.PI;
+      const pickupLng = lon2 * 180 / Math.PI;
 
-        const pickupLat = lat2 * 180 / Math.PI;
-        const pickupLng = lon2 * 180 / Math.PI;
-
-
-        const geocoder = new window.google.maps.Geocoder();
-        geocoder.geocode({ location: { lat: pickupLat, lng: pickupLng } }, (results, status) => {
-            if (status === 'OK' && results && results[0]) {
-                const pickupAddress = results[0].formatted_address;
-                
-                const newRide: Ride = {
-                    id: `ride-sim-${Date.now()}`,
-                    userId: randomPassenger.id,
-                    driverId: user!.id,
-                    startLocation: pickupAddress,
-                    endLocation: "Osu Oxford Street", // Hardcoded destination for simulation
-                    fare: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
-                    date: new Date().toISOString(),
-                    status: 'cancelled', // Initial status
-                };
-
-                setCurrentRideRequest(newRide);
-                setTripStatus('requesting');
-
-            } else {
-                toast({
-                    variant: 'destructive',
-                    title: 'Simulation Error',
-                    description: 'Could not generate a nearby ride request.',
-                })
-            }
-        });
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ location: { lat: pickupLat, lng: pickupLng } }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+              const pickupAddress = results[0].formatted_address;
+              
+              const newRide: Ride = {
+                  id: `ride-sim-${Date.now()}`,
+                  userId: randomPassenger.id,
+                  driverId: user!.id,
+                  startLocation: pickupAddress,
+                  endLocation: "Osu Oxford Street",
+                  fare: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+                  date: new Date().toISOString(),
+                  status: 'cancelled',
+              };
+              
+              setCurrentRideRequest(newRide);
+              setTripStatus('requesting');
+          } else {
+              toast({
+                  variant: 'destructive',
+                  title: 'Simulation Error',
+                  description: 'Could not generate a nearby ride request.',
+              })
+          }
+      });
     };
     
-    requestIntervalRef.current = setInterval(generateRequest, 12000); // Check for a new ride every 12 seconds
-}, [isLoaded, user, toast]);
-
+    requestIntervalRef.current = setInterval(generateRequest, 12000);
+  }, [isLoaded, user, toast]);
 
     const stopRequestSimulator = () => {
         if (requestIntervalRef.current) {
@@ -199,12 +175,30 @@ export default function DashboardPage() {
     }
   }, [user, router]);
   
+  const tripStatusRef = useRef(tripStatus);
+  const currentPositionRef = useRef(currentPosition);
+  const radiusRef = useRef(radius);
+  
+  useEffect(() => {
+    tripStatusRef.current = tripStatus;
+    currentPositionRef.current = currentPosition;
+    radiusRef.current = radius;
+  });
+
+  useEffect(() => {
+    const storedIsOnline = localStorage.getItem('ghana-must-go-isOnline');
+    if (storedIsOnline) {
+      const savedIsOnline = JSON.parse(storedIsOnline);
+      if (savedIsOnline) {
+        setIsOnline(true);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     let watchId: number;
 
     if (isOnline) {
-      startRequestSimulator();
-
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -229,23 +223,30 @@ export default function DashboardPage() {
           }
         },
         (error) => console.error("Geolocation watch error:", error),
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0, }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     } else {
       setCurrentPosition(null);
-      stopRequestSimulator();
       if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
       setCurrentRideRequest(null);
       setTripStatus('none');
       setDirections(null);
     }
-
+    
     return () => {
       if (watchId) navigator.geolocation.clearWatch(watchId);
-      stopRequestSimulator();
-      if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
     };
-  }, [isOnline, userInteracted, startRequestSimulator]);
+  }, [isOnline, userInteracted]);
+
+    useEffect(() => {
+        if (isOnline) {
+            startRequestSimulator();
+        } else {
+            stopRequestSimulator();
+        }
+        return () => stopRequestSimulator();
+    }, [isOnline, startRequestSimulator]);
+
 
     useEffect(() => {
         let tripTimer: NodeJS.Timeout | null = null;
@@ -264,16 +265,12 @@ export default function DashboardPage() {
                 handleDeclineRide();
             }, 10000); // 10-second timer for the request
         }
-        
-        if (tripStatus === 'none' && isOnline) {
-            startRequestSimulator();
-        }
 
         return () => {
             if (tripTimer) clearTimeout(tripTimer);
             if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
         };
-    }, [tripStatus, handleDeclineRide, handleCompleteRide, isOnline, startRequestSimulator]);
+    }, [tripStatus, handleDeclineRide, handleCompleteRide]);
 
 
   const handleToggleOnline = () => {
@@ -441,7 +438,7 @@ export default function DashboardPage() {
           <button
               onClick={handleToggleOnline}
               className={cn(
-                  "relative inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors shadow-lg",
+                  "relative inline-flex h-12 w-12 items-center justify-center rounded-full transition-colors shadow-lg",
                   isOnline ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
               )}
               aria-label={isOnline ? 'Go Offline' : 'Go Online'}
@@ -468,11 +465,11 @@ export default function DashboardPage() {
             <div className="absolute bottom-4 right-4 z-10">
               <Button
                 size="icon"
-                className="rounded-full shadow-lg"
+                className="rounded-full shadow-lg h-12 w-12"
                 onClick={handleRecenter}
                 aria-label="Recenter map"
               >
-                <Crosshair className="h-5 w-5" />
+                <Crosshair className="h-6 w-6" />
               </Button>
             </div>
           )}
@@ -499,5 +496,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    

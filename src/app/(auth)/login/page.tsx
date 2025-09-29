@@ -88,7 +88,7 @@ export default function LoginPage() {
 
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
+    <div className="flex items-center justify-center min-h-screen sm:min-h-[calc(100vh-10rem)] py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />
