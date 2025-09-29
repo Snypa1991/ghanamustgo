@@ -86,8 +86,8 @@ export default function RouteOptimization({
                         <FormControl>
                           <Input placeholder="e.g., Accra Mall" {...field} className="pl-9" />
                         </FormControl>
-                        <Button variant="ghost" size="sm" type="button" onClick={handleGetCurrentLocation} className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-xs px-2">
-                             Use Current
+                         <Button variant="ghost" size="sm" type="button" onClick={() => onPinLocation('start')} className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-xs px-2">
+                             Pin on map
                         </Button>
                     </div>
                     <FormMessage />
