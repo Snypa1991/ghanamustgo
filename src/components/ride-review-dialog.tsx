@@ -14,9 +14,10 @@ interface RideReviewDialogProps {
     ride: Ride;
     otherUser: User;
     onReviewPublished: (rideId: string, rating: number, review: string) => void;
+    children?: React.ReactNode;
 }
 
-export default function RideReviewDialog({ ride, otherUser, onReviewPublished }: RideReviewDialogProps) {
+export default function RideReviewDialog({ ride, otherUser, onReviewPublished, children }: RideReviewDialogProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
@@ -33,14 +34,21 @@ export default function RideReviewDialog({ ride, otherUser, onReviewPublished }:
             alert("Please provide a rating and a review.");
         }
     }
+    
+    const trigger = children ? (
+        <DialogTrigger asChild>{children}</DialogTrigger>
+    ) : (
+        <DialogTrigger asChild>
+            <Button variant="outline" size="sm" className="w-full mt-2">
+                <Star className="mr-2 h-4 w-4" /> Rate & Review
+            </Button>
+        </DialogTrigger>
+    );
+
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full mt-2">
-                    <Star className="mr-2 h-4 w-4" /> Rate & Review
-                </Button>
-            </DialogTrigger>
+            {trigger}
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Rate your trip with {otherUser.name}</DialogTitle>

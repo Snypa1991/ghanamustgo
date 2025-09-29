@@ -15,7 +15,10 @@ import { getOptimizedRoute } from '@/app/actions';
 import type { OptimizeRouteWithAIOutput } from '@/ai/flows/optimize-route-with-ai';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import RouteOptimization from '@/components/route-optimization';
+import { DUMMY_RIDES, DUMMY_USERS, Ride, User } from '@/lib/dummy-data';
+import TripStatusCard from '@/components/trip-status-card';
 
+type BookingStep = 'details' | 'selection' | 'confirming' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
 
 const containerStyle = {
   width: '100%',
@@ -36,8 +39,9 @@ export default function BookPage() {
   const { user } = useAuth();
   
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
-  const [step, setStep] = useState<'details' | 'selection'>('details');
+  const [step, setStep] = useState<BookingStep>('details');
   const [ridePrices, setRidePrices] = useState({ okada: 0, taxi: 0 });
+  const [selectedRideType, setSelectedRideType] = useState<'okada' | 'taxi'>('okada');
 
   const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -45,6 +49,8 @@ export default function BookPage() {
   const [startLocation, setStartLocation] = useState('East Legon, American House');
   const [endLocation, setEndLocation] = useState('Osu Oxford Street');
 
+  const [assignedDriver, setAssignedDriver] = useState<User | null>(null);
+  const [currentRide, setCurrentRide] = useState<Ride | null>(null);
 
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -94,6 +100,60 @@ export default function BookPage() {
     setStep('selection');
   }
 
+  const handleBookRide = () => {
+    if (!user) return;
+    setStep('confirming');
+
+    const driverRole = selectedRideType === 'okada' ? 'biker' : 'driver';
+    const availableDrivers = DUMMY_USERS.filter(u => u.role === driverRole);
+    const driver = availableDrivers[Math.floor(Math.random() * availableDrivers.length)];
+    
+    const newRide: Ride = {
+      id: `ride-${Date.now()}`,
+      userId: user.id,
+      driverId: driver.id,
+      startLocation,
+      endLocation,
+      fare: selectedRideType === 'okada' ? ridePrices.okada : ridePrices.taxi,
+      date: new Date().toISOString(),
+      status: 'cancelled', // Will be updated to completed later
+    };
+
+    setCurrentRide(newRide);
+
+    setTimeout(() => {
+      setAssignedDriver(driver);
+      setStep('enroute-to-pickup');
+    }, 4000); // Simulate finding a driver
+  };
+
+  const handleCompleteRide = () => {
+    if(currentRide){
+      const completedRide: Ride = {...currentRide, status: 'completed' };
+      DUMMY_RIDES.unshift(completedRide);
+    }
+    setStep('completed');
+  }
+  
+  const handleReviewAndFinish = () => {
+    setStep('details');
+    setDirections(null);
+    setCurrentRide(null);
+    setAssignedDriver(null);
+  }
+
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (step === 'enroute-to-pickup') {
+      timer = setTimeout(() => setStep('enroute-to-destination'), 10000); // 10s to pickup
+    } else if (step === 'enroute-to-destination') {
+      timer = setTimeout(() => handleCompleteRide(), 15000); // 15s to destination
+    }
+    return () => clearTimeout(timer);
+  }, [step]);
+
+
   const handleRouteUpdate = (start: string, end: string) => {
     if (start !== startLocation) setStartLocation(start);
     if (end !== endLocation) setEndLocation(end);
@@ -104,7 +164,7 @@ export default function BookPage() {
   }, [isLoaded, startLocation, endLocation, step]);
   
   const startMarkerIcon = useMemo(() => {
-    if (user && isLoaded) {
+    if (!user || !isLoaded) return;
       const imageUrl = `https://picsum.photos/seed/${user.email}/40/40`;
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
@@ -122,8 +182,7 @@ export default function BookPage() {
         scaledSize: new window.google.maps.Size(48, 48),
         anchor: new window.google.maps.Point(24, 24),
       };
-    }
-    return undefined;
+    
   }, [user, isLoaded]);
 
   const endMarkerIcon = useMemo(() => {
@@ -139,6 +198,26 @@ export default function BookPage() {
     }
     return undefined;
   }, [isLoaded]);
+  
+  const driverMarkerIcon = useMemo(() => {
+    if (!assignedDriver || !isLoaded) return undefined;
+    
+    const commonOptions = {
+      fillColor: 'hsl(var(--accent))',
+      fillOpacity: 1,
+      strokeColor: 'white',
+      strokeWeight: 2,
+      anchor: new window.google.maps.Point(12, 12),
+    };
+
+    if (assignedDriver.role === 'biker') {
+        const svgPath = 'M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM8 19h8M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2zM5 11v-5h8M11 6L7 4M13 11V4h-2';
+        return { ...commonOptions, path: svgPath, scale: 1.2 };
+    }
+    
+    return { ...commonOptions, path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW, scale: 6 };
+  }, [assignedDriver, isLoaded]);
+
 
   if (loadError) {
     return <div>Error loading maps. Please check your API key.</div>;
@@ -151,6 +230,7 @@ export default function BookPage() {
     }
   }, [step]);
 
+  const isTripInProgress = step === 'confirming' || step === 'enroute-to-pickup' || step === 'enroute-to-destination' || step === 'completed';
 
   return (
     <div className="relative h-[calc(100vh-4rem)] w-full">
@@ -183,7 +263,7 @@ export default function BookPage() {
             <DirectionsRenderer
               options={{
                 directions: directions,
-                suppressMarkers: true,
+                suppressMarkers: step !== 'details',
                 polylineOptions: {
                   strokeColor: 'hsl(var(--primary))',
                   strokeOpacity: 0.8,
@@ -193,17 +273,23 @@ export default function BookPage() {
             />
           )}
           
-           {directions && directions.routes[0]?.legs[0]?.start_location && (
+           {directions && directions.routes[0]?.legs[0]?.start_location && !isTripInProgress &&(
              <Marker 
                 position={directions.routes[0].legs[0].start_location} 
                 icon={startMarkerIcon}
              />
            )}
-           {directions && directions.routes[0]?.legs[0]?.end_location && (
+           {directions && directions.routes[0]?.legs[0]?.end_location && !isTripInProgress && (
              <Marker 
                 position={directions.routes[0].legs[0].end_location} 
                 icon={endMarkerIcon}
              />
+           )}
+           {isTripInProgress && assignedDriver && directions?.routes[0]?.legs[0]?.start_location && (
+              <Marker
+                position={directions.routes[0].legs[0].start_location}
+                icon={driverMarkerIcon}
+              />
            )}
 
         </GoogleMap>
@@ -212,73 +298,86 @@ export default function BookPage() {
       )}
 
       <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-auto sm:right-8 sm:w-full sm:max-w-sm">
-        <Card className="shadow-2xl">
-          {step === 'details' && (
-            <>
-              <CardHeader>
-                <CardTitle className="font-headline text-2xl">Where to?</CardTitle>
-                <CardDescription>Enter your pickup and drop-off locations.</CardDescription>
-              </CardHeader>
-               <CardContent>
-                    <RouteOptimization onRouteUpdate={handleRouteUpdate} onSubmit={handleFindRide} isLoading={isLoading}/>
-               </CardContent>
-            </>
-          )}
-
-          {step === 'selection' && (
-            <>
+        
+        {isTripInProgress ? (
+          <TripStatusCard 
+            step={step} 
+            driver={assignedDriver} 
+            ride={currentRide}
+            onReviewAndFinish={handleReviewAndFinish}
+          />
+        ) : (
+          <Card className="shadow-2xl">
+            {step === 'details' && (
+              <>
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold font-headline text-center">Choose a ride</CardTitle>
-                    <CardDescription className="text-center">Select a vehicle that suits your needs.</CardDescription>
+                  <CardTitle className="font-headline text-2xl">Where to?</CardTitle>
+                  <CardDescription>Enter your pickup and drop-off locations.</CardDescription>
                 </CardHeader>
-
                 <CardContent>
-                    {aiResult && (
-                       <Alert className="mb-4 bg-primary/5">
-                          <Bot className="h-5 w-5 text-primary" />
-                          <AlertTitle className="text-sm font-headline text-primary">Smart Route Suggestion</AlertTitle>
-                          <AlertDescription className="text-xs">{aiResult.optimizedRoute} (Est: {aiResult.estimatedTravelTime})</AlertDescription>
-                        </Alert>
-                    )}
-                     <RadioGroup defaultValue="okada" className="grid grid-cols-1 gap-4">
-                        <Label
-                            htmlFor="okada"
-                            className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                        >
-                            <div className='flex items-center gap-4'>
-                                <MopedIcon className="h-10 w-10 text-primary" />
-                                <div>
-                                <p className="font-bold text-lg">Okada</p>
-                                <p className="text-sm text-muted-foreground">Quick & affordable</p>
-                                </div>
-                            </div>
-                            <p className="text-lg font-bold">GH₵{ridePrices.okada.toFixed(2)}</p>
-                            <RadioGroupItem value="okada" id="okada" className="sr-only" />
-                        </Label>
-                        <Label
-                            htmlFor="car"
-                            className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                        >
-                            <div className='flex items-center gap-4'>
-                                <Car className="h-10 w-10 text-primary" />
-                                <div>
-                                <p className="font-bold text-lg">Taxi</p>
-                                <p className="text-sm text-muted-foreground">Comfortable & private</p>
-                                </div>
-                            </div>
-                            <p className="text-lg font-bold">GH₵{ridePrices.taxi.toFixed(2)}</p>
-                            <RadioGroupItem value="car" id="car" className="sr-only" />
-                        </Label>
-                    </RadioGroup>
+                      <RouteOptimization onRouteUpdate={handleRouteUpdate} onSubmit={handleFindRide} isLoading={isLoading}/>
                 </CardContent>
-                <CardFooter className="flex-col gap-3">
-                    <Button size="lg" className="w-full h-12 text-lg">Book Ride</Button>
-                    <Button variant="link" onClick={() => setStep('details')}>Back</Button>
-                </CardFooter>
-            </>
-          )}
+              </>
+            )}
 
-        </Card>
+            {step === 'selection' && (
+              <>
+                  <CardHeader>
+                      <CardTitle className="text-2xl font-bold font-headline text-center">Choose a ride</CardTitle>
+                      <CardDescription className="text-center">Select a vehicle that suits your needs.</CardDescription>
+                  </CardHeader>
+
+                  <CardContent>
+                      {aiResult && (
+                        <Alert className="mb-4 bg-primary/5">
+                            <Bot className="h-5 w-5 text-primary" />
+                            <AlertTitle className="text-sm font-headline text-primary">Smart Route Suggestion</AlertTitle>
+                            <AlertDescription className="text-xs">{aiResult.optimizedRoute} (Est: {aiResult.estimatedTravelTime})</AlertDescription>
+                          </Alert>
+                      )}
+                      <RadioGroup 
+                        defaultValue="okada" 
+                        className="grid grid-cols-1 gap-4"
+                        onValueChange={(value: 'okada' | 'taxi') => setSelectedRideType(value)}
+                      >
+                          <Label
+                              htmlFor="okada"
+                              className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                          >
+                              <div className='flex items-center gap-4'>
+                                  <MopedIcon className="h-10 w-10 text-primary" />
+                                  <div>
+                                  <p className="font-bold text-lg">Okada</p>
+                                  <p className="text-sm text-muted-foreground">Quick & affordable</p>
+                                  </div>
+                              </div>
+                              <p className="text-lg font-bold">GH₵{ridePrices.okada.toFixed(2)}</p>
+                              <RadioGroupItem value="okada" id="okada" className="sr-only" />
+                          </Label>
+                          <Label
+                              htmlFor="car"
+                              className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                          >
+                              <div className='flex items-center gap-4'>
+                                  <Car className="h-10 w-10 text-primary" />
+                                  <div>
+                                  <p className="font-bold text-lg">Taxi</p>
+                                  <p className="text-sm text-muted-foreground">Comfortable & private</p>
+                                  </div>
+                              </div>
+                              <p className="text-lg font-bold">GH₵{ridePrices.taxi.toFixed(2)}</p>
+                              <RadioGroupItem value="car" id="car" className="sr-only" />
+                          </Label>
+                      </RadioGroup>
+                  </CardContent>
+                  <CardFooter className="flex-col gap-3">
+                      <Button size="lg" className="w-full h-12 text-lg" onClick={handleBookRide}>Book Ride</Button>
+                      <Button variant="link" onClick={() => setStep('details')}>Back</Button>
+                  </CardFooter>
+              </>
+            )}
+          </Card>
+        )}
       </div>
     </div>
   );

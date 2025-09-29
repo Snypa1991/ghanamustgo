@@ -42,7 +42,7 @@ export default function DashboardPage() {
   const [tripStatus, setTripStatus] = useState<TripStatus>('none');
   const [isCompleting, setIsCompleting] = useState(false);
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
-  const [historyVersion, setHistoryVersion] = useState(0);
+  const [historyKey, setHistoryKey] = useState(Date.now()); // Used to force re-render
 
   const requestIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const requestTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -111,7 +111,7 @@ export default function DashboardPage() {
             status: 'completed',
         };
         DUMMY_RIDES.unshift(completedRide);
-        setHistoryVersion(v => v + 1); // Trigger re-render of RideHistory
+        setHistoryKey(Date.now());
     }
 
     setDirections(null);
@@ -245,7 +245,7 @@ export default function DashboardPage() {
     if (status === 'OK' && response) {
       setDirections(response);
        if (mapRef.current) {
-        const bounds = new google.maps.LatLngBounds();
+        const bounds = new window.google.maps.LatLngBounds();
         response.routes[0].legs.forEach(leg => {
           leg.steps.forEach(step => {
             step.path.forEach(path => bounds.extend(path));
@@ -399,7 +399,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="container py-8">
-          <RideHistory key={historyVersion} />
+          <RideHistory key={historyKey} />
       </div>
 
     </div>
