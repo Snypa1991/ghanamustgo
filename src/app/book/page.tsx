@@ -50,8 +50,8 @@ export default function BookPage() {
   const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [startLocation, setStartLocation] = useState('East Legon, American House');
-  const [endLocation, setEndLocation] = useState('Osu Oxford Street');
+  const [startLocation, setStartLocation] = useState('');
+  const [endLocation, setEndLocation] = useState('');
 
   const [assignedDriver, setAssignedDriver] = useState<User | null>(null);
   const [currentRide, setCurrentRide] = useState<Ride | null>(null);
@@ -169,6 +169,8 @@ export default function BookPage() {
     setDirections(null);
     setCurrentRide(null);
     setAssignedDriver(null);
+    setStartLocation('');
+    setEndLocation('');
   }
 
 
@@ -190,29 +192,28 @@ export default function BookPage() {
   }
 
   const shouldRenderDirectionsService = useMemo(() => {
-    return isLoaded && startLocation && endLocation && step === 'details';
+    return isLoaded && startLocation && endLocation && (step === 'details' || step === 'selection');
   }, [isLoaded, startLocation, endLocation, step]);
   
   const startMarkerIcon = useMemo(() => {
     if (!user || !isLoaded) return undefined;
-      const imageUrl = `https://picsum.photos/seed/${user.email}/40/40`;
-      const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-          <defs>
-            <clipPath id="circle-clip">
-              <circle cx="24" cy="24" r="20" />
-            </clipPath>
-          </defs>
-          <circle cx="24" cy="24" r="22" fill="white" stroke="hsl(var(--primary))" stroke-width="2"/>
-          <image href="${imageUrl}" x="4" y="4" width="40" height="40" clip-path="url(#circle-clip)" />
-        </svg>`;
-      
-      return {
-        url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
-        scaledSize: new window.google.maps.Size(48, 48),
-        anchor: new window.google.maps.Point(24, 24),
-      };
+    const imageUrl = `https://picsum.photos/seed/${user.email}/40/40`;
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+        <defs>
+          <clipPath id="circle-clip">
+            <circle cx="24" cy="24" r="20" />
+          </clipPath>
+        </defs>
+        <circle cx="24" cy="24" r="22" fill="white" stroke="hsl(var(--primary))" stroke-width="2"/>
+        <image href="${imageUrl}" x="4" y="4" width="40" height="40" clip-path="url(#circle-clip)" />
+      </svg>`;
     
+    return {
+      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+      scaledSize: new window.google.maps.Size(48, 48),
+      anchor: new window.google.maps.Point(24, 48),
+    };
   }, [user, isLoaded]);
 
   const endMarkerIcon = useMemo(() => {
@@ -255,10 +256,10 @@ export default function BookPage() {
   
   // Set directions when step changes back to details
    useEffect(() => {
-    if (step === 'details') {
-      setDirections(null);
+    if (step === 'details' && startLocation && endLocation) {
+      setDirections(null); // This will trigger a re-render and a new call to DirectionsService
     }
-  }, [step]);
+  }, [step, startLocation, endLocation]);
   
   useEffect(() => {
     if (pinningLocation) {
@@ -310,7 +311,7 @@ export default function BookPage() {
             <DirectionsRenderer
               options={{
                 directions: directions,
-                suppressMarkers: step !== 'details',
+                suppressMarkers: isTripInProgress,
                 polylineOptions: {
                   strokeColor: 'hsl(var(--primary))',
                   strokeOpacity: 0.8,
@@ -421,7 +422,11 @@ export default function BookPage() {
 
                   </CardContent>
                   <CardFooter className="flex-col gap-3 pt-4">
-                      <Button variant="link" onClick={() => setStep('details')}>Back</Button>
+                      <Button variant="link" onClick={() => {
+                        setStep('details');
+                        setAiResult(null);
+                        setAiError(null);
+                      }}>Back</Button>
                   </CardFooter>
               </>
             )}
@@ -431,5 +436,7 @@ export default function BookPage() {
     </div>
   );
 }
+
+    
 
     

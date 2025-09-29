@@ -48,6 +48,16 @@ export default function RouteOptimization({
   const watchedEnd = watch('endLocation');
 
   useEffect(() => {
+    if (startLocation !== form.getValues('startLocation')) {
+      form.setValue('startLocation', startLocation);
+    }
+    if (endLocation !== form.getValues('endLocation')) {
+      form.setValue('endLocation', endLocation);
+    }
+  }, [startLocation, endLocation, form]);
+
+
+  useEffect(() => {
     onRouteUpdate(watchedStart, watchedEnd);
   }, [watchedStart, watchedEnd, onRouteUpdate]);
 
@@ -126,3 +136,6 @@ export default function RouteOptimization({
     </div>
   );
 }
+
+
+    
