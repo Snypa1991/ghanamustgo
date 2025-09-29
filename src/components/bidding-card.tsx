@@ -30,7 +30,7 @@ type BidFormValues = z.infer<typeof bidSchema>;
 
 export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps) {
     const { user } = useAuth();
-    const [bids, setBids] = useState<Bid[]>(DUMMY_BIDS.filter(b => b.itemId === itemId).sort((a, b) => b.amount - a.amount));
+    const [bids, setBids] = useState<Bid[]>(() => DUMMY_BIDS.filter(b => b.itemId === itemId).sort((a, b) => b.amount - a.amount));
     const [isLoading, setIsLoading] = useState(false);
 
     const highestBid = bids.length > 0 ? bids[0].amount : startingPrice;
@@ -46,8 +46,9 @@ export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps)
     });
 
      useEffect(() => {
-        form.reset({ amount: Math.floor(highestBid + 1) });
-    }, [highestBid, form]);
+        const newHighestBid = bids.length > 0 ? bids[0].amount : startingPrice;
+        form.reset({ amount: Math.floor(newHighestBid + 1) });
+    }, [bids, startingPrice, form]);
 
 
     function onSubmit(values: BidFormValues) {

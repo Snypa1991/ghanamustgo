@@ -141,6 +141,20 @@ export default function BookPage() {
     return undefined;
   }, [user, isLoaded]);
 
+  const endMarkerIcon = useMemo(() => {
+    if (isLoaded) {
+      return {
+        path: window.google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: "hsl(var(--primary))",
+        fillOpacity: 1,
+        strokeWeight: 3,
+        strokeColor: "white",
+      }
+    }
+    return undefined;
+  }, [isLoaded]);
+
   if (loadError) {
     return <div>Error loading maps. Please check your API key.</div>;
   }
@@ -195,14 +209,7 @@ export default function BookPage() {
            {directions && directions.routes[0]?.legs[0]?.end_location && (
              <Marker 
                 position={directions.routes[0].legs[0].end_location} 
-                icon={{
-                    path: window.google.maps.SymbolPath.CIRCLE,
-                    scale: 10,
-                    fillColor: "hsl(var(--primary))",
-                    fillOpacity: 1,
-                    strokeWeight: 3,
-                    strokeColor: "white",
-                }}
+                icon={endMarkerIcon}
              />
            )}
 
@@ -323,5 +330,3 @@ export default function BookPage() {
     </div>
   );
 }
-
-    

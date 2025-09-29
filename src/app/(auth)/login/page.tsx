@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/app-context';
-import { DUMMY_USERS } from '@/lib/dummy-data';
+import { DUMMY_USERS, User } from '@/lib/dummy-data';
 import { useEffect } from 'react';
 
 const formSchema = z.object({
@@ -36,17 +36,21 @@ export default function LoginPage() {
     },
   });
 
+  const redirectToDashboard = (user: User) => {
+    if (user.role === 'unassigned') {
+      router.push('/role-selection');
+    } else if (user.role === 'admin') {
+      router.push('/admin/dashboard');
+    } else if (user.role === 'biker' || user.role === 'driver') {
+      router.push('/dashboard');
+    } else {
+      router.push('/book');
+    }
+  };
+
   useEffect(() => {
     if (loggedInUser) {
-      if (loggedInUser.role === 'unassigned') {
-        router.push('/role-selection');
-      } else if (loggedInUser.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else if (loggedInUser.role === 'biker' || loggedInUser.role === 'driver') {
-        router.push('/dashboard');
-      } else {
-        router.push('/book');
-      }
+      redirectToDashboard(loggedInUser);
     }
   }, [loggedInUser, router]);
 
@@ -62,7 +66,7 @@ export default function LoginPage() {
         title: 'Login Successful',
         description: `Akwaaba, ${user.name}!`,
       });
-      // The useEffect above will handle redirection.
+      redirectToDashboard(user);
     } else {
       toast({
         variant: 'destructive',
