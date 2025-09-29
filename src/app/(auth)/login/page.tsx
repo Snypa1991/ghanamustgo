@@ -4,7 +4,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { GhanaMustGoIcon } from '@/components/icons';
+import { GhanaMustGoIcon, MopedIcon } from '@/components/icons';
 import { useAuth } from '@/context/app-context';
 import { DUMMY_USERS, User as UserType } from '@/lib/dummy-data';
 import { Loader2, User, Car, Store, Shield } from 'lucide-react';
@@ -22,16 +22,23 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
         user: DUMMY_USERS.find(u => u.role === 'user')
     },
     {
+        name: 'biker',
+        title: 'Biker',
+        description: 'Offer okada & dispatch.',
+        icon: MopedIcon,
+        user: DUMMY_USERS.find(u => u.role === 'biker')
+    },
+    {
         name: 'driver',
-        title: 'Biker / Driver',
-        description: 'Offer rides and delivery services.',
+        title: 'Driver',
+        description: 'Offer taxi rides.',
         icon: Car,
-        user: DUMMY_USERS.find(u => u.role === 'biker') // or driver
+        user: DUMMY_USERS.find(u => u.role === 'driver')
     },
     {
         name: 'vendor',
         title: 'Vendor',
-        description: 'Sell items on the marketplace.',
+        description: 'Sell on the marketplace.',
         icon: Store,
         user: DUMMY_USERS.find(u => u.role === 'vendor')
     },
@@ -87,7 +94,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen sm:min-h-[calc(100vh-10rem)] py-12 px-4">
-      <Card className="w-full max-w-lg">
+      <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
           <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />
           <CardTitle className="mt-4 font-headline text-2xl">Akwaaba</CardTitle>
@@ -95,7 +102,7 @@ export default function LoginPage() {
             Choose a test account to log in.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {roles.map((role) => (
               role.user && (
                 <button
