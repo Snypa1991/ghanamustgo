@@ -55,7 +55,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 email: firebaseUser.email!,
                 role: 'unassigned' // Default role for new signups
             };
-            DUMMY_USERS.push(newUser); // Add to dummy users for this session
+            // Add to dummy users for this session to ensure consistency
+            if (!DUMMY_USERS.some(u => u.id === newUser.id)) {
+                DUMMY_USERS.push(newUser); 
+            }
             setUser(newUser);
         }
       } else {
@@ -71,25 +74,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
-       const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
-       
-       if (!appUser) {
-            // This case can happen if the user was created but is not in DUMMY_USERS
-            // onAuthStateChanged should handle it, but we can be safe
-             const newUser: User = {
-                id: firebaseUser.uid,
-                name: firebaseUser.displayName || 'New User',
-                email: firebaseUser.email!,
-                role: 'unassigned'
-            };
-            setUser(newUser);
-            redirectToDashboard(newUser);
-            return { success: true };
-       }
-
-      setUser(appUser);
-      redirectToDashboard(appUser);
+       // onAuthStateChanged will handle setting the user and redirecting
+      const appUser = DUMMY_USERS.find(u => u.email === userCredential.user.email);
+      if (appUser) {
+        redirectToDashboard(appUser);
+      }
       return { success: true };
     } catch (error: any) {
       console.error("Login failed:", error);
@@ -107,10 +96,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } else if (error.message) {
           errorMessage = error.message;
       }
+       setLoading(false);
       return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
+    } 
+    // No finally block needed as success path is handled by onAuthStateChanged
   };
 
   const logout = async () => {
