@@ -8,25 +8,25 @@ import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Edit, Store } from 'lucide-react';
+import { Edit, Store, Loader2 } from 'lucide-react';
 import VehicleDetails from '@/components/vehicle-details';
 import Link from 'next/link';
 import RideHistory from '@/components/ride-history';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
-  if (!user) {
+  if (loading || !user) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
-            <p>Loading...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     );
   }

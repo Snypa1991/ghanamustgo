@@ -13,6 +13,16 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { checkImage } from '@/app/actions';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/app-context';
+
 
 type Role = 'user' | 'partner' | 'vendor';
 
@@ -37,22 +47,69 @@ const roles = [
     }
 ]
 
+const formSchema = z.object({
+  name: z.string().min(1, 'Full name is required.'),
+  email: z.string().email('Invalid email address.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
+});
+
+type SignupFormValues = z.infer<typeof formSchema>;
+
 export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [selectedRole, setSelectedRole] = useState<Role>('user');
   const [isCheckingImage, setIsCheckingImage] = useState(false);
   const [blurResult, setBlurResult] = useState<{ isBlurry: boolean, reasoning: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { toast } = useToast();
+  const router = useRouter();
+  const { updateUser } = useAuth();
+  
   const selectedRoleInfo = roles.find(r => r.name === selectedRole);
 
-  const handleAccountCreation = () => {
-    // In a real app, you would handle form submission, validation,
-    // and user creation via an API call here.
-    setStep(3);
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
+  });
+
+  const handleAccountCreation = async (values: SignupFormValues) => {
+    setIsSubmitting(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      await updateProfile(userCredential.user, { displayName: values.name });
+
+      // Create a temporary app user profile.
+      // The role will be set to unassigned initially by the AppContext
+      // then the user will be redirected to the role selection page.
+      // Here, we just move to the next step of the UI flow.
+      toast({
+        title: 'Account Created',
+        description: 'Please complete the verification step.',
+      });
+      setStep(3);
+
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Signup Failed',
+        description: error.message || 'Could not create account.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const handleVerification = () => {
-    // In a real app, you would handle document submission here.
+    // In a real app, you would handle document submission here
+    // and trigger a backend process.
+    
+    // We are skipping the real role update from here, as it's
+    // now handled on the role-selection page after first login.
     setStep(4);
   }
 
@@ -129,33 +186,59 @@ export default function SignupPage() {
         )}
 
         {step === 2 && (
-             <>
-                <CardHeader className="text-center">
-                    <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
-                    <CardTitle className="mt-4 font-headline text-2xl">Create Your Account</CardTitle>
-                    <CardDescription>
-                        You are signing up for a <span className="font-bold text-primary">{selectedRoleInfo?.title}</span> account.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input id="name" placeholder="Ama Busia" required />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" placeholder="okada@example.com" required />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input id="password" type="password" required />
-                    </div>
-                </CardContent>
-                <CardFooter className="flex-col gap-4">
-                    <Button className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} onClick={handleAccountCreation}>Create Account</Button>
-                    <Button variant="link" onClick={() => setStep(1)}>Back to role selection</Button>
-                </CardFooter>
-            </>
+             <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleAccountCreation)}>
+                    <CardHeader className="text-center">
+                        <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
+                        <CardTitle className="mt-4 font-headline text-2xl">Create Your Account</CardTitle>
+                        <CardDescription>
+                            You are signing up for a <span className="font-bold text-primary">{selectedRoleInfo?.title}</span> account.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-4">
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Full Name</FormLabel>
+                                <FormControl><Input placeholder="Ama Busia" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl><Input placeholder="okada@example.com" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                         <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Password</FormLabel>
+                                <FormControl><Input type="password" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                    </CardContent>
+                    <CardFooter className="flex-col gap-4">
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Create Account
+                        </Button>
+                        <Button variant="link" onClick={() => setStep(1)}>Back to role selection</Button>
+                    </CardFooter>
+                </form>
+             </Form>
         )}
         
         {step === 3 && (
@@ -230,14 +313,14 @@ export default function SignupPage() {
                         <AlertTitle className="font-headline">What's Next?</AlertTitle>
                         <AlertDescription>
                            <p>Your documents have been submitted for review. This process usually takes 24-48 hours.</p>
-                           <p className="mt-2">You will receive an email notification once your account is approved. You can then log in to your account.</p>
+                           <p className="mt-2">You will receive an email notification once your account is approved. You can now log in to your account.</p>
                         </AlertDescription>
                     </Alert>
                 </CardContent>
                 <CardFooter>
                     <Link href="/login" className="w-full">
                         <Button className="w-full" variant="outline">
-                            Back to Login
+                            Proceed to Login
                         </Button>
                     </Link>
                 </CardFooter>

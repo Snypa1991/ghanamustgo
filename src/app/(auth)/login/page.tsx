@@ -14,11 +14,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/app-context';
 import { DUMMY_USERS, User } from '@/lib/dummy-data';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email('Invalid email address.'),
-  password: z.string().min(1, 'Password is required.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
 
 type LoginFormValues = z.infer<typeof formSchema>;
@@ -26,7 +29,8 @@ type LoginFormValues = z.infer<typeof formSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { login, user: loggedInUser } = useAuth();
+  const { user: loggedInUser, loading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
@@ -51,41 +55,38 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (loggedInUser) {
+    if (!loading && loggedInUser) {
       redirectToDashboard(loggedInUser);
     }
-  }, [loggedInUser, router]);
+  }, [loggedInUser, loading, router]);
 
 
-  function onSubmit(values: LoginFormValues) {
-    const user = DUMMY_USERS.find(
-      (u) => u.email === values.email && u.password === values.password
-    );
-
-    if (user) {
-      login(user);
+  async function onSubmit(values: LoginFormValues) {
+    setIsSubmitting(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      // The onAuthStateChanged listener in AppProvider will handle the rest.
       toast({
         title: 'Login Successful',
-        description: `Akwaaba, ${user.name}!`,
+        description: `Akwaaba!`,
       });
-      redirectToDashboard(user);
-    } else {
-      toast({
+    } catch (error: any) {
+       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: 'Invalid email or password.',
+        description: error.message || 'Invalid email or password.',
       });
+      setIsSubmitting(false);
     }
   }
   
-  if (loggedInUser) {
+  if (loading || loggedInUser) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
-            <p>Redirecting...</p>
+            <p>Loading...</p>
         </div>
     );
   }
-
 
   return (
     <div className="flex items-center justify-center min-h-screen sm:min-h-[calc(100vh-10rem)] py-12 px-4">
@@ -128,7 +129,8 @@ export default function LoginPage() {
               />
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
               <div className="text-center text-sm">
@@ -140,35 +142,6 @@ export default function LoginPage() {
             </CardFooter>
           </form>
         </Form>
-        <CardContent>
-            <div className="text-center text-xs text-muted-foreground mb-2">Quick Logins</div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
-                <Button variant="outline" size="sm" onClick={() => {
-                    form.setValue('email', 'user@example.com');
-                    form.setValue('password', 'password');
-                }}>User</Button>
-                <Button variant="outline" size="sm" onClick={() => {
-                    form.setValue('email', 'biker@example.com');
-                    form.setValue('password', 'password');
-                }}>Biker</Button>
-                 <Button variant="outline" size="sm" onClick={() => {
-                    form.setValue('email', 'driver@example.com');
-                    form.setValue('password', 'password');
-                }}>Driver</Button>
-                <Button variant="outline" size="sm" onClick={() => {
-                    form.setValue('email', 'vendor@example.com');
-                    form.setValue('password', 'password');
-                }}>Vendor</Button>
-                 <Button variant="outline" size="sm" onClick={() => {
-                    form.setValue('email', 'admin@example.com');
-                    form.setValue('password', 'password');
-                }}>Admin</Button>
-                 <Button variant="outline" size="sm" onClick={() => {
-                    form.setValue('email', 'new@example.com');
-                    form.setValue('password', 'password');
-                }}>New User</Button>
-            </div>
-        </CardContent>
       </Card>
     </div>
   );

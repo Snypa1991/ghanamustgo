@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { GhanaMustGoIcon } from '@/components/icons';
-import { User, Store, Car } from 'lucide-react';
+import { User, Store, Car, Loader2 } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/app-context';
@@ -37,28 +37,33 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
 ];
 
 export default function RoleSelectionPage() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, loading } = useAuth();
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<Role>('user');
 
   useEffect(() => {
-    // If no user is logged in, or user already has a role, redirect them.
-    if (!user || (user.role !== 'unassigned' && user.role !== 'user' && user.role !== 'driver' && user.role !== 'vendor' && user.role !== 'biker' ) ) {
+    // If no user is logged in, redirect them.
+    if (!loading && !user) {
       router.push('/login');
     }
-  }, [user, router]);
+    // If user already has a role, redirect them away from this page.
+    if (!loading && user && user.role !== 'unassigned') {
+        if (user.role === 'admin') router.push('/admin/dashboard');
+        else if (user.role === 'biker' || user.role === 'driver') router.push('/dashboard');
+        else if (user.role === 'vendor') router.push('/vendor/dashboard');
+        else router.push('/book');
+    }
+  }, [user, loading, router]);
 
   const handleRoleSelection = () => {
     if (user) {
-        // In a real app, this would be an API call to the backend.
+        // In a real app, this would be an API call to the backend to update user role in Firestore.
         let roleToSet = selectedRole;
-        // The UI presents "driver" for both, but we need to know which one. For simulation, we can default to driver.
-        // A real app might have a second step to differentiate.
+        
+        // This is a simplification. A real app would need a clearer way
+        // to distinguish between biker and driver during role selection.
         if (selectedRole === 'driver') {
-            // This is a simplification. A real app would need a clearer way
-            // to distinguish between biker and driver during role selection.
-            // For now, we can just default to 'driver' or add more logic.
-            // Let's assume the user can be a 'driver' and the system handles it.
+           roleToSet = 'driver'; // Defaulting to driver for now
         }
 
         const updatedUser: UserType = { ...user, role: roleToSet };
@@ -76,8 +81,12 @@ export default function RoleSelectionPage() {
     }
   };
 
-  if (!user) {
-    return null; // Or a loading spinner
+  if (loading || !user || user.role !== 'unassigned') {
+    return (
+        <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
   }
 
   return (
