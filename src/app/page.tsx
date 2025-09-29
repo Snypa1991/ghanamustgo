@@ -3,7 +3,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Package, UtensilsCrossed, Store, ArrowRight, Car } from 'lucide-react';
+import { Package, Store, ArrowRight, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -53,16 +53,26 @@ export default function Home() {
             Rides, deliveries, and local goods—all in one app. Akwaaba to Ghana Must Go.
           </p>
           <div className="mt-8 flex gap-4">
-            <Link href={user ? "/book" : "/signup"}>
-               <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                  {user ? "Book a Service" : "Get Started"}
-              </Button>
-            </Link>
-            <Link href="#features">
-               <Button size="lg" variant="secondary">
-                Learn More
-              </Button>
-            </Link>
+            {user ? (
+               <Link href="/book">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                      Book a Service
+                  </Button>
+               </Link>
+            ) : (
+              <>
+                 <Link href="/signup">
+                   <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                      Get Started
+                  </Button>
+                </Link>
+                 <Link href="/login">
+                   <Button size="lg" variant="secondary">
+                    Login
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>

@@ -75,8 +75,6 @@ export default function DashboardPage() {
   }
 
  const startRequestSimulator = useCallback(() => {
-    if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
-
     const generateRequest = () => {
       const currentTripStatus = tripStatusRef.current;
       const currentPos = currentPositionRef.current;
@@ -130,6 +128,7 @@ export default function DashboardPage() {
       });
     };
     
+    if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
     requestIntervalRef.current = setInterval(generateRequest, 12000);
   }, [isLoaded, user, toast]);
 
@@ -244,7 +243,6 @@ export default function DashboardPage() {
         } else {
             stopRequestSimulator();
         }
-        return () => stopRequestSimulator();
     }, [isOnline, startRequestSimulator]);
 
 
@@ -288,7 +286,6 @@ export default function DashboardPage() {
         clearTimeout(requestTimeoutRef.current);
         requestTimeoutRef.current = null;
     }
-    stopRequestSimulator();
     setDirections(null); 
     setTripStatus('enroute-to-pickup');
   };
@@ -366,7 +363,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="relative h-[60vh] w-full">
+      <div className="relative h-[calc(100vh-16rem)] sm:h-[calc(100vh-4rem)]">
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={containerStyle}
@@ -415,17 +412,19 @@ export default function DashboardPage() {
             {currentPosition && partnerIcon && (
               <>
                 <Marker position={currentPosition} icon={partnerIcon} />
-                <Circle 
-                  center={currentPosition}
-                  radius={radius}
-                  options={{
-                    strokeColor: 'hsl(var(--primary))',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: 'hsl(var(--primary))',
-                    fillOpacity: 0.1,
-                  }}
-                />
+                {isOnline && (
+                    <Circle 
+                    center={currentPosition}
+                    radius={radius}
+                    options={{
+                        strokeColor: 'hsl(var(--primary))',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: 'hsl(var(--primary))',
+                        fillOpacity: 0.1,
+                    }}
+                    />
+                )}
               </>
             )}
             
@@ -444,13 +443,17 @@ export default function DashboardPage() {
               aria-label={isOnline ? 'Go Offline' : 'Go Online'}
           >
               <Power className="h-6 w-6 text-white" />
+              {isOnline && <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-300 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-green-400"></span>
+              </span>}
           </button>
         </div>
 
         {isOnline && (
            <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
             <div className="bg-background rounded-full shadow-lg flex items-center p-1">
-                <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => changeRadius(-500)}>
+                <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => changeRadius(-500)} disabled={radius <= 500}>
                     <Minus className="h-4 w-4" />
                 </Button>
                 <span className="text-xs font-semibold tabular-nums w-12 text-center">{(radius/1000).toFixed(1)} km</span>
@@ -489,7 +492,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="container py-8">
+      <div className="container py-8 sm:hidden">
           <RideHistory key={historyKey} />
       </div>
 
