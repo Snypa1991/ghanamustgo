@@ -9,9 +9,10 @@ import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { DUMMY_RIDES, Ride } from '@/lib/dummy-data';
+import { DUMMY_RIDES, Ride, DUMMY_USERS } from '@/lib/dummy-data';
 import RideRequestCard from '@/components/ride-request-card';
 import RideHistory from '@/components/ride-history';
+import { useToast } from '@/hooks/use-toast';
 
 const containerStyle = {
   width: '100%',
@@ -30,6 +31,7 @@ export type TripStatus = 'none' | 'requesting' | 'enroute-to-pickup' | 'enroute-
 export default function DashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
@@ -46,7 +48,6 @@ export default function DashboardPage() {
 
   const requestIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const requestTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const rideIndexRef = useRef(0);
 
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -84,16 +85,49 @@ export default function DashboardPage() {
   }
 
   const startRequestSimulator = useCallback(() => {
-        if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
-        requestIntervalRef.current = setInterval(() => {
-            if (tripStatus === 'none') {
-                const nextRide = DUMMY_RIDES[rideIndexRef.current % DUMMY_RIDES.length];
-                setCurrentRideRequest(nextRide);
-                setTripStatus('requesting');
-                rideIndexRef.current++;
-            }
-        }, 12000); // 12 seconds to give a small buffer after a request times out
-    }, [tripStatus]);
+    if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
+    requestIntervalRef.current = setInterval(() => {
+        if (tripStatus === 'none' && currentPosition && isLoaded) {
+            // Generate a random passenger
+            const passengers = DUMMY_USERS.filter(u => u.role === 'user' || u.role === 'unassigned');
+            const randomPassenger = passengers[Math.floor(Math.random() * passengers.length)];
+
+            // Generate a nearby pickup location
+            const offset = 0.01; // Approx 1.1km
+            const pickupLat = currentPosition.lat + (Math.random() - 0.5) * offset;
+            const pickupLng = currentPosition.lng + (Math.random() - 0.5) * offset;
+
+            const geocoder = new window.google.maps.Geocoder();
+            geocoder.geocode({ location: { lat: pickupLat, lng: pickupLng } }, (results, status) => {
+                if (status === 'OK' && results && results[0]) {
+                    const pickupAddress = results[0].formatted_address;
+                    
+                    const newRide: Ride = {
+                        id: `ride-sim-${Date.now()}`,
+                        userId: randomPassenger.id,
+                        driverId: user!.id,
+                        startLocation: pickupAddress,
+                        endLocation: "Osu Oxford Street", // Hardcoded destination for simulation
+                        fare: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+                        date: new Date().toISOString(),
+                        status: 'cancelled', // Initial status
+                    };
+
+                    setCurrentRideRequest(newRide);
+                    setTripStatus('requesting');
+
+                } else {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Simulation Error',
+                        description: 'Could not generate a nearby ride request.',
+                    })
+                }
+            });
+        }
+    }, 12000); // Check for a new ride every 12 seconds
+}, [tripStatus, currentPosition, user, isLoaded, toast]);
+
 
     const stopRequestSimulator = () => {
         if (requestIntervalRef.current) {
@@ -405,3 +439,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
