@@ -41,6 +41,24 @@
       "description": "A carved wooden mask from Ghana.",
       "imageUrl": "https://images.unsplash.com/photo-1719169395854-136cedc974d9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBtYXNrfGVufDB8fHx8MTc1OTExMDE3OHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "wooden mask"
+    },
+    {
+      "id": "restaurant-jollof",
+      "description": "A delicious plate of Ghanaian jollof rice.",
+      "imageUrl": "https://images.unsplash.com/photo-1569058242252-623df46b5025?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxqb2xsb2YlMjByaWNlfGVufDB8fHx8MTc1OTExODQwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "jollof rice"
+    },
+    {
+      "id": "restaurant-burger",
+      "description": "A juicy gourmet beef burger.",
+      "imageUrl": "https://images.unsplash.com/photo-1632898657999-ae6920976661?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxnb3VybWV0JTIwYnVyZ2VyfGVufDB8fHx8MTc1OTA0ODA0MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gourmet burger"
+    },
+    {
+      "id": "restaurant-pizza",
+      "description": "A hot pepperoni pizza.",
+      "imageUrl": "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwZXBwZXJvbmklMjBwaXp6YXxlbnwwfHx8fDE3NTkwNDE4MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pepperoni pizza"
     }
   ]
 }

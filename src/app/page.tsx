@@ -3,7 +3,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Package, Store, ArrowRight, Car } from 'lucide-react';
+import { Package, Store, ArrowRight, Car, UtensilsCrossed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -19,18 +19,18 @@ const features = [
     cta: 'Book Now',
   },
   {
+    title: 'Order Food',
+    description: 'Get your favorite meals delivered to your doorstep, fast.',
+    icon: UtensilsCrossed,
+    href: '/food',
+    cta: 'Order Now',
+  },
+  {
     title: 'Send a Package',
     description: 'Affordable and secure on-demand dispatch services.',
     icon: Package,
     href: '/dispatch',
     cta: 'Dispatch Now',
-  },
-  {
-    title: 'Shop Local',
-    description: 'Discover and buy unique items from local sellers.',
-    icon: Store,
-    href: '/marketplace',
-    cta: 'Explore Market',
   },
 ];
 
