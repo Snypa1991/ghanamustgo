@@ -56,7 +56,7 @@ export default function LoginPage() {
   const { user, loading, switchUserForTesting } = useAuth();
   const router = useRouter();
 
-  // Redirect if user is already logged in
+  // Redirect if user is ALREADY logged in and not loading.
   useEffect(() => {
     if (!loading && user) {
        if (user.role === 'admin') {

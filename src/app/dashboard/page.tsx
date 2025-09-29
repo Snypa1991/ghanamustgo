@@ -356,14 +356,6 @@ export default function DashboardPage() {
     );
   }
 
-  if (user.role !== 'biker' && user.role !== 'driver') {
-    return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
-        <p>Access Denied. Redirecting...</p>
-      </div>
-    );
-  }
-
   const shouldRenderDirections = isLoaded && currentRideRequest && currentPosition && (tripStatus === 'enroute-to-pickup' || tripStatus === 'enroute-to-destination');
   const directionsOrigin = tripStatus === 'enroute-to-pickup' ? currentPosition : currentRideRequest?.startLocation;
   const directionsDestination = tripStatus === 'enroute-to-pickup' ? currentRideRequest?.startLocation : currentRideRequest?.endLocation;

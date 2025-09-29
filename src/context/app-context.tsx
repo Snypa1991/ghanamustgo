@@ -67,22 +67,29 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const switchUserForTesting = async (newUser: User) => {
     setLoading(true);
     try {
-        await firebaseSignOut(auth);
+        // We sign out first to ensure a clean login session.
+        if (auth.currentUser) {
+            await firebaseSignOut(auth);
+        }
+        
         if (newUser.password) {
           const userCredential = await signInWithEmailAndPassword(auth, newUser.email, newUser.password);
+          // The onAuthStateChanged listener will automatically pick up the new user,
+          // set the state, and the useEffect on the login page will handle redirection.
           const finalUser = DUMMY_USERS.find(u => u.email === userCredential.user.email)!;
-          setUser(finalUser);
+          // We manually call redirect here to ensure it happens after sign-in.
           redirectToDashboard(finalUser);
         } else {
            throw new Error("Dummy user password not set.");
         }
     } catch (e) {
       console.error("Test user sign-in failed", e);
-      await firebaseSignOut(auth); // Ensure we are logged out on failure
+      // Ensure we are logged out on failure
+      await firebaseSignOut(auth); 
       setUser(null);
       router.push('/login');
     } finally {
-        setLoading(false);
+        // We let onAuthStateChanged handle the final loading state.
     }
   };
   
