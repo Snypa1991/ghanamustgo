@@ -25,6 +25,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   const redirectToDashboard = useCallback((targetUser: User) => {
+    if (!targetUser) return;
     if (targetUser.role === 'unassigned') {
       router.push('/role-selection');
     } else if (targetUser.role === 'admin') {
@@ -54,6 +55,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 email: firebaseUser.email!,
                 role: 'unassigned' // Default role for new signups
             };
+            DUMMY_USERS.push(newUser); // Add to dummy users for this session
             setUser(newUser);
         }
       } else {
@@ -73,7 +75,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
        const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
        
        if (!appUser) {
-           throw new Error("User profile not found in the application.");
+            // This case can happen if the user was created but is not in DUMMY_USERS
+            // onAuthStateChanged should handle it, but we can be safe
+             const newUser: User = {
+                id: firebaseUser.uid,
+                name: firebaseUser.displayName || 'New User',
+                email: firebaseUser.email!,
+                role: 'unassigned'
+            };
+            setUser(newUser);
+            redirectToDashboard(newUser);
+            return { success: true };
        }
 
       setUser(appUser);
@@ -110,6 +122,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const updateUser = (updatedUser: User) => {
     // This is for client-side role updates for newly signed-up users
     setUser(updatedUser);
+    const userIndex = DUMMY_USERS.findIndex(u => u.id === updatedUser.id);
+    if (userIndex !== -1) {
+      DUMMY_USERS[userIndex] = updatedUser;
+    }
   };
 
   return (

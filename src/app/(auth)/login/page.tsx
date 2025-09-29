@@ -15,12 +15,17 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { DUMMY_USERS } from '@/lib/dummy-data';
 
-
-const formSchema = z.object({
+const emailSchema = z.object({
   email: z.string().email('Invalid email address.'),
-  password: z.string().min(1, 'Password is required.'),
 });
+
+const passwordSchema = z.object({
+    password: z.string().min(1, 'Password is required.'),
+});
+
+const formSchema = emailSchema.merge(passwordSchema);
 
 type LoginFormValues = z.infer<typeof formSchema>;
 
@@ -30,6 +35,9 @@ export default function LoginPage() {
   const { user, login, loading, redirectToDashboard } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setStep] = useState(1);
+  const [submittedEmail, setSubmittedEmail] = useState('');
+
 
   useEffect(() => {
     if (!loading && user) {
@@ -38,14 +46,36 @@ export default function LoginPage() {
   }, [user, loading, router, redirectToDashboard]);
   
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(step === 1 ? emailSchema : formSchema),
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  const handleLogin = async (values: LoginFormValues) => {
+  const handleEmailCheck = async ({ email }: { email: string }) => {
+    setIsSubmitting(true);
+    
+    const isDummyUser = DUMMY_USERS.some(u => u.email === email && u.password);
+
+    if (isDummyUser) {
+        // Automatically log in dummy user
+        const result = await login(email, DUMMY_USERS.find(u => u.email === email)!.password!);
+        if (result.success) {
+            toast({ title: 'Login Successful', description: 'Welcome back!' });
+        } else {
+             toast({ variant: 'destructive', title: 'Login Failed', description: result.error });
+        }
+    } else {
+        // Proceed to password step for regular users
+        setSubmittedEmail(email);
+        setStep(2);
+    }
+    
+    setIsSubmitting(false);
+  }
+
+  const handlePasswordLogin = async (values: LoginFormValues) => {
     setIsSubmitting(true);
     const result = await login(values.email, values.password);
     if (result.success) {
@@ -63,6 +93,11 @@ export default function LoginPage() {
     setIsSubmitting(false);
   };
 
+  const handleBack = () => {
+    setStep(1);
+    form.reset({ email: submittedEmail, password: '' });
+  }
+
   if (loading || user) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
@@ -78,45 +113,63 @@ export default function LoginPage() {
           <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />
           <CardTitle className="mt-4 font-headline text-2xl">Akwaaba Back</CardTitle>
           <CardDescription>
-            Sign in to your account to continue.
+            {step === 1 ? "Enter your email to sign in or get started." : "Enter your password to continue."}
           </CardDescription>
         </CardHeader>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleLogin)}>
+            <form onSubmit={form.handleSubmit(step === 1 ? handleEmailCheck : handlePasswordLogin)}>
                 <CardContent className="grid gap-4">
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl><Input placeholder="user@example.com" {...field} /></FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
+                    {step === 1 ? (
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl><Input placeholder="user@example.com" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                    ) : (
+                        <>
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <Input value={submittedEmail} readOnly disabled />
+                            </FormItem>
+                             <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl><Input type="password" placeholder="••••••••" {...field} autoFocus /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                        </>
+                    )}
                 </CardContent>
                 <CardFooter className="flex-col gap-4">
                     <Button type="submit" className="w-full" disabled={isSubmitting}>
                          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Sign In
+                        {step === 1 ? 'Continue' : 'Sign In'}
                     </Button>
+                    {step === 2 && (
+                         <Button variant="link" onClick={handleBack}>
+                            Back
+                        </Button>
+                    )}
                      <div className="text-center text-sm">
-                        Don't have an account?{' '}
-                        <Link href="/signup" className="underline text-primary hover:text-primary/80">
-                        Sign up here
-                        </Link>
+                        {step === 1 && (
+                            <>
+                                Don't have an account?{' '}
+                                <Link href="/signup" className="underline text-primary hover:text-primary/80">
+                                Sign up here
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </CardFooter>
             </form>
