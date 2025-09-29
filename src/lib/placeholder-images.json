@@ -1,106 +1,45 @@
-
 {
   "placeholderImages": [
     {
       "id": "hero-image",
       "description": "A vibrant street scene in Accra, Ghana, with Okadas (motorcycle taxis) in motion.",
-      "imageUrl": "https://picsum.photos/seed/ghana-street/1200/600",
+      "imageUrl": "https://images.unsplash.com/photo-1453413453658-27fec8f43f29?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaXR5JTIwc3RyZWV0fGVufDB8fHx8MTc1OTAyMzkzNXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "city street"
     },
     {
       "id": "map-background",
       "description": "A stylized map of a city, showing streets and locations.",
-      "imageUrl": "https://picsum.photos/seed/city-map/1200/800",
+      "imageUrl": "https://images.unsplash.com/photo-1730317195705-8a265a59ed1b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjaXR5JTIwbWFwfGVufDB8fHx8MTc1OTA4MTY3OHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "city map"
     },
     {
       "id": "user-avatar-1",
       "description": "Avatar for a user.",
-      "imageUrl": "https://picsum.photos/seed/avatar1/100/100",
+      "imageUrl": "https://images.unsplash.com/photo-1521119989659-a83eee488004?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzU5MTA1NDc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "person portrait"
-    },
-    {
-      "id": "restaurant-1",
-      "description": "The exterior of a modern restaurant specializing in Jollof rice.",
-      "imageUrl": "https://picsum.photos/seed/restaurant1/400/300",
-      "imageHint": "restaurant exterior"
-    },
-    {
-      "id": "restaurant-2",
-      "description": "A cozy cafe with outdoor seating.",
-      "imageUrl": "https://picsum.photos/seed/restaurant2/400/300",
-      "imageHint": "cafe interior"
-    },
-    {
-      "id": "restaurant-3",
-      "description": "A street food vendor selling local delicacies.",
-      "imageUrl": "https://picsum.photos/seed/restaurant3/400/300",
-      "imageHint": "street food"
-    },
-    {
-      "id": "restaurant-4",
-      "description": "An upscale continental restaurant interior.",
-      "imageUrl": "https://picsum.photos/seed/restaurant4/400/300",
-      "imageHint": "restaurant interior"
-    },
-    {
-      "id": "food-1",
-      "description": "A delicious plate of Jollof rice with chicken.",
-      "imageUrl": "https://picsum.photos/seed/food1/200/200",
-      "imageHint": "jollof rice"
-    },
-    {
-      "id": "food-2",
-      "description": "A bowl of fufu and light soup.",
-      "imageUrl": "https://picsum.photos/seed/food2/200/200",
-      "imageHint": "fufu soup"
-    },
-    {
-      "id": "food-3",
-      "description": "Banku and Tilapia with hot pepper.",
-      "imageUrl": "https://picsum.photos/seed/food3/200/200",
-      "imageHint": "banku tilapia"
-    },
-    {
-      "id": "food-4",
-      "description": "Waakye served with shito, gari, and spaghetti.",
-      "imageUrl": "https://picsum.photos/seed/food4/200/200",
-      "imageHint": "waakye"
-    },
-    {
-      "id": "food-5",
-      "description": "A tall glass of iced coffee.",
-      "imageUrl": "https://picsum.photos/seed/food5/200/200",
-      "imageHint": "iced coffee"
-    },
-    {
-      "id": "food-6",
-      "description": "A golden-brown baked meat pie.",
-      "imageUrl": "https://picsum.photos/seed/food6/200/200",
-      "imageHint": "meat pie"
     },
     {
       "id": "marketplace-item-1",
       "description": "A traditional Kente cloth.",
-      "imageUrl": "https://picsum.photos/seed/item1/400/300",
+      "imageUrl": "https://images.unsplash.com/photo-1660695828374-4ff51ac9df5d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxrZW50ZSUyMGNsb3RofGVufDB8fHx8MTc1OTA5OTAwNnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "kente cloth"
     },
     {
       "id": "marketplace-item-2",
       "description": "Handmade leather sandals.",
-      "imageUrl": "https://picsum.photos/seed/item2/400/300",
+      "imageUrl": "https://images.unsplash.com/photo-1625318880107-49baad6765fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxsZWF0aGVyJTIwc2FuZGFsc3xlbnwwfHx8fDE3NTkxMDI3MTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "leather sandals"
     },
     {
       "id": "marketplace-item-3",
       "description": "A set of beaded jewelry.",
-      "imageUrl": "https://picsum.photos/seed/item3/400/300",
+      "imageUrl": "https://images.unsplash.com/photo-1742137189330-a7f45de85c4b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxiZWFkZWQlMjBqZXdlbHJ5fGVufDB8fHx8MTc1OTExMDE3OHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "beaded jewelry"
     },
     {
       "id": "marketplace-item-4",
       "description": "A carved wooden mask from Ghana.",
-      "imageUrl": "https://picsum.photos/seed/item4/400/300",
+      "imageUrl": "https://images.unsplash.com/photo-1719169395854-136cedc974d9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBtYXNrfGVufDB8fHx8MTc1OTExMDE3OHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "wooden mask"
     }
   ]

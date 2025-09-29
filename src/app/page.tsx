@@ -19,13 +19,6 @@ const features = [
     cta: 'Book Now',
   },
   {
-    title: 'Order Food',
-    description: 'Your favorite local dishes delivered to your doorstep.',
-    icon: UtensilsCrossed,
-    href: '/restaurants',
-    cta: 'Order Now',
-  },
-  {
     title: 'Shop Local',
     description: 'Discover and buy unique items from local sellers.',
     icon: Store,
@@ -57,7 +50,7 @@ export default function Home() {
             Your City, Connected.
           </h1>
           <p className="mt-4 max-w-2xl text-lg sm:text-xl">
-            Rides, deliveries, food, and local goods—all in one app. Akwaaba to Ghana Must Go.
+            Rides, deliveries, and local goods—all in one app. Akwaaba to Ghana Must Go.
           </p>
           <div className="mt-8 flex gap-4">
             <Link href={user ? "/book" : "/signup"}>
@@ -82,7 +75,7 @@ export default function Home() {
               From commuting to cravings, we've got you covered.
             </p>
           </div>
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-8 md:grid-cols-2">
             {features.map((feature) => (
               <Card key={feature.title} className="flex flex-col text-center items-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>

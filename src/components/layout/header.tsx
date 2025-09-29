@@ -20,13 +20,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const defaultNavItems = [
   { href: '/book', icon: Car, label: 'Book' },
-  { href: '/restaurants', icon: UtensilsCrossed, label: 'Food' },
   { href: '/marketplace', icon: Store, label: 'Market' },
 ];
 
 const partnerNavItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { href: '/restaurants', icon: UtensilsCrossed, label: 'Food' },
     { href: '/marketplace', icon: Store, label: 'Market' },
 ];
 
@@ -151,7 +149,7 @@ export default function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                       <AvatarImage src={`https://picsum.photos/seed/${user.email}/100/100`} alt={user.name} />
+                       <AvatarImage src={`https://picsum.photos/seed/${'user.email'}/100/100`} alt={user.name} />
                       <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                   </Button>
