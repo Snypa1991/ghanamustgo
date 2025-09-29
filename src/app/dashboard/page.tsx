@@ -3,8 +3,8 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-import { Power, Crosshair } from 'lucide-react';
+import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer, Circle } from '@react-google-maps/api';
+import { Power, Crosshair, Plus, Minus } from 'lucide-react';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -45,6 +45,7 @@ export default function DashboardPage() {
   const [isCompleting, setIsCompleting] = useState(false);
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const [historyKey, setHistoryKey] = useState(Date.now()); // Used to force re-render
+  const [radius, setRadius] = useState(2000); // 2km radius
 
   const requestIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const requestTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -333,6 +334,9 @@ export default function DashboardPage() {
   const directionsOrigin = tripStatus === 'enroute-to-pickup' ? currentPosition : currentRideRequest?.startLocation;
   const directionsDestination = tripStatus === 'enroute-to-pickup' ? currentRideRequest?.startLocation : currentRideRequest?.endLocation;
 
+  const changeRadius = (delta: number) => {
+    setRadius(prev => Math.max(500, prev + delta)); // Minimum radius 500m
+  }
 
   return (
     <div>
@@ -383,7 +387,20 @@ export default function DashboardPage() {
             )}
 
             {currentPosition && partnerIcon && (
-              <Marker position={currentPosition} icon={partnerIcon} />
+              <>
+                <Marker position={currentPosition} icon={partnerIcon} />
+                <Circle 
+                  center={currentPosition}
+                  radius={radius}
+                  options={{
+                    strokeColor: 'hsl(var(--primary))',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: 'hsl(var(--primary))',
+                    fillOpacity: 0.1,
+                  }}
+                />
+              </>
             )}
             
           </GoogleMap>
@@ -403,6 +420,20 @@ export default function DashboardPage() {
               <Power className="h-6 w-6 text-white" />
           </button>
         </div>
+
+        {isOnline && (
+           <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+            <div className="bg-background rounded-full shadow-lg flex items-center p-1">
+                <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => changeRadius(-500)}>
+                    <Minus className="h-4 w-4" />
+                </Button>
+                <span className="text-xs font-semibold tabular-nums w-12 text-center">{(radius/1000).toFixed(1)} km</span>
+                 <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => changeRadius(500)}>
+                    <Plus className="h-4 w-4" />
+                </Button>
+            </div>
+          </div>
+        )}
 
         {isLoaded && isOnline && userInteracted && (
             <div className="absolute bottom-4 right-4 z-10">
