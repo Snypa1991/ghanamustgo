@@ -19,7 +19,7 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
     {
         name: 'user',
         title: 'User',
-        description: 'Book rides, order food, and shop.',
+        description: 'Book rides and shop.',
         icon: User,
     },
     {
@@ -30,8 +30,8 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
     },
     {
         name: 'vendor',
-        title: 'Vendor',
-        description: 'Sell food or items on the marketplace.',
+        title: 'Vendor/Retailer',
+        description: 'Sell items on the marketplace.',
         icon: Store,
     }
 ];
@@ -51,14 +51,24 @@ export default function RoleSelectionPage() {
   const handleRoleSelection = () => {
     if (user) {
         // In a real app, this would be an API call to the backend.
-        const updatedUser: UserType = { ...user, role: selectedRole };
+        let roleToSet = selectedRole;
+        // The UI presents "driver" for both, but we need to know which one. For simulation, we can default to driver.
+        // A real app might have a second step to differentiate.
+        if (selectedRole === 'driver') {
+            // This is a simplification. A real app would need a clearer way
+            // to distinguish between biker and driver during role selection.
+            // For now, we can just default to 'driver' or add more logic.
+            // Let's assume the user can be a 'driver' and the system handles it.
+        }
+
+        const updatedUser: UserType = { ...user, role: roleToSet };
         updateUser(updatedUser);
         
-        if (selectedRole === 'user') {
+        if (roleToSet === 'user') {
           router.push('/book');
-        } else if (selectedRole === 'driver' || selectedRole === 'biker') {
+        } else if (roleToSet === 'driver' || roleToSet === 'biker') {
           router.push('/dashboard');
-        } else if (selectedRole === 'vendor') {
+        } else if (roleToSet === 'vendor') {
             router.push('/vendor/dashboard');
         } else {
           router.push('/profile');

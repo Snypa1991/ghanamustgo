@@ -43,6 +43,8 @@ export default function LoginPage() {
       router.push('/admin/dashboard');
     } else if (user.role === 'biker' || user.role === 'driver') {
       router.push('/dashboard');
+    } else if (user.role === 'vendor') {
+      router.push('/vendor/dashboard');
     } else {
       router.push('/book');
     }
@@ -142,10 +144,6 @@ export default function LoginPage() {
             <div className="text-center text-xs text-muted-foreground mb-2">Quick Logins</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
                 <Button variant="outline" size="sm" onClick={() => {
-                    form.setValue('email', 'new@example.com');
-                    form.setValue('password', 'password');
-                }}>New User</Button>
-                <Button variant="outline" size="sm" onClick={() => {
                     form.setValue('email', 'user@example.com');
                     form.setValue('password', 'password');
                 }}>User</Button>
@@ -165,6 +163,10 @@ export default function LoginPage() {
                     form.setValue('email', 'admin@example.com');
                     form.setValue('password', 'password');
                 }}>Admin</Button>
+                 <Button variant="outline" size="sm" onClick={() => {
+                    form.setValue('email', 'new@example.com');
+                    form.setValue('password', 'password');
+                }}>New User</Button>
             </div>
         </CardContent>
       </Card>
