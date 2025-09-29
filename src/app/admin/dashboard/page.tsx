@@ -20,22 +20,13 @@ export default function AdminDashboardPage() {
     }
   }, [user, loading, router]);
 
-  if (loading || !user) {
+  if (loading || !user || user.role !== 'admin') {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
-
-  if (user.role !== 'admin') {
-     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
-        <p>Access Denied. Redirecting...</p>
-      </div>
-    );
-  }
-
 
   return (
     <div className="container py-12">

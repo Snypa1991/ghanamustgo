@@ -348,7 +348,7 @@ export default function DashboardPage() {
   }, [user, isLoaded]);
   
 
-  if (loading || !user) {
+  if (loading || !user || (user.role !== 'biker' && user.role !== 'driver')) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
