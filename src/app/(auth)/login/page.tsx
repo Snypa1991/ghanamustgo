@@ -17,7 +17,16 @@ import { DUMMY_USERS, User } from '@/lib/dummy-data';
 import { useEffect, useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Users } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 const formSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -29,7 +38,7 @@ type LoginFormValues = z.infer<typeof formSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { user: loggedInUser, loading } = useAuth();
+  const { user: loggedInUser, loading, switchUserForTesting } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -64,8 +73,7 @@ export default function LoginPage() {
   async function onSubmit(values: LoginFormValues) {
     setIsSubmitting(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-      // The onAuthStateChanged listener in AppProvider will handle the rest.
+      await signInWithEmailAndPassword(auth, values.email, values.password);
       toast({
         title: 'Login Successful',
         description: `Akwaaba!`,
@@ -80,10 +88,18 @@ export default function LoginPage() {
     }
   }
   
+  const handleTestUserLogin = (testUser: User) => {
+    switchUserForTesting(testUser);
+    toast({
+      title: 'Switched User',
+      description: `Logged in as ${testUser.name} (${testUser.role})`,
+    });
+  };
+
   if (loading || loggedInUser) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
-            <p>Loading...</p>
+            <Loader2 className="h-10 w-10 animate-spin text-primary"/>
         </div>
     );
   }
@@ -133,6 +149,25 @@ export default function LoginPage() {
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
+              {process.env.NODE_ENV === 'development' && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-full">
+                        <Users className="mr-2 h-4 w-4" /> 
+                        Login as a Test User
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuLabel>Available Test Accounts</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {DUMMY_USERS.map((testUser) => (
+                        <DropdownMenuItem key={testUser.id} onClick={() => handleTestUserLogin(testUser)}>
+                          {testUser.name} ({testUser.role})
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+              )}
               <div className="text-center text-sm">
                 Don't have an account?{' '}
                 <Link href="/signup" className="underline text-primary hover:text-primary/80">
