@@ -6,6 +6,7 @@ import Footer from '@/components/layout/footer';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/context/app-context';
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: 'Ghana Must Go',
@@ -40,6 +41,7 @@ export default function RootLayout({
           <Toaster />
         </AppProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
