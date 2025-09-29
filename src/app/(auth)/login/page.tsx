@@ -52,23 +52,18 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
 ];
 
 export default function LoginPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const { loading, switchUserForTesting } = useAuth();
-  const [isSwitching, setIsSwitching] = useState(false);
 
   const handleTestUserLogin = async (testUser: UserType) => {
-    setIsSwitching(true);
     toast({
       title: 'Switching User...',
       description: `Logging in as ${testUser.name} (${testUser.role})`,
     });
     await switchUserForTesting(testUser);
-    // Let the context handle the redirect. If it fails, we stop loading.
-    setIsSwitching(false);
   };
 
-  if (loading || isSwitching) {
+  if (loading) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
             <Loader2 className="h-10 w-10 animate-spin text-primary"/>
@@ -77,7 +72,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen sm:min-h-[calc(100vh-10rem)] py-12 px-4">
+    <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
           <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />
@@ -93,6 +88,7 @@ export default function LoginPage() {
                     key={role.name}
                     onClick={() => handleTestUserLogin(role.user!)}
                     className="text-left border p-4 rounded-lg hover:bg-accent/50 hover:border-primary transition-all flex items-start space-x-4"
+                    disabled={loading}
                 >
                     <role.icon className="h-8 w-8 text-primary mt-1" />
                     <div>

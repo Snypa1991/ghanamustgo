@@ -55,14 +55,14 @@ function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const redirectToDashboard = (user: User) => {
-    if (user.role === 'unassigned') {
+  const redirectToDashboard = (targetUser: User) => {
+    if (targetUser.role === 'unassigned') {
       router.push('/role-selection');
-    } else if (user.role === 'admin') {
+    } else if (targetUser.role === 'admin') {
       router.push('/admin/dashboard');
-    } else if (user.role === 'biker' || user.role === 'driver') {
+    } else if (targetUser.role === 'biker' || targetUser.role === 'driver') {
       router.push('/dashboard');
-    } else if (user.role === 'vendor') {
+    } else if (targetUser.role === 'vendor') {
       router.push('/vendor/dashboard');
     } else {
       router.push('/book');
@@ -71,19 +71,27 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   const switchUserForTesting = async (newUser: User) => {
     setLoading(true);
-    await firebaseSignOut(auth);
+    // Sign out existing user if there is one
+    if (auth.currentUser) {
+        await firebaseSignOut(auth);
+    }
     
     const appUser = DUMMY_USERS.find(u => u.email === newUser.email);
+
     if (appUser && appUser.password) {
         try {
             await signInWithEmailAndPassword(auth, appUser.email, appUser.password);
-            // onAuthStateChanged will set the user. Now we can redirect.
+            // onAuthStateChanged will handle setting the user and loading state
+            // and redirecting. We can just redirect here after successful login.
+            setUser(appUser);
             redirectToDashboard(appUser);
+
         } catch (e) {
             console.error("Test user sign-in failed", e);
-            setLoading(false);
+            setLoading(false); // Stop loading on error
         }
     } else {
+        // This case handles users not in the dummy list or without passwords
         setUser(appUser || null);
         if (appUser) {
             redirectToDashboard(appUser);
