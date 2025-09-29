@@ -51,6 +51,18 @@ export default function DashboardPage() {
   const requestTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  
+  // Refs to hold the latest state values to be used inside intervals
+  const tripStatusRef = useRef(tripStatus);
+  const currentPositionRef = useRef(currentPosition);
+  const radiusRef = useRef(radius);
+
+  useEffect(() => {
+    tripStatusRef.current = tripStatus;
+    currentPositionRef.current = currentPosition;
+    radiusRef.current = radius;
+  });
+
 
   // Load online status from localStorage on initial render
   useEffect(() => {
@@ -87,57 +99,62 @@ export default function DashboardPage() {
 
   const startRequestSimulator = useCallback(() => {
     if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
-    requestIntervalRef.current = setInterval(() => {
-        if (tripStatus === 'none' && currentPosition && isLoaded) {
-            // Generate a random passenger
-            const passengers = DUMMY_USERS.filter(u => u.role === 'user' || u.role === 'unassigned');
-            const randomPassenger = passengers[Math.floor(Math.random() * passengers.length)];
-
-            // Generate a nearby pickup location within the radius
-            const angle = Math.random() * 2 * Math.PI;
-            const distance = Math.random() * radius; // distance in meters
-            const earthRadius = 6371000; // meters
-
-            const lat1 = currentPosition.lat * Math.PI / 180;
-            const lon1 = currentPosition.lng * Math.PI / 180;
-            
-            const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance / earthRadius) + Math.cos(lat1) * Math.sin(distance / earthRadius) * Math.cos(angle));
-            const lon2 = lon1 + Math.atan2(Math.sin(angle) * Math.sin(distance / earthRadius) * Math.cos(lat1), Math.cos(distance / earthRadius) - Math.sin(lat1) * Math.sin(lat2));
-
-            const pickupLat = lat2 * 180 / Math.PI;
-            const pickupLng = lon2 * 180 / Math.PI;
-
-
-            const geocoder = new window.google.maps.Geocoder();
-            geocoder.geocode({ location: { lat: pickupLat, lng: pickupLng } }, (results, status) => {
-                if (status === 'OK' && results && results[0]) {
-                    const pickupAddress = results[0].formatted_address;
-                    
-                    const newRide: Ride = {
-                        id: `ride-sim-${Date.now()}`,
-                        userId: randomPassenger.id,
-                        driverId: user!.id,
-                        startLocation: pickupAddress,
-                        endLocation: "Osu Oxford Street", // Hardcoded destination for simulation
-                        fare: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
-                        date: new Date().toISOString(),
-                        status: 'cancelled', // Initial status
-                    };
-
-                    setCurrentRideRequest(newRide);
-                    setTripStatus('requesting');
-
-                } else {
-                    toast({
-                        variant: 'destructive',
-                        title: 'Simulation Error',
-                        description: 'Could not generate a nearby ride request.',
-                    })
-                }
-            });
+    
+    const generateRequest = () => {
+        if (tripStatusRef.current !== 'none' || !currentPositionRef.current || !isLoaded || !user) {
+            return;
         }
-    }, 12000); // Check for a new ride every 12 seconds
-}, [tripStatus, currentPosition, user, isLoaded, toast, radius]);
+        
+        // Generate a random passenger
+        const passengers = DUMMY_USERS.filter(u => u.role === 'user' || u.role === 'unassigned');
+        const randomPassenger = passengers[Math.floor(Math.random() * passengers.length)];
+
+        // Generate a nearby pickup location within the radius
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * radiusRef.current; // distance in meters
+        const earthRadius = 6371000; // meters
+
+        const lat1 = currentPositionRef.current.lat * Math.PI / 180;
+        const lon1 = currentPositionRef.current.lng * Math.PI / 180;
+        
+        const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance / earthRadius) + Math.cos(lat1) * Math.sin(distance / earthRadius) * Math.cos(angle));
+        const lon2 = lon1 + Math.atan2(Math.sin(angle) * Math.sin(distance / earthRadius) * Math.cos(lat1), Math.cos(distance / earthRadius) - Math.sin(lat1) * Math.sin(lat2));
+
+        const pickupLat = lat2 * 180 / Math.PI;
+        const pickupLng = lon2 * 180 / Math.PI;
+
+
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ location: { lat: pickupLat, lng: pickupLng } }, (results, status) => {
+            if (status === 'OK' && results && results[0]) {
+                const pickupAddress = results[0].formatted_address;
+                
+                const newRide: Ride = {
+                    id: `ride-sim-${Date.now()}`,
+                    userId: randomPassenger.id,
+                    driverId: user!.id,
+                    startLocation: pickupAddress,
+                    endLocation: "Osu Oxford Street", // Hardcoded destination for simulation
+                    fare: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+                    date: new Date().toISOString(),
+                    status: 'cancelled', // Initial status
+                };
+
+                setCurrentRideRequest(newRide);
+                setTripStatus('requesting');
+
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Simulation Error',
+                    description: 'Could not generate a nearby ride request.',
+                })
+            }
+        });
+    };
+    
+    requestIntervalRef.current = setInterval(generateRequest, 12000); // Check for a new ride every 12 seconds
+}, [isLoaded, user, toast]);
 
 
     const stopRequestSimulator = () => {
@@ -186,9 +203,7 @@ export default function DashboardPage() {
     let watchId: number;
 
     if (isOnline) {
-      if (tripStatus === 'none') {
-        startRequestSimulator();
-      }
+      startRequestSimulator();
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -230,7 +245,7 @@ export default function DashboardPage() {
       stopRequestSimulator();
       if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
     };
-  }, [isOnline, userInteracted, startRequestSimulator, tripStatus]);
+  }, [isOnline, userInteracted, startRequestSimulator]);
 
     useEffect(() => {
         let tripTimer: NodeJS.Timeout | null = null;
@@ -249,12 +264,16 @@ export default function DashboardPage() {
                 handleDeclineRide();
             }, 10000); // 10-second timer for the request
         }
+        
+        if (tripStatus === 'none' && isOnline) {
+            startRequestSimulator();
+        }
 
         return () => {
             if (tripTimer) clearTimeout(tripTimer);
             if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
         };
-    }, [tripStatus, handleDeclineRide, handleCompleteRide]);
+    }, [tripStatus, handleDeclineRide, handleCompleteRide, isOnline, startRequestSimulator]);
 
 
   const handleToggleOnline = () => {
@@ -480,3 +499,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
