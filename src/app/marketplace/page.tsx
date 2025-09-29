@@ -1,10 +1,14 @@
 
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { Store, Tag, ShoppingCart } from 'lucide-react';
+import { Store, Tag, ShoppingCart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useState, useMemo } from 'react';
+import { Input } from '@/components/ui/input';
 
 const items = [
   { id: '1', name: 'Traditional Kente Cloth', price: '150.00', imageId: 'marketplace-item-1' },
@@ -14,25 +18,47 @@ const items = [
 ];
 
 export default function MarketplacePage() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery) {
+      return items;
+    }
+    return items.filter(item => 
+      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
   return (
     <div className="container py-12">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
         <div className="text-left">
           <Store className="h-12 w-12 text-primary" />
           <h1 className="mt-4 text-4xl font-bold font-headline">Marketplace</h1>
           <p className="mt-2 text-lg text-muted-foreground">Discover unique items from local artisans and sellers.</p>
         </div>
-        <Link href="/marketplace/list-item">
-            <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} className="w-full sm:w-auto">
-                <Tag className="mr-2 h-4 w-4" />
-                Sell Your Item
-            </Button>
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <div className="relative w-full sm:w-auto flex-grow">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input 
+                placeholder="Search items..." 
+                className="pl-10 w-full md:w-64 lg:w-80"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Link href="/marketplace/list-item">
+                <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} className="w-full sm:w-auto">
+                    <Tag className="mr-2 h-4 w-4" />
+                    Sell Your Item
+                </Button>
+            </Link>
+        </div>
       </div>
 
-      {items.length > 0 ? (
+      {filteredItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {items.map((item) => {
+          {filteredItems.map((item) => {
             const image = PlaceHolderImages.find(p => p.id === item.imageId);
             return (
               <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group flex flex-col">
@@ -66,8 +92,8 @@ export default function MarketplacePage() {
       ) : (
         <div className="text-center py-16 border-2 border-dashed rounded-lg">
             <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h2 className="mt-6 text-2xl font-semibold font-headline">Marketplace is Empty</h2>
-            <p className="mt-2 text-muted-foreground">No items have been listed for sale yet. Be the first to sell!</p>
+            <h2 className="mt-6 text-2xl font-semibold font-headline">No Items Found</h2>
+             <p className="mt-2 text-muted-foreground">Your search for "{searchQuery}" did not match any items.</p>
             <Link href="/marketplace/list-item" className="mt-6 inline-block">
                  <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                     <Tag className="mr-2 h-4 w-4" />
