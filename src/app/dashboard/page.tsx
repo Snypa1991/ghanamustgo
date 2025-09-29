@@ -93,10 +93,20 @@ export default function DashboardPage() {
             const passengers = DUMMY_USERS.filter(u => u.role === 'user' || u.role === 'unassigned');
             const randomPassenger = passengers[Math.floor(Math.random() * passengers.length)];
 
-            // Generate a nearby pickup location
-            const offset = 0.01; // Approx 1.1km
-            const pickupLat = currentPosition.lat + (Math.random() - 0.5) * offset;
-            const pickupLng = currentPosition.lng + (Math.random() - 0.5) * offset;
+            // Generate a nearby pickup location within the radius
+            const angle = Math.random() * 2 * Math.PI;
+            const distance = Math.random() * radius; // distance in meters
+            const earthRadius = 6371000; // meters
+
+            const lat1 = currentPosition.lat * Math.PI / 180;
+            const lon1 = currentPosition.lng * Math.PI / 180;
+            
+            const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance / earthRadius) + Math.cos(lat1) * Math.sin(distance / earthRadius) * Math.cos(angle));
+            const lon2 = lon1 + Math.atan2(Math.sin(angle) * Math.sin(distance / earthRadius) * Math.cos(lat1), Math.cos(distance / earthRadius) - Math.sin(lat1) * Math.sin(lat2));
+
+            const pickupLat = lat2 * 180 / Math.PI;
+            const pickupLng = lon2 * 180 / Math.PI;
+
 
             const geocoder = new window.google.maps.Geocoder();
             geocoder.geocode({ location: { lat: pickupLat, lng: pickupLng } }, (results, status) => {
@@ -127,7 +137,7 @@ export default function DashboardPage() {
             });
         }
     }, 12000); // Check for a new ride every 12 seconds
-}, [tripStatus, currentPosition, user, isLoaded, toast]);
+}, [tripStatus, currentPosition, user, isLoaded, toast, radius]);
 
 
     const stopRequestSimulator = () => {
@@ -470,7 +480,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
-
-    
