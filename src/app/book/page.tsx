@@ -112,7 +112,7 @@ export default function BookPage() {
   
   async function handleFindRide() {
     setIsLoading(true);
-    setError(null);
+    setAiError(null);
     setAiResult(null);
 
     // Get directions from Google Maps
@@ -123,7 +123,7 @@ export default function BookPage() {
     if (response.success && response.data) {
       setAiResult(response.data);
     } else {
-      setError(response.error || 'An unknown error occurred.');
+      setAiError(response.error || 'An unknown error occurred.');
     }
     
     setIsLoading(false);
