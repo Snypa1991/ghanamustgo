@@ -112,7 +112,7 @@ export default function BookPage() {
   
   async function handleFindRide() {
     setIsLoading(true);
-    setAiError(null);
+    setError(null);
     setAiResult(null);
 
     // Get directions from Google Maps
@@ -123,7 +123,7 @@ export default function BookPage() {
     if (response.success && response.data) {
       setAiResult(response.data);
     } else {
-      setAiError(response.error || 'An unknown error occurred.');
+      setError(response.error || 'An unknown error occurred.');
     }
     
     setIsLoading(false);
@@ -409,7 +409,7 @@ export default function BookPage() {
                               <RadioGroupItem value="okada" id="okada" className="sr-only" />
                           </Label>
                           <Label
-                              htmlFor="car"
+                              htmlFor="taxi"
                               className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                           >
                               <div className='flex items-center gap-4'>
@@ -420,7 +420,7 @@ export default function BookPage() {
                                   </div>
                               </div>
                               <p className="text-lg font-bold">GH₵{ridePrices.taxi.toFixed(2)}</p>
-                              <RadioGroupItem value="car" id="car" className="sr-only" />
+                              <RadioGroupItem value="taxi" id="taxi" className="sr-only" />
                           </Label>
                       </RadioGroup>
                   </CardContent>
