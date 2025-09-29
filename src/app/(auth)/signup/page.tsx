@@ -64,7 +64,6 @@ export default function SignupPage() {
 
   const { toast } = useToast();
   const router = useRouter();
-  const { updateUser } = useAuth();
   
   const selectedRoleInfo = roles.find(r => r.name === selectedRole);
 
@@ -83,15 +82,21 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       await updateProfile(userCredential.user, { displayName: values.name });
 
-      // Create a temporary app user profile.
-      // The role will be set to unassigned initially by the AppContext
-      // then the user will be redirected to the role selection page.
-      // Here, we just move to the next step of the UI flow.
+      // The role will be set to 'unassigned' by the AppContext
+      // The user will be redirected to the role selection page on first login.
       toast({
         title: 'Account Created',
         description: 'Please complete the verification step.',
       });
-      setStep(3);
+
+      // For this prototype, we'll decide where to go based on role.
+      // A real app would likely always go to verification.
+      if (selectedRole === 'user') {
+          setStep(4); // Skip verification for simple users
+      } else {
+          setStep(3); // Go to verification for partners/vendors
+      }
+
 
     } catch (error: any) {
       toast({
@@ -107,9 +112,6 @@ export default function SignupPage() {
   const handleVerification = () => {
     // In a real app, you would handle document submission here
     // and trigger a backend process.
-    
-    // We are skipping the real role update from here, as it's
-    // now handled on the role-selection page after first login.
     setStep(4);
   }
 
@@ -192,7 +194,7 @@ export default function SignupPage() {
                         <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
                         <CardTitle className="mt-4 font-headline text-2xl">Create Your Account</CardTitle>
                         <CardDescription>
-                            You are signing up for a <span className="font-bold text-primary">{selectedRoleInfo?.title}</span> account.
+                            You are signing up as a <span className="font-bold text-primary">{selectedRoleInfo?.title}</span>.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4">
@@ -245,9 +247,9 @@ export default function SignupPage() {
             <>
                 <CardHeader className="text-center">
                     <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
-                    <CardTitle className="mt-4 font-headline text-2xl">Account Verification</CardTitle>
+                    <CardTitle className="mt-4 font-headline text-2xl">Partner Verification</CardTitle>
                     <CardDescription>
-                        For security, we require all users to verify their identity.
+                        To ensure safety, partners must provide additional verification.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6">
@@ -306,14 +308,17 @@ export default function SignupPage() {
             <>
                 <CardHeader className="text-center">
                     <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
-                    <CardTitle className="mt-4 font-headline text-2xl">Verification Submitted</CardTitle>
+                    <CardTitle className="mt-4 font-headline text-2xl">Account Created!</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Alert>
                         <AlertTitle className="font-headline">What's Next?</AlertTitle>
                         <AlertDescription>
-                           <p>Your documents have been submitted for review. This process usually takes 24-48 hours.</p>
-                           <p className="mt-2">You will receive an email notification once your account is approved. You can now log in to your account.</p>
+                           <p>Your account is ready!</p>
+                           {selectedRole !== 'user' && (
+                               <p className="mt-2">Your verification documents have been submitted for review. This process usually takes 24-48 hours. You will receive an email notification once your account is approved.</p>
+                           )}
+                           <p className="mt-2">You can now proceed to login.</p>
                         </AlertDescription>
                     </Alert>
                 </CardContent>

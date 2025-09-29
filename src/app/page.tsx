@@ -68,7 +68,7 @@ export default function Home() {
                </Link>
             ) : (
               <>
-                 <Link href="/signup">
+                 <Link href="/login">
                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                       Get Started
                   </Button>
