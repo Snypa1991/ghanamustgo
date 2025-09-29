@@ -37,29 +37,33 @@ export default function RouteOptimization({
   
   const form = useForm<RouteOptimizationFormValues>({
     resolver: zodResolver(formSchema),
-    values: {
-      startLocation,
-      endLocation
-    }
+    defaultValues: {
+      startLocation: '',
+      endLocation: '',
+    },
   });
 
   const { watch, setValue } = form;
   const watchedStart = watch('startLocation');
   const watchedEnd = watch('endLocation');
 
+  // Update form fields when props change from the parent (e.g., after pinning on map)
   useEffect(() => {
     if (startLocation !== form.getValues('startLocation')) {
-      form.setValue('startLocation', startLocation);
+      setValue('startLocation', startLocation);
     }
     if (endLocation !== form.getValues('endLocation')) {
-      form.setValue('endLocation', endLocation);
+      setValue('endLocation', endLocation);
     }
-  }, [startLocation, endLocation, form]);
+  }, [startLocation, endLocation, setValue, form]);
 
-
+  // Notify parent component when form fields change due to user typing
   useEffect(() => {
-    onRouteUpdate(watchedStart, watchedEnd);
-  }, [watchedStart, watchedEnd, onRouteUpdate]);
+    const subscription = watch((value) => {
+      onRouteUpdate(value.startLocation || '', value.endLocation || '');
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, onRouteUpdate]);
 
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
@@ -136,6 +140,3 @@ export default function RouteOptimization({
     </div>
   );
 }
-
-
-    

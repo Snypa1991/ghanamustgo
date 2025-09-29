@@ -6,8 +6,6 @@ import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRendere
 import { Car, Loader2, Navigation, Bot } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import { MopedIcon } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/app-context';
@@ -217,17 +215,15 @@ export default function BookPage() {
   }, [user, isLoaded]);
 
   const endMarkerIcon = useMemo(() => {
-    if (isLoaded) {
-      return {
-        path: window.google.maps.SymbolPath.CIRCLE,
-        scale: 10,
-        fillColor: "hsl(var(--primary))",
-        fillOpacity: 1,
-        strokeWeight: 3,
-        strokeColor: "white",
-      }
-    }
-    return undefined;
+    if (!isLoaded) return undefined;
+    return {
+      path: window.google.maps.SymbolPath.CIRCLE,
+      scale: 10,
+      fillColor: "hsl(var(--primary))",
+      fillOpacity: 1,
+      strokeWeight: 3,
+      strokeColor: "white",
+    };
   }, [isLoaded]);
   
   const driverMarkerIcon = useMemo(() => {
@@ -436,7 +432,3 @@ export default function BookPage() {
     </div>
   );
 }
-
-    
-
-    
