@@ -1,7 +1,7 @@
 
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User, DUMMY_USERS } from '@/lib/dummy-data';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, User as FirebaseUser } from 'firebase/auth';
@@ -14,6 +14,7 @@ interface AppContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateUser: (user: User) => void;
+  redirectToDashboard: (targetUser: User) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -23,7 +24,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const redirectToDashboard = (targetUser: User) => {
+  const redirectToDashboard = useCallback((targetUser: User) => {
     if (targetUser.role === 'unassigned') {
       router.push('/role-selection');
     } else if (targetUser.role === 'admin') {
@@ -35,20 +36,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } else {
       router.push('/book');
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
         // Find the full user profile from our dummy data
-        const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email) || {
-             id: firebaseUser.uid,
-             name: firebaseUser.displayName || 'New User',
-             email: firebaseUser.email!,
-             role: 'unassigned'
-        };
-        setUser(appUser);
+        const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
+        if (appUser) {
+            setUser(appUser);
+        } else {
+            // This handles newly created users who are not in the dummy list
+            const newUser: User = {
+                id: firebaseUser.uid,
+                name: firebaseUser.displayName || 'New User',
+                email: firebaseUser.email!,
+                role: 'unassigned' // Default role for new signups
+            };
+            setUser(newUser);
+        }
       } else {
         setUser(null);
       }
@@ -63,18 +70,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
-       const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email) || {
-             id: firebaseUser.uid,
-             name: firebaseUser.displayName || 'New User',
-             email: firebaseUser.email!,
-             role: 'unassigned'
-        };
+       const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
+       
+       if (!appUser) {
+           throw new Error("User profile not found in the application.");
+       }
+
       setUser(appUser);
       redirectToDashboard(appUser);
       return { success: true };
     } catch (error: any) {
       console.error("Login failed:", error);
-      return { success: false, error: error.message };
+      let errorMessage = "An unknown error occurred.";
+      if (error.code) {
+        switch (error.code) {
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
+            case 'auth/invalid-credential':
+                errorMessage = 'Invalid email or password. Please try again.';
+                break;
+            default:
+                errorMessage = error.message;
+        }
+      } else if (error.message) {
+          errorMessage = error.message;
+      }
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -92,7 +113,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ user, loading, login, logout, updateUser }}>
+    <AppContext.Provider value={{ user, loading, login, logout, updateUser, redirectToDashboard }}>
       {children}
     </AppContext.Provider>
   );

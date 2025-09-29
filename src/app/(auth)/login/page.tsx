@@ -27,25 +27,15 @@ type LoginFormValues = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const { user, login, loading } = useAuth();
+  const { user, login, loading, redirectToDashboard } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
-       if (user.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else if (user.role === 'biker' || user.role === 'driver') {
-        router.push('/dashboard');
-      } else if (user.role === 'vendor') {
-        router.push('/vendor/dashboard');
-      } else if (user.role === 'user') {
-        router.push('/book');
-      } else if (user.role === 'unassigned') {
-        router.push('/role-selection');
-      }
+       redirectToDashboard(user);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, redirectToDashboard]);
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
