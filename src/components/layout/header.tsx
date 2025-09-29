@@ -55,6 +55,11 @@ export default function Header() {
                   Dashboard
                 </Link>
             )}
+            {user?.role === 'vendor' && (
+                <Link href="/vendor/dashboard" className="transition-colors hover:text-primary text-accent font-bold">
+                  Dashboard
+                </Link>
+            )}
           </nav>
         </div>
 
@@ -90,6 +95,14 @@ export default function Header() {
                         </Link>
                       </li>
                     ))}
+                     {user?.role === 'vendor' && (
+                       <li>
+                         <Link href="/vendor/dashboard" className="flex items-center space-x-3 text-lg font-medium text-foreground/80 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                           <LayoutDashboard className="h-5 w-5" />
+                           <span>Vendor Dashboard</span>
+                         </Link>
+                       </li>
+                    )}
                   </ul>
                 </nav>
                 <div className="p-4 mt-auto border-t">
@@ -161,6 +174,11 @@ export default function Header() {
                    {isPartner && (
                      <DropdownMenuItem asChild>
                         <Link href="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Link>
+                    </DropdownMenuItem>
+                   )}
+                   {user.role === 'vendor' && (
+                     <DropdownMenuItem asChild>
+                        <Link href="/vendor/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" />Vendor Dashboard</Link>
                     </DropdownMenuItem>
                    )}
                   <DropdownMenuItem asChild>

@@ -58,6 +58,8 @@ export default function RoleSelectionPage() {
           router.push('/book');
         } else if (selectedRole === 'driver' || selectedRole === 'biker') {
           router.push('/dashboard');
+        } else if (selectedRole === 'vendor') {
+            router.push('/vendor/dashboard');
         } else {
           router.push('/profile');
         }
