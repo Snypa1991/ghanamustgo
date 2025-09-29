@@ -23,18 +23,16 @@ type RouteOptimizationFormValues = z.infer<typeof formSchema>;
 
 interface RouteOptimizationProps {
   onRouteUpdate?: (startLocation: string, endLocation: string) => void;
+  onSubmit: (values: RouteOptimizationFormValues) => void;
+  isLoading: boolean;
 }
 
-export default function RouteOptimization({ onRouteUpdate }: RouteOptimizationProps) {
-  const [result, setResult] = useState<OptimizeRouteWithAIOutput | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
+export default function RouteOptimization({ onRouteUpdate, onSubmit, isLoading }: RouteOptimizationProps) {
   const form = useForm<RouteOptimizationFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      startLocation: '',
-      endLocation: '',
+      startLocation: 'East Legon, American House',
+      endLocation: 'Osu Oxford Street',
     },
   });
 
@@ -49,24 +47,11 @@ export default function RouteOptimization({ onRouteUpdate }: RouteOptimizationPr
   }, [startLocation, endLocation, onRouteUpdate]);
 
 
-  async function onSubmit(values: RouteOptimizationFormValues) {
-    setIsLoading(true);
-    setError(null);
-    setResult(null);
-    const response = await getOptimizedRoute(values);
-    if (response.success && response.data) {
-      setResult(response.data);
-    } else {
-      setError(response.error || 'An unknown error occurred.');
-    }
-    setIsLoading(false);
-  }
-
   return (
     <div className="w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4 !p-0">
+          <div className="space-y-4">
              <div className="grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
@@ -107,65 +92,15 @@ export default function RouteOptimization({ onRouteUpdate }: RouteOptimizationPr
                 )}
               />
             </div>
-          </CardContent>
-          <CardFooter className="mt-4 !p-0">
-            <Button type="submit" disabled={isLoading} className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+          </div>
+          <div className="mt-4">
+            <Button type="submit" disabled={isLoading} className="w-full h-11" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
-              Find Ride & Optimize
+              Find Ride
             </Button>
-          </CardFooter>
+          </div>
         </form>
       </Form>
-
-      {isLoading && (
-         <div className="p-6 pt-4">
-             <div className="flex items-center justify-center rounded-md border border-dashed p-8">
-                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                 <p className="ml-4 text-muted-foreground">AI is optimizing...</p>
-             </div>
-         </div>
-      )}
-
-      {error && (
-        <div className="p-6 pt-4">
-            <Alert variant="destructive">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-        </div>
-      )}
-      
-      {result && (
-        <div className="p-6 pt-4 space-y-4">
-            <Alert className="bg-primary/5">
-              <Map className="h-5 w-5 text-primary" />
-              <AlertTitle className="font-headline text-primary">Optimized Route</AlertTitle>
-              <AlertDescription>{result.optimizedRoute}</AlertDescription>
-            </Alert>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Travel Time</CardTitle>
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{result.estimatedTravelTime}</div>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Fuel Savings</CardTitle>
-                        <Fuel className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{result.fuelSavingsEstimate}</div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
-      )}
     </div>
   );
 }
-
-    

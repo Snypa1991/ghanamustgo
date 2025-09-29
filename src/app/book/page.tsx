@@ -1,24 +1,21 @@
 
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-import { Car, MapPin, Loader2, Navigation, Bot } from 'lucide-react';
+import { Car, Loader2, Navigation, Bot } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { MopedIcon } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/app-context';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { getOptimizedRoute } from '@/app/actions';
 import type { OptimizeRouteWithAIOutput } from '@/ai/flows/optimize-route-with-ai';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import RouteOptimization from '@/components/route-optimization';
+
 
 const containerStyle = {
   width: '100%',
@@ -30,14 +27,6 @@ const center = {
   lat: 5.6037,
   lng: -0.1870
 };
-
-const formSchema = z.object({
-  startLocation: z.string().min(1, 'Start location is required'),
-  endLocation: z.string().min(1, 'End location is required'),
-});
-
-type RouteOptimizationFormValues = z.infer<typeof formSchema>;
-
 
 export default function BookPage() {
   const { isLoaded, loadError } = useJsApiLoader({
@@ -53,20 +42,11 @@ export default function BookPage() {
   const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [startLocation, setStartLocation] = useState('East Legon, American House');
+  const [endLocation, setEndLocation] = useState('Osu Oxford Street');
+
 
   const mapRef = useRef<google.maps.Map | null>(null);
-
-  const form = useForm<RouteOptimizationFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      startLocation: 'East Legon, American House',
-      endLocation: 'Osu Oxford Street',
-    },
-  });
-
-  const { watch } = form;
-  const startLocation = watch('startLocation');
-  const endLocation = watch('endLocation');
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -94,7 +74,7 @@ export default function BookPage() {
     }
   };
   
-  async function onSubmit(values: RouteOptimizationFormValues) {
+  async function handleFindRide() {
     setIsLoading(true);
     setAiError(null);
     setAiResult(null);
@@ -103,7 +83,7 @@ export default function BookPage() {
     setDirections(null); // Reset directions to trigger DirectionsService
     
     // Get AI optimization
-    const response = await getOptimizedRoute(values);
+    const response = await getOptimizedRoute({startLocation, endLocation});
     if (response.success && response.data) {
       setAiResult(response.data);
     } else {
@@ -114,9 +94,14 @@ export default function BookPage() {
     setStep('selection');
   }
 
+  const handleRouteUpdate = (start: string, end: string) => {
+    if (start !== startLocation) setStartLocation(start);
+    if (end !== endLocation) setEndLocation(end);
+  }
+
   const shouldRenderDirectionsService = useMemo(() => {
-    return isLoaded && startLocation && endLocation;
-  }, [isLoaded, startLocation, endLocation]);
+    return isLoaded && startLocation && endLocation && step === 'details';
+  }, [isLoaded, startLocation, endLocation, step]);
   
   const startMarkerIcon = useMemo(() => {
     if (user && isLoaded) {
@@ -158,6 +143,14 @@ export default function BookPage() {
   if (loadError) {
     return <div>Error loading maps. Please check your API key.</div>;
   }
+  
+  // Set directions when step changes back to details
+   useEffect(() => {
+    if (step === 'details') {
+      setDirections(null);
+    }
+  }, [step]);
+
 
   return (
     <div className="relative h-[calc(100vh-4rem)] w-full">
@@ -175,7 +168,7 @@ export default function BookPage() {
           onLoad={onMapLoad}
           onUnmount={onUnmount}
         >
-          {shouldRenderDirectionsService && !directions && (
+          {shouldRenderDirectionsService && (
             <DirectionsService
               options={{
                 destination: endLocation,
@@ -226,50 +219,9 @@ export default function BookPage() {
                 <CardTitle className="font-headline text-2xl">Where to?</CardTitle>
                 <CardDescription>Enter your pickup and drop-off locations.</CardDescription>
               </CardHeader>
-               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <CardContent className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="startLocation"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Pickup Location</FormLabel>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <FormControl>
-                                      <Input placeholder="e.g., Accra Mall" {...field} className="pl-9" />
-                                    </FormControl>
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="endLocation"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Drop-off Location</FormLabel>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <FormControl>
-                                      <Input placeholder="e.g., Labadi Beach" {...field} className="pl-9" />
-                                    </FormControl>
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                    </CardContent>
-                    <CardFooter>
-                        <Button type="submit" disabled={isLoading} className="w-full h-11" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
-                            Find Ride
-                        </Button>
-                    </CardFooter>
-                </form>
-              </Form>
+               <CardContent>
+                    <RouteOptimization onRouteUpdate={handleRouteUpdate} onSubmit={handleFindRide} isLoading={isLoading}/>
+               </CardContent>
             </>
           )}
 
