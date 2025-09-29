@@ -8,6 +8,8 @@ import { DUMMY_USERS, User as UserType } from '@/lib/dummy-data';
 import { Loader2, User, Car, Store, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 type Role = 'user' | 'biker' | 'driver' | 'vendor' | 'admin';
 
@@ -51,18 +53,35 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const { loading, switchUserForTesting } = useAuth();
+  const { user, loading, switchUserForTesting } = useAuth();
+  const router = useRouter();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (!loading && user) {
+       if (user.role === 'admin') {
+        router.push('/admin/dashboard');
+      } else if (user.role === 'biker' || user.role === 'driver') {
+        router.push('/dashboard');
+      } else if (user.role === 'vendor') {
+        router.push('/vendor/dashboard');
+      } else if (user.role === 'user') {
+        router.push('/book');
+      } else if (user.role === 'unassigned') {
+        router.push('/role-selection');
+      }
+    }
+  }, [user, loading, router]);
   
   const handleTestUserLogin = async (testUser: UserType) => {
     toast({
       title: 'Switching User...',
       description: `Logging in as ${testUser.name} (${testUser.role})`,
     });
-    // The switchUserForTesting function now handles redirection.
     await switchUserForTesting(testUser);
   };
 
-  if (loading) {
+  if (loading || user) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
             <Loader2 className="h-10 w-10 animate-spin text-primary"/>

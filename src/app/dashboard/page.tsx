@@ -30,6 +30,7 @@ export type TripStatus = 'none' | 'requesting' | 'enroute-to-pickup' | 'enroute-
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
+  const router = useRouter();
   const { toast } = useToast();
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -50,6 +51,12 @@ export default function DashboardPage() {
   const requestTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const mapRef = useRef<google.maps.Map | null>(null);
+
+  useEffect(() => {
+    if (!loading && (!user || (user.role !== 'biker' && user.role !== 'driver'))) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
   
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -350,7 +357,11 @@ export default function DashboardPage() {
   }
 
   if (user.role !== 'biker' && user.role !== 'driver') {
-    return <div className="flex items-center justify-center min-h-screen">Access Denied. Redirecting...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+        <p>Access Denied. Redirecting...</p>
+      </div>
+    );
   }
 
   const shouldRenderDirections = isLoaded && currentRideRequest && currentPosition && (tripStatus === 'enroute-to-pickup' || tripStatus === 'enroute-to-destination');

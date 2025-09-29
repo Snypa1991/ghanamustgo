@@ -6,9 +6,19 @@ import { Store, Package, LineChart, Tag, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function VendorDashboardPage() {
   const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && (!user || user.role !== 'vendor')) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
 
   if (loading || !user) {
     return (

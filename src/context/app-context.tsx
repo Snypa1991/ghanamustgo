@@ -27,6 +27,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
+        // Find the user in our dummy data, or create a temporary 'unassigned' user
         const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email) || {
              id: firebaseUser.uid,
              name: firebaseUser.displayName || 'New User',
@@ -34,7 +35,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
              role: 'unassigned'
         };
         setUser(appUser);
-        redirectToDashboard(appUser);
       } else {
         setUser(null);
       }
@@ -42,14 +42,12 @@ function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   const logout = async () => {
-    setLoading(true);
     await firebaseSignOut(auth);
     setUser(null);
     router.push('/login');
-    setLoading(false);
   };
   
   const redirectToDashboard = (targetUser: User) => {
@@ -69,28 +67,22 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const switchUserForTesting = async (newUser: User) => {
     setLoading(true);
     try {
-      if (auth.currentUser?.email !== newUser.email) {
-          await firebaseSignOut(auth);
-          if (newUser.password) {
-            // onAuthStateChanged will handle setting the user and redirecting.
-            await signInWithEmailAndPassword(auth, newUser.email, newUser.password);
-          } else {
-             throw new Error("Dummy user password not set.");
-          }
-      } else {
-        // If already logged in as this user, just ensure redirection happens.
-        const finalUser = DUMMY_USERS.find(u => u.email === newUser.email)!;
-        setUser(finalUser);
-        redirectToDashboard(finalUser);
-        setLoading(false);
-      }
-      
+        await firebaseSignOut(auth);
+        if (newUser.password) {
+          const userCredential = await signInWithEmailAndPassword(auth, newUser.email, newUser.password);
+          const finalUser = DUMMY_USERS.find(u => u.email === userCredential.user.email)!;
+          setUser(finalUser);
+          redirectToDashboard(finalUser);
+        } else {
+           throw new Error("Dummy user password not set.");
+        }
     } catch (e) {
       console.error("Test user sign-in failed", e);
-      await firebaseSignOut(auth);
+      await firebaseSignOut(auth); // Ensure we are logged out on failure
       setUser(null);
       router.push('/login');
-      setLoading(false);
+    } finally {
+        setLoading(false);
     }
   };
   

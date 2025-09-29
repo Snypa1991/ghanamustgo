@@ -7,9 +7,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ListingFeeSuggestion from '@/components/listing-fee-suggestion';
 import AdminRouteOptimization from '@/components/admin-route-optimization';
 import ReviewSummarizer from '@/components/review-summarizer';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AdminDashboardPage() {
   const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && (!user || user.role !== 'admin')) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
 
   if (loading || !user) {
     return (

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +41,12 @@ export default function RoleSelectionPage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<Role>('user');
 
+  useEffect(() => {
+    if (!loading && user && user.role !== 'unassigned') {
+        router.push('/login');
+    }
+  }, [user, loading, router]);
+
   const handleRoleSelection = () => {
     if (user) {
         // This is a simplification. A real app would need a clearer way
@@ -70,14 +76,13 @@ export default function RoleSelectionPage() {
     );
   }
 
-  if (user.role !== 'unassigned') {
+   if (user.role !== 'unassigned') {
      return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
             <p>Redirecting...</p>
         </div>
     );
   }
-
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
