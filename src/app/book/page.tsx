@@ -17,8 +17,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import RouteOptimization from '@/components/route-optimization';
 import { DUMMY_RIDES, DUMMY_USERS, Ride, User } from '@/lib/dummy-data';
 import TripStatusCard from '@/components/trip-status-card';
+import { useToast } from '@/hooks/use-toast';
 
 type BookingStep = 'details' | 'selection' | 'confirming' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
+type PinningLocation = 'start' | 'end' | null;
+
 
 const containerStyle = {
   width: '100%',
@@ -34,9 +37,11 @@ const center = {
 export default function BookPage() {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    libraries: ['places']
   });
   const { user } = useAuth();
+  const { toast } = useToast();
   
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const [step, setStep] = useState<BookingStep>('details');
@@ -51,6 +56,8 @@ export default function BookPage() {
 
   const [assignedDriver, setAssignedDriver] = useState<User | null>(null);
   const [currentRide, setCurrentRide] = useState<Ride | null>(null);
+  
+  const [pinningLocation, setPinningLocation] = useState<PinningLocation>(null);
 
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -61,6 +68,29 @@ export default function BookPage() {
   const onUnmount = useCallback(() => {
     mapRef.current = null;
   }, []);
+
+  const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+    if (!pinningLocation || !e.latLng) return;
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: e.latLng }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+            const address = results[0].formatted_address;
+            if (pinningLocation === 'start') {
+                setStartLocation(address);
+            } else {
+                setEndLocation(address);
+            }
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'Could not get address',
+                description: 'Failed to reverse geocode the selected location.'
+            })
+        }
+        setPinningLocation(null); // Exit pinning mode
+    });
+  }, [pinningLocation, toast]);
 
   const directionsCallback = (
     response: google.maps.DirectionsResult | null,
@@ -164,7 +194,7 @@ export default function BookPage() {
   }, [isLoaded, startLocation, endLocation, step]);
   
   const startMarkerIcon = useMemo(() => {
-    if (!user || !isLoaded) return;
+    if (!user || !isLoaded) return undefined;
       const imageUrl = `https://picsum.photos/seed/${user.email}/40/40`;
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
@@ -229,6 +259,22 @@ export default function BookPage() {
       setDirections(null);
     }
   }, [step]);
+  
+  useEffect(() => {
+    if (pinningLocation) {
+        toast({
+            title: 'Select a location',
+            description: `Click on the map to set your ${pinningLocation} point.`,
+        });
+        if (mapRef.current) {
+            mapRef.current.setOptions({ draggableCursor: 'crosshair' });
+        }
+    } else {
+        if (mapRef.current) {
+            mapRef.current.setOptions({ draggableCursor: undefined });
+        }
+    }
+  }, [pinningLocation, toast]);
 
   const isTripInProgress = step === 'confirming' || step === 'enroute-to-pickup' || step === 'enroute-to-destination' || step === 'completed';
 
@@ -247,6 +293,7 @@ export default function BookPage() {
           }}
           onLoad={onMapLoad}
           onUnmount={onUnmount}
+          onClick={onMapClick}
         >
           {shouldRenderDirectionsService && (
             <DirectionsService
@@ -315,7 +362,14 @@ export default function BookPage() {
                   <CardDescription>Enter your pickup and drop-off locations.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                      <RouteOptimization onRouteUpdate={handleRouteUpdate} onSubmit={handleFindRide} isLoading={isLoading}/>
+                    <RouteOptimization 
+                        startLocation={startLocation}
+                        endLocation={endLocation}
+                        onRouteUpdate={handleRouteUpdate} 
+                        onPinLocation={setPinningLocation}
+                        onSubmit={handleFindRide} 
+                        isLoading={isLoading}
+                    />
                 </CardContent>
               </>
             )}

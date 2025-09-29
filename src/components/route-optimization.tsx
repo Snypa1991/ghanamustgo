@@ -1,18 +1,14 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Map, Clock, Fuel, Loader2, Navigation, MapPin } from 'lucide-react';
+import { Loader2, Navigation, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { getOptimizedRoute } from '@/app/actions';
-import type { OptimizeRouteWithAIOutput } from '@/ai/flows/optimize-route-with-ai';
 
 const formSchema = z.object({
   startLocation: z.string().min(1, 'Start location is required'),
@@ -22,29 +18,55 @@ const formSchema = z.object({
 type RouteOptimizationFormValues = z.infer<typeof formSchema>;
 
 interface RouteOptimizationProps {
-  onRouteUpdate?: (startLocation: string, endLocation: string) => void;
+  startLocation: string;
+  endLocation: string;
+  onRouteUpdate: (startLocation: string, endLocation: string) => void;
+  onPinLocation: (locationType: 'start' | 'end') => void;
   onSubmit: (values: RouteOptimizationFormValues) => void;
   isLoading: boolean;
 }
 
-export default function RouteOptimization({ onRouteUpdate, onSubmit, isLoading }: RouteOptimizationProps) {
+export default function RouteOptimization({ 
+    startLocation,
+    endLocation,
+    onRouteUpdate, 
+    onPinLocation,
+    onSubmit, 
+    isLoading 
+}: RouteOptimizationProps) {
+  
   const form = useForm<RouteOptimizationFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      startLocation: 'East Legon, American House',
-      endLocation: 'Osu Oxford Street',
-    },
+    values: {
+      startLocation,
+      endLocation
+    }
   });
 
-  const { watch } = form;
-  const startLocation = watch('startLocation');
-  const endLocation = watch('endLocation');
+  const { watch, setValue } = form;
+  const watchedStart = watch('startLocation');
+  const watchedEnd = watch('endLocation');
 
   useEffect(() => {
-    if (onRouteUpdate) {
-        onRouteUpdate(startLocation, endLocation);
+    onRouteUpdate(watchedStart, watchedEnd);
+  }, [watchedStart, watchedEnd, onRouteUpdate]);
+
+  const handleGetCurrentLocation = () => {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                // In a real app, you'd use a geocoding service to convert coords to address
+                setValue('startLocation', `Current Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
+            },
+            () => {
+                alert('Could not get current location. Please enable location services.');
+            }
+        );
+    } else {
+        alert('Geolocation is not supported by this browser.');
     }
-  }, [startLocation, endLocation, onRouteUpdate]);
+  };
 
 
   return (
@@ -64,7 +86,7 @@ export default function RouteOptimization({ onRouteUpdate, onSubmit, isLoading }
                         <FormControl>
                           <Input placeholder="e.g., Accra Mall" {...field} className="pl-9" />
                         </FormControl>
-                        <Button variant="ghost" size="sm" type="button" onClick={() => form.setValue('startLocation', 'East Legon, American House')} className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-xs px-2">
+                        <Button variant="ghost" size="sm" type="button" onClick={handleGetCurrentLocation} className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-xs px-2">
                              Use Current
                         </Button>
                     </div>
@@ -83,7 +105,7 @@ export default function RouteOptimization({ onRouteUpdate, onSubmit, isLoading }
                         <FormControl>
                           <Input placeholder="e.g., Labadi Beach" {...field} className="pl-9" />
                         </FormControl>
-                         <Button variant="ghost" size="sm" type="button" onClick={() => form.setValue('endLocation', 'Osu Oxford Street')} className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-xs px-2">
+                         <Button variant="ghost" size="sm" type="button" onClick={() => onPinLocation('end')} className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-xs px-2">
                              Pin on map
                         </Button>
                     </div>
