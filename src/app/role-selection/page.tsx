@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/app-context';
 import { User as UserType } from '@/lib/dummy-data';
 
-type Role = 'user' | 'biker' | 'vendor' | 'driver';
+type Role = 'user' | 'driver' | 'vendor';
 
 const roles: {name: Role, title: string, description: string, icon: React.ElementType}[] = [
     {
@@ -58,20 +58,16 @@ export default function RoleSelectionPage() {
   const handleRoleSelection = () => {
     if (user) {
         // In a real app, this would be an API call to the backend to update user role in Firestore.
-        let roleToSet = selectedRole;
-        
         // This is a simplification. A real app would need a clearer way
         // to distinguish between biker and driver during role selection.
-        if (selectedRole === 'driver') {
-           roleToSet = 'driver'; // Defaulting to driver for now
-        }
-
+        const roleToSet = selectedRole;
+        
         const updatedUser: UserType = { ...user, role: roleToSet };
         updateUser(updatedUser);
         
         if (roleToSet === 'user') {
           router.push('/book');
-        } else if (roleToSet === 'driver' || roleToSet === 'biker') {
+        } else if (roleToSet === 'driver') { // This covers biker too for now
           router.push('/dashboard');
         } else if (roleToSet === 'vendor') {
             router.push('/vendor/dashboard');

@@ -4,7 +4,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, DUMMY_USERS } from '@/lib/dummy-data';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, User as FirebaseUser } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 
@@ -26,6 +26,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
+        // If there's an active Firebase user, find their corresponding app user data
         const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email) || {
              id: firebaseUser.uid,
              name: firebaseUser.displayName || 'New User',
@@ -34,6 +35,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
         };
         setUser(appUser);
       } else {
+        // If no Firebase user, clear the app user state
         setUser(null);
       }
       setLoading(false);
@@ -44,17 +46,12 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     setLoading(true);
-    try {
-      await firebaseSignOut(auth);
-      setUser(null);
-      router.push('/login');
-    } catch (error) { 
-      console.error("Firebase logout error:", error);
-    } finally {
-      setLoading(false);
-    }
+    await firebaseSignOut(auth);
+    // onAuthStateChanged will handle setting user to null
+    router.push('/login');
+    setLoading(false);
   };
-
+  
   const redirectToDashboard = (targetUser: User) => {
     if (targetUser.role === 'unassigned') {
       router.push('/role-selection');
@@ -71,39 +68,36 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   const switchUserForTesting = async (newUser: User) => {
     setLoading(true);
-    // Sign out existing user if there is one
-    if (auth.currentUser) {
+    try {
+      // Sign out any previous user to ensure a clean state
+      if (auth.currentUser) {
         await firebaseSignOut(auth);
-    }
-    
-    const appUser = DUMMY_USERS.find(u => u.email === newUser.email);
+      }
+      
+      const appUser = DUMMY_USERS.find(u => u.email === newUser.email);
 
-    if (appUser && appUser.password) {
-        try {
-            await signInWithEmailAndPassword(auth, appUser.email, appUser.password);
-            // onAuthStateChanged will handle setting the user and loading state
-            // and redirecting. We can just redirect here after successful login.
-            setUser(appUser);
-            redirectToDashboard(appUser);
-
-        } catch (e) {
-            console.error("Test user sign-in failed", e);
-            setLoading(false); // Stop loading on error
-        }
-    } else {
-        // This case handles users not in the dummy list or without passwords
-        setUser(appUser || null);
-        if (appUser) {
-            redirectToDashboard(appUser);
-        }
-        setLoading(false);
+      if (appUser && appUser.password) {
+          const userCredential = await signInWithEmailAndPassword(auth, appUser.email, appUser.password);
+          if (userCredential.user) {
+              // The onAuthStateChanged listener will fire and set the user state.
+              // We can then redirect.
+              redirectToDashboard(appUser);
+          }
+      } else {
+        throw new Error("Dummy user not found or password not set.");
+      }
+    } catch (e) {
+      console.error("Test user sign-in failed", e);
+      setLoading(false); // Stop loading on error
     }
+    // setLoading(false) will be handled by the onAuthStateChanged listener
   };
   
   const updateUser = (updatedUser: User) => {
+    // This is for client-side role updates for newly signed up users
+    // In a real app, this might trigger a backend update.
     setUser(updatedUser);
   }
-
 
   return (
     <AppContext.Provider value={{ user, logout, loading, switchUserForTesting, updateUser }}>
