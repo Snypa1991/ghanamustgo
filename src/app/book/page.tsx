@@ -45,8 +45,6 @@ export default function BookPage() {
   const [step, setStep] = useState<BookingStep>('details');
   const [ridePrices, setRidePrices] = useState({ okada: 0, taxi: 0 });
 
-  const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
-  const [aiError, setAiError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
@@ -109,19 +107,9 @@ export default function BookPage() {
   
   async function handleFindRide() {
     setIsLoading(true);
-    setAiError(null);
-    setAiResult(null);
 
     // Get directions from Google Maps
     setDirections(null); // Reset directions to trigger DirectionsService
-    
-    // Get AI optimization
-    const response = await getOptimizedRoute({startLocation, endLocation});
-    if (response.success && response.data) {
-      setAiResult(response.data);
-    } else {
-      setAiError(response.error || 'An unknown error occurred.');
-    }
     
     setIsLoading(false);
     setStep('selection');
@@ -292,7 +280,7 @@ export default function BookPage() {
           onUnmount={onUnmount}
           onClick={onMapClick}
         >
-          {shouldRenderDirectionsService && (
+          {shouldRenderDirectionsService && !directions && (
             <DirectionsService
               options={{
                 destination: endLocation,
@@ -379,14 +367,6 @@ export default function BookPage() {
                   </CardHeader>
 
                   <CardContent className="space-y-4">
-                      {aiResult && (
-                        <Alert className="mb-4 bg-primary/5">
-                            <Bot className="h-5 w-5 text-primary" />
-                            <AlertTitle className="text-sm font-headline text-primary">Smart Route Suggestion</AlertTitle>
-                            <AlertDescription className="text-xs">{aiResult.optimizedRoute} (Est: {aiResult.estimatedTravelTime})</AlertDescription>
-                          </Alert>
-                      )}
-                      
                         <Button
                             variant="outline"
                             className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50"
@@ -420,8 +400,6 @@ export default function BookPage() {
                   <CardFooter className="flex-col gap-3 pt-4">
                       <Button variant="link" onClick={() => {
                         setStep('details');
-                        setAiResult(null);
-                        setAiError(null);
                       }}>Back</Button>
                   </CardFooter>
               </>
