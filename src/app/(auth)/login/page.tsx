@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { GhanaMustGoIcon, MopedIcon } from '@/components/icons';
@@ -54,37 +54,21 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { user: loggedInUser, loading, switchUserForTesting } = useAuth();
+  const { loading, switchUserForTesting } = useAuth();
+  const [isSwitching, setIsSwitching] = useState(false);
 
-  const redirectToDashboard = (user: UserType) => {
-    if (user.role === 'unassigned') {
-      router.push('/role-selection');
-    } else if (user.role === 'admin') {
-      router.push('/admin/dashboard');
-    } else if (user.role === 'biker' || user.role === 'driver') {
-      router.push('/dashboard');
-    } else if (user.role === 'vendor') {
-      router.push('/vendor/dashboard');
-    } else {
-      router.push('/book');
-    }
-  };
-
-  useEffect(() => {
-    if (!loading && loggedInUser) {
-      redirectToDashboard(loggedInUser);
-    }
-  }, [loggedInUser, loading, router]);
-
-  const handleTestUserLogin = (testUser: UserType) => {
-    switchUserForTesting(testUser);
+  const handleTestUserLogin = async (testUser: UserType) => {
+    setIsSwitching(true);
     toast({
       title: 'Switching User...',
       description: `Logging in as ${testUser.name} (${testUser.role})`,
     });
+    await switchUserForTesting(testUser);
+    // Let the context handle the redirect. If it fails, we stop loading.
+    setIsSwitching(false);
   };
 
-  if (loading || loggedInUser) {
+  if (loading || isSwitching) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
             <Loader2 className="h-10 w-10 animate-spin text-primary"/>

@@ -5,31 +5,32 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { User, DUMMY_USERS } from '@/lib/dummy-data';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+
 
 interface AppContextType {
   user: User | null;
   updateUser: (user: User) => void;
   logout: () => void;
   loading: boolean;
-  switchUserForTesting: (user: User) => void;
+  switchUserForTesting: (user: User) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export function AppProvider({ children }: { children: ReactNode }) {
+function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        // Find the user from our dummy data based on email
-        // If display name is available on firebase user, we can use that too
         const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email) || {
              id: firebaseUser.uid,
              name: firebaseUser.displayName || 'New User',
              email: firebaseUser.email!,
-             role: 'unassigned' // Default role for new signups
+             role: 'unassigned'
         };
         setUser(appUser);
       } else {
@@ -46,8 +47,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       await firebaseSignOut(auth);
       setUser(null);
-       // Navigate to login page after logout
-      window.location.href = '/login';
+      router.push('/login');
     } catch (error) { 
       console.error("Firebase logout error:", error);
     } finally {
@@ -55,28 +55,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const switchUserForTesting = (newUser: User) => {
+  const redirectToDashboard = (user: User) => {
+    if (user.role === 'unassigned') {
+      router.push('/role-selection');
+    } else if (user.role === 'admin') {
+      router.push('/admin/dashboard');
+    } else if (user.role === 'biker' || user.role === 'driver') {
+      router.push('/dashboard');
+    } else if (user.role === 'vendor') {
+      router.push('/vendor/dashboard');
+    } else {
+      router.push('/book');
+    }
+  };
+
+  const switchUserForTesting = async (newUser: User) => {
     setLoading(true);
-    // Sign out current user silently
-    firebaseSignOut(auth).finally(() => {
-        const appUser = DUMMY_USERS.find(u => u.email === newUser.email);
-        if (appUser && appUser.password) {
-            signInWithEmailAndPassword(auth, appUser.email, appUser.password)
-                .catch(e => {
-                    console.error("Test user sign-in failed", e);
-                    setLoading(false);
-                });
-        } else {
-            // If user has no password (e.g. new signup), just set them locally
-            setUser(appUser || null);
+    await firebaseSignOut(auth);
+    
+    const appUser = DUMMY_USERS.find(u => u.email === newUser.email);
+    if (appUser && appUser.password) {
+        try {
+            await signInWithEmailAndPassword(auth, appUser.email, appUser.password);
+            // onAuthStateChanged will set the user. Now we can redirect.
+            redirectToDashboard(appUser);
+        } catch (e) {
+            console.error("Test user sign-in failed", e);
             setLoading(false);
         }
-    });
+    } else {
+        setUser(appUser || null);
+        if (appUser) {
+            redirectToDashboard(appUser);
+        }
+        setLoading(false);
+    }
   };
   
   const updateUser = (updatedUser: User) => {
-    // This function is used to update user details locally, e.g., after role selection.
-    // In a real app, this would also write to a Firestore 'users' collection.
     setUser(updatedUser);
   }
 
@@ -86,6 +102,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       {children}
     </AppContext.Provider>
   );
+}
+
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  return <AuthProvider>{children}</AuthProvider>
 }
 
 export function useAuth() {
