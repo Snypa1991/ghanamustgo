@@ -25,6 +25,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setLoading(true);
       if (firebaseUser) {
         const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email) || {
              id: firebaseUser.uid,
@@ -33,6 +34,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
              role: 'unassigned'
         };
         setUser(appUser);
+        redirectToDashboard(appUser);
       } else {
         setUser(null);
       }
@@ -40,12 +42,14 @@ function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const logout = async () => {
+    setLoading(true);
     await firebaseSignOut(auth);
-    setUser(null); // Explicitly set user to null
+    setUser(null);
     router.push('/login');
+    setLoading(false);
   };
   
   const redirectToDashboard = (targetUser: User) => {
@@ -68,27 +72,25 @@ function AuthProvider({ children }: { children: ReactNode }) {
       if (auth.currentUser?.email !== newUser.email) {
           await firebaseSignOut(auth);
           if (newUser.password) {
+            // onAuthStateChanged will handle setting the user and redirecting.
             await signInWithEmailAndPassword(auth, newUser.email, newUser.password);
-            // onAuthStateChanged will handle setting the user, so we don't setUser here.
           } else {
              throw new Error("Dummy user password not set.");
           }
+      } else {
+        // If already logged in as this user, just ensure redirection happens.
+        const finalUser = DUMMY_USERS.find(u => u.email === newUser.email)!;
+        setUser(finalUser);
+        redirectToDashboard(finalUser);
+        setLoading(false);
       }
-      // Regardless of sign-in, we know the user and can redirect
-      // This is safe because onAuthStateChanged will have already fired if there was a change.
-      const finalUser = DUMMY_USERS.find(u => u.email === newUser.email)!;
-      setUser(finalUser);
-      redirectToDashboard(finalUser);
       
     } catch (e) {
       console.error("Test user sign-in failed", e);
-      // Ensure loading is turned off and we are back at the login page.
       await firebaseSignOut(auth);
       setUser(null);
       router.push('/login');
-    } finally {
-        // Set loading to false after a brief delay to allow state to propagate
-        setTimeout(() => setLoading(false), 100);
+      setLoading(false);
     }
   };
   

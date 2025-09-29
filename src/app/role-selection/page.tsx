@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,18 +41,6 @@ export default function RoleSelectionPage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<Role>('user');
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-    if (!loading && user && user.role !== 'unassigned') {
-        if (user.role === 'admin') router.push('/admin/dashboard');
-        else if (user.role === 'biker' || user.role === 'driver') router.push('/dashboard');
-        else if (user.role === 'vendor') router.push('/vendor/dashboard');
-        else router.push('/book');
-    }
-  }, [user, loading, router]);
-
   const handleRoleSelection = () => {
     if (user) {
         // This is a simplification. A real app would need a clearer way
@@ -74,13 +62,22 @@ export default function RoleSelectionPage() {
     }
   };
 
-  if (loading || !user || user.role !== 'unassigned') {
+  if (loading || !user) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     );
   }
+
+  if (user.role !== 'unassigned') {
+     return (
+        <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+            <p>Redirecting...</p>
+        </div>
+    );
+  }
+
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">

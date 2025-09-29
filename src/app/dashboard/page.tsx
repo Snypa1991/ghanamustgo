@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer, Circle } from '@react-google-maps/api';
-import { Power, Crosshair, Plus, Minus } from 'lucide-react';
+import { Power, Crosshair, Plus, Minus, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -29,8 +29,7 @@ export type TripStatus = 'none' | 'requesting' | 'enroute-to-pickup' | 'enroute-
 
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -167,13 +166,6 @@ export default function DashboardPage() {
       setTripStatus('none');
   }, []);
 
-
-  useEffect(() => {
-    if (!user || (user.role !== 'biker' && user.role !== 'driver')) {
-      router.push('/login');
-    }
-  }, [user, router]);
-  
   const tripStatusRef = useRef(tripStatus);
   const currentPositionRef = useRef(currentPosition);
   const radiusRef = useRef(radius);
@@ -349,8 +341,16 @@ export default function DashboardPage() {
   }, [user, isLoaded]);
   
 
-  if (!user || (user.role !== 'biker' && user.role !== 'driver')) {
-    return <div className="flex items-center justify-center min-h-screen">Redirecting...</div>;
+  if (loading || !user) {
+    return (
+        <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
+  }
+
+  if (user.role !== 'biker' && user.role !== 'driver') {
+    return <div className="flex items-center justify-center min-h-screen">Access Denied. Redirecting...</div>;
   }
 
   const shouldRenderDirections = isLoaded && currentRideRequest && currentPosition && (tripStatus === 'enroute-to-pickup' || tripStatus === 'enroute-to-destination');

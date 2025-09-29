@@ -1,31 +1,31 @@
 
 "use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/app-context';
-import { Store, Package, LineChart, Tag } from 'lucide-react';
+import { Store, Package, LineChart, Tag, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function VendorDashboardPage() {
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!user || user.role !== 'vendor') {
-      router.push('/login');
-    }
-  }, [user, router]);
-
-  if (!user || user.role !== 'vendor') {
+  if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
-        <p>Redirecting...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
+
+  if (user.role !== 'vendor') {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+        <p>Access Denied. Redirecting...</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="container py-12">

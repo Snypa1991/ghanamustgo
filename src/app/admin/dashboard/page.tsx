@@ -1,32 +1,32 @@
 
 "use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/app-context';
-import { Shield, Bot, Package, Star } from 'lucide-react';
+import { Shield, Bot, Package, Star, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ListingFeeSuggestion from '@/components/listing-fee-suggestion';
 import AdminRouteOptimization from '@/components/admin-route-optimization';
 import ReviewSummarizer from '@/components/review-summarizer';
 
 export default function AdminDashboardPage() {
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!user || user.role !== 'admin') {
-      router.push('/login');
-    }
-  }, [user, router]);
-
-  if (!user || user.role !== 'admin') {
+  if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
-        <p>Redirecting...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
+
+  if (user.role !== 'admin') {
+     return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+        <p>Access Denied. Redirecting...</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="container py-12">
