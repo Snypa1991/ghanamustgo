@@ -46,7 +46,6 @@ export default function BookPage() {
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const [step, setStep] = useState<BookingStep>('details');
   const [ridePrices, setRidePrices] = useState({ okada: 0, taxi: 0 });
-  const [selectedRideType, setSelectedRideType] = useState<'okada' | 'taxi'>('okada');
 
   const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -130,11 +129,11 @@ export default function BookPage() {
     setStep('selection');
   }
 
-  const handleBookRide = () => {
+  const handleBookRide = (rideType: 'okada' | 'taxi') => {
     if (!user) return;
     setStep('confirming');
 
-    const driverRole = selectedRideType === 'okada' ? 'biker' : 'driver';
+    const driverRole = rideType === 'okada' ? 'biker' : 'driver';
     const availableDrivers = DUMMY_USERS.filter(u => u.role === driverRole);
     const driver = availableDrivers[Math.floor(Math.random() * availableDrivers.length)];
     
@@ -144,7 +143,7 @@ export default function BookPage() {
       driverId: driver.id,
       startLocation,
       endLocation,
-      fare: selectedRideType === 'okada' ? ridePrices.okada : ridePrices.taxi,
+      fare: rideType === 'okada' ? ridePrices.okada : ridePrices.taxi,
       date: new Date().toISOString(),
       status: 'cancelled', // Will be updated to completed later
     };
@@ -181,6 +180,7 @@ export default function BookPage() {
       timer = setTimeout(() => handleCompleteRide(), 15000); // 15s to destination
     }
     return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
 
@@ -381,7 +381,7 @@ export default function BookPage() {
                       <CardDescription className="text-center">Select a vehicle that suits your needs.</CardDescription>
                   </CardHeader>
 
-                  <CardContent>
+                  <CardContent className="space-y-4">
                       {aiResult && (
                         <Alert className="mb-4 bg-primary/5">
                             <Bot className="h-5 w-5 text-primary" />
@@ -389,43 +389,38 @@ export default function BookPage() {
                             <AlertDescription className="text-xs">{aiResult.optimizedRoute} (Est: {aiResult.estimatedTravelTime})</AlertDescription>
                           </Alert>
                       )}
-                      <RadioGroup 
-                        defaultValue="okada" 
-                        className="grid grid-cols-1 gap-4"
-                        onValueChange={(value: 'okada' | 'taxi') => setSelectedRideType(value)}
-                      >
-                          <Label
-                              htmlFor="okada"
-                              className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                          >
-                              <div className='flex items-center gap-4'>
-                                  <MopedIcon className="h-10 w-10 text-primary" />
-                                  <div>
-                                  <p className="font-bold text-lg">Okada</p>
-                                  <p className="text-sm text-muted-foreground">Quick & affordable</p>
-                                  </div>
-                              </div>
-                              <p className="text-lg font-bold">GH₵{ridePrices.okada.toFixed(2)}</p>
-                              <RadioGroupItem value="okada" id="okada" className="sr-only" />
-                          </Label>
-                          <Label
-                              htmlFor="taxi"
-                              className="flex items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                          >
-                              <div className='flex items-center gap-4'>
-                                  <Car className="h-10 w-10 text-primary" />
-                                  <div>
-                                  <p className="font-bold text-lg">Taxi</p>
-                                  <p className="text-sm text-muted-foreground">Comfortable & private</p>
-                                  </div>
-                              </div>
-                              <p className="text-lg font-bold">GH₵{ridePrices.taxi.toFixed(2)}</p>
-                              <RadioGroupItem value="taxi" id="taxi" className="sr-only" />
-                          </Label>
-                      </RadioGroup>
+                      
+                        <Button
+                            variant="outline"
+                            className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50"
+                            onClick={() => handleBookRide('okada')}
+                        >
+                            <div className='flex items-center gap-4 text-left'>
+                                <MopedIcon className="h-10 w-10 text-primary" />
+                                <div>
+                                <p className="font-bold text-lg">Book Okada</p>
+                                <p className="text-sm text-muted-foreground">Quick & affordable</p>
+                                </div>
+                            </div>
+                            <p className="text-lg font-bold">GH₵{ridePrices.okada.toFixed(2)}</p>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50"
+                            onClick={() => handleBookRide('taxi')}
+                        >
+                            <div className='flex items-center gap-4 text-left'>
+                                <Car className="h-10 w-10 text-primary" />
+                                <div>
+                                <p className="font-bold text-lg">Book Taxi</p>
+                                <p className="text-sm text-muted-foreground">Comfortable & private</p>
+                                </div>
+                            </div>
+                            <p className="text-lg font-bold">GH₵{ridePrices.taxi.toFixed(2)}</p>
+                        </Button>
+
                   </CardContent>
-                  <CardFooter className="flex-col gap-3">
-                      <Button size="lg" className="w-full h-12 text-lg" onClick={handleBookRide}>Book Ride</Button>
+                  <CardFooter className="flex-col gap-3 pt-4">
                       <Button variant="link" onClick={() => setStep('details')}>Back</Button>
                   </CardFooter>
               </>
@@ -436,3 +431,5 @@ export default function BookPage() {
     </div>
   );
 }
+
+    
