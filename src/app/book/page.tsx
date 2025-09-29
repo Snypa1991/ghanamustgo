@@ -48,6 +48,9 @@ export default function BookPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
+  
+  const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const [assignedDriver, setAssignedDriver] = useState<User | null>(null);
   const [currentRide, setCurrentRide] = useState<Ride | null>(null);
@@ -107,9 +110,23 @@ export default function BookPage() {
   
   async function handleFindRide() {
     setIsLoading(true);
+    setAiError(null);
+    setAiResult(null);
 
     // Get directions from Google Maps
     setDirections(null); // Reset directions to trigger DirectionsService
+
+    // Get AI-optimized route
+    const response = await getOptimizedRoute({
+      startLocation: startLocation,
+      endLocation: endLocation,
+    });
+
+    if (response.success && response.data) {
+      setAiResult(response.data);
+    } else {
+      setAiError(response.error); // We might not show this, but it's good to have.
+    }
     
     setIsLoading(false);
     setStep('selection');
@@ -157,6 +174,8 @@ export default function BookPage() {
     setAssignedDriver(null);
     setStartLocation('');
     setEndLocation('');
+    setAiResult(null);
+    setAiError(null);
   }
 
 
@@ -364,6 +383,13 @@ export default function BookPage() {
                   <CardHeader>
                       <CardTitle className="text-2xl font-bold font-headline text-center">Choose a ride</CardTitle>
                       <CardDescription className="text-center">Select a vehicle that suits your needs.</CardDescription>
+                       {aiResult && (
+                        <Alert className="text-center text-sm bg-primary/5 border-primary/20 mt-2">
+                            <Bot className="h-4 w-4" />
+                            <AlertTitle className="font-semibold">Smart Route Suggestion</AlertTitle>
+                            <AlertDescription>{aiResult.optimizedRoute}</AlertDescription>
+                        </Alert>
+                      )}
                   </CardHeader>
 
                   <CardContent className="space-y-4">
