@@ -56,18 +56,16 @@ export default function LoginPage() {
   const handleEmailCheck = async ({ email }: { email: string }) => {
     setIsSubmitting(true);
     
-    const isDummyUser = DUMMY_USERS.some(u => u.email === email && u.password);
+    const dummyUser = DUMMY_USERS.find(u => u.email === email && u.password);
 
-    if (isDummyUser) {
-        // Automatically log in dummy user
-        const result = await login(email, DUMMY_USERS.find(u => u.email === email)!.password!);
+    if (dummyUser) {
+        const result = await login(email, dummyUser.password!);
         if (result.success) {
             toast({ title: 'Login Successful', description: 'Welcome back!' });
         } else {
              toast({ variant: 'destructive', title: 'Login Failed', description: result.error });
         }
     } else {
-        // Proceed to password step for regular users
         setSubmittedEmail(email);
         setStep(2);
     }
@@ -135,7 +133,17 @@ export default function LoginPage() {
                         <>
                             <FormItem>
                                 <FormLabel>Email</FormLabel>
-                                <Input value={submittedEmail} readOnly disabled />
+                                <FormControl>
+                                  <Input 
+                                      value={submittedEmail} 
+                                      readOnly 
+                                      disabled 
+                                      onChange={(e) => {
+                                        setSubmittedEmail(e.target.value);
+                                        form.setValue('email', e.target.value);
+                                      }}
+                                  />
+                                </FormControl>
                             </FormItem>
                              <FormField
                                 control={form.control}

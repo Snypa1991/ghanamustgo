@@ -4,7 +4,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User, DUMMY_USERS } from '@/lib/dummy-data';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, User as FirebaseUser } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 
@@ -24,8 +24,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const redirectToDashboard = useCallback((targetUser: User) => {
-    if (!targetUser) return;
+  const redirectToDashboard = useCallback((targetUser: User | null) => {
+    if (!targetUser) {
+        router.push('/login');
+        return;
+    };
+    
     if (targetUser.role === 'unassigned') {
       router.push('/role-selection');
     } else if (targetUser.role === 'admin') {
@@ -43,19 +47,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
-        // Find the full user profile from our dummy data
         const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
         if (appUser) {
             setUser(appUser);
         } else {
-            // This handles newly created users who are not in the dummy list
             const newUser: User = {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'New User',
                 email: firebaseUser.email!,
-                role: 'unassigned' // Default role for new signups
+                role: 'unassigned'
             };
-            // Add to dummy users for this session to ensure consistency
             if (!DUMMY_USERS.some(u => u.id === newUser.id)) {
                 DUMMY_USERS.push(newUser); 
             }
@@ -74,12 +75,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-       // onAuthStateChanged will handle setting the user and redirecting
       const appUser = DUMMY_USERS.find(u => u.email === userCredential.user.email);
       if (appUser) {
+        setUser(appUser); // Manually set user to trigger useEffects faster
         redirectToDashboard(appUser);
+        return { success: true };
       }
-      return { success: true };
+      // This case should ideally not be hit if onAuthStateChanged works as expected
+      return { success: false, error: 'User profile not found.' };
     } catch (error: any) {
       console.error("Login failed:", error);
       let errorMessage = "An unknown error occurred.";
@@ -93,13 +96,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             default:
                 errorMessage = error.message;
         }
-      } else if (error.message) {
-          errorMessage = error.message;
       }
-       setLoading(false);
+      setLoading(false);
       return { success: false, error: errorMessage };
-    } 
-    // No finally block needed as success path is handled by onAuthStateChanged
+    }
   };
 
   const logout = async () => {
@@ -109,7 +109,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
   
   const updateUser = (updatedUser: User) => {
-    // This is for client-side role updates for newly signed-up users
     setUser(updatedUser);
     const userIndex = DUMMY_USERS.findIndex(u => u.id === updatedUser.id);
     if (userIndex !== -1) {
