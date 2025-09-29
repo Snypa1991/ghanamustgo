@@ -22,6 +22,7 @@ import { Separator } from '../ui/separator';
 
 const defaultNavItems = [
   { href: '/book', icon: Car, label: 'Book' },
+  { href: '/dispatch', icon: Package, label: 'Dispatch' },
   { href: '/marketplace', icon: Store, label: 'Market' },
 ];
 
@@ -40,7 +41,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <div className="md:hidden">
+        <div className="mr-4 flex md:hidden">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -48,20 +49,19 @@ export default function Header() {
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0">
-               <SheetHeader className="p-4 border-b">
-                  <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-                    <GhanaMustGoIcon className="h-12 w-auto text-primary" />
-                  </Link>
-                </SheetHeader>
+            <SheetContent side="left">
+              <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
+                <GhanaMustGoIcon className="h-12 w-auto text-primary" />
+              </Link>
+              <Separator className="my-4" />
               <div className="flex flex-col h-full">
-                <nav className="flex-grow p-4">
-                  <ul className="space-y-4">
+                <nav className="flex-grow">
+                  <ul className="space-y-2">
                     {navItems.map((item) => (
                       <li key={item.label}>
                         <Link 
                           href={item.href} 
-                          className="flex items-center space-x-3 text-lg font-medium text-foreground/80 hover:text-primary"
+                          className="flex items-center space-x-3 text-lg font-medium text-foreground/80 hover:text-primary p-2 rounded-md"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <item.icon className="h-5 w-5" />
@@ -71,7 +71,7 @@ export default function Header() {
                     ))}
                      {user?.role === 'vendor' && (
                        <li>
-                         <Link href="/vendor/dashboard" className="flex items-center space-x-3 text-lg font-medium text-accent hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                         <Link href="/vendor/dashboard" className="flex items-center space-x-3 text-lg font-medium text-accent hover:text-primary p-2 rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
                            <LayoutDashboard className="h-5 w-5" />
                            <span>Vendor Dashboard</span>
                          </Link>
@@ -79,7 +79,7 @@ export default function Header() {
                     )}
                      {user?.role === 'admin' && (
                        <li>
-                         <Link href="/admin/dashboard" className="flex items-center space-x-3 text-lg font-medium text-accent hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                         <Link href="/admin/dashboard" className="flex items-center space-x-3 text-lg font-medium text-accent hover:text-primary p-2 rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
                            <Shield className="h-5 w-5" />
                            <span>Admin Dashboard</span>
                          </Link>
@@ -87,7 +87,8 @@ export default function Header() {
                     )}
                   </ul>
                 </nav>
-                <div className="p-4 mt-auto border-t">
+                <div className="mt-auto">
+                  <Separator className="my-4" />
                   {user ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

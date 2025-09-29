@@ -12,11 +12,18 @@ import { useAuth } from '@/context/app-context';
 
 const features = [
   {
-    title: 'Book a Ride or Dispatch',
-    description: 'Fast, reliable rides and deliveries to get you where you need to be.',
+    title: 'Book a Ride',
+    description: 'Fast and reliable rides to get you where you need to be.',
     icon: Car,
     href: '/book',
     cta: 'Book Now',
+  },
+  {
+    title: 'Send a Package',
+    description: 'Affordable and secure on-demand dispatch services.',
+    icon: Package,
+    href: '/dispatch',
+    cta: 'Dispatch Now',
   },
   {
     title: 'Shop Local',
@@ -85,7 +92,7 @@ export default function Home() {
               From commuting to cravings, we've got you covered.
             </p>
           </div>
-          <div className="mt-12 grid gap-8 md:grid-cols-2">
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
             {features.map((feature) => (
               <Card key={feature.title} className="flex flex-col text-center items-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>

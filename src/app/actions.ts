@@ -1,9 +1,11 @@
+
 "use server";
 
 import { optimizeRouteWithAI, OptimizeRouteWithAIInput } from '@/ai/flows/optimize-route-with-ai';
 import { suggestListingFee, SuggestListingFeeInput } from '@/ai/flows/suggest-listing-fee';
 import { summarizeReviews, SummarizeReviewsInput } from '@/ai/flows/summarize-reviews';
 import { checkImageQuality, CheckImageQualityInput } from '@/ai/flows/check-image-quality';
+import { suggestDeliveryFee, SuggestDeliveryFeeInput } from '@/ai/flows/suggest-delivery-fee';
 
 export async function getOptimizedRoute(input: OptimizeRouteWithAIInput) {
   try {
@@ -42,5 +44,15 @@ export async function checkImage(input: CheckImageQualityInput) {
   } catch (error) {
     console.error(error);
     return { success: false, error: "Failed to check image quality." };
+  }
+}
+
+export async function getSuggestedDeliveryFee(input: SuggestDeliveryFeeInput) {
+  try {
+    const result = await suggestDeliveryFee(input);
+    return { success: true, data: result };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Failed to suggest a delivery fee." };
   }
 }
