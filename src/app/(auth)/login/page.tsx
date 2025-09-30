@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -49,10 +49,19 @@ export default function LoginPage() {
   const handleLogin = (role: User['role']) => {
     const userToLogin = DUMMY_USERS.find(user => user.role === role);
     if (userToLogin) {
-        switchUserForTesting(userToLogin);
-        toast({
-            title: 'Logged In',
-            description: `You are now logged in as ${userToLogin.name} (${userToLogin.role}).`,
+        switchUserForTesting(userToLogin.role).then(result => {
+            if (result.success) {
+                toast({
+                    title: 'Logged In',
+                    description: `You are now logged in as ${userToLogin.name} (${userToLogin.role}).`,
+                });
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Login Failed',
+                    description: result.error || `Failed to log in as ${role}`
+                });
+            }
         });
     } else {
         toast({
@@ -89,7 +98,7 @@ export default function LoginPage() {
                     <Button 
                         key={role} 
                         onClick={() => handleLogin(role)} 
-                        variant="outline" 
+                        variant="secondary" 
                         className="h-24 flex flex-col gap-2 items-center justify-center"
                     >
                         {roleIcons[role]}
