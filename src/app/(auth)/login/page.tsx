@@ -119,7 +119,7 @@ export default function LoginPage() {
                             </Link>
                         </p>
                         <p>
-                             <Link href="/(auth)/test-login" className="text-muted-foreground underline text-xs flex items-center justify-center gap-1">
+                             <Link href="/test-login" className="text-muted-foreground underline text-xs flex items-center justify-center gap-1">
                                 <TestTube className="h-3 w-3" /> Quick Test Login
                             </Link>
                         </p>
