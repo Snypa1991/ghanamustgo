@@ -1,4 +1,3 @@
-
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -120,17 +119,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const switchUserForTesting = async (role: User['role']) => {
     setLoading(true);
     const testUser = DUMMY_USERS.find(u => u.role === role);
-    if (!testUser) {
-      setLoading(false);
-      return { success: false, error: 'Test user for this role not found.' };
+    if (!testUser || !testUser.email || !testUser.password) {
+        setLoading(false);
+        return { success: false, error: "Test user not found or missing credentials." };
     }
-    
-    // Bypass Firebase for test users and set them directly
-    setUser(testUser);
-    redirectToDashboard(testUser);
-    setLoading(false);
-    return { success: true };
-  };
+
+    try {
+        await signInWithEmailAndPassword(auth, testUser.email, testUser.password);
+        // onAuthStateChanged will manage the user state and redirection will be handled
+        // by the effect hook on the login page.
+        return { success: true };
+    } catch (error: any) {
+        console.error("Test user login failed:", error);
+        // If the test user doesn't exist in Firebase, create it.
+        if (error.code === 'auth/user-not-found') {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, testUser.email, testUser.password);
+                await updateProfile(userCredential.user, { displayName: testUser.name });
+                return { success: true };
+            } catch (creationError: any) {
+                console.error("Test user creation failed:", creationError);
+                 setLoading(false);
+                return { success: false, error: creationError.message };
+            }
+        } else {
+            setLoading(false);
+            return { success: false, error: error.message };
+        }
+    }
+};
 
   const logout = async () => {
     await firebaseSignOut(auth);
