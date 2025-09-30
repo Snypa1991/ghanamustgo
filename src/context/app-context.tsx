@@ -12,6 +12,7 @@ interface AppContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  switchUserForTesting: (role: User['role']) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateUser: (user: User) => void;
   redirectToDashboard: (targetUser: User) => void;
@@ -47,16 +48,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
-        const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
+        // Find existing user first
+        let appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
         if (appUser) {
             setUser(appUser);
         } else {
+            // Handle users created via signup form
             const newUser: User = {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'New User',
                 email: firebaseUser.email!,
                 role: 'unassigned'
             };
+            // Add to DUMMY_USERS for this session if they don't exist
             if (!DUMMY_USERS.some(u => u.id === newUser.id)) {
                 DUMMY_USERS.push(newUser); 
             }
@@ -75,14 +79,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged will handle setting the user and redirecting
       const appUser = DUMMY_USERS.find(u => u.email === userCredential.user.email);
       if (appUser) {
-        setUser(appUser); // Manually set user to trigger useEffects faster
         redirectToDashboard(appUser);
         return { success: true };
       }
-      // This case should ideally not be hit if onAuthStateChanged works as expected
-      return { success: false, error: 'User profile not found.' };
+       return { success: false, error: 'User data not found after login.' };
     } catch (error: any) {
       console.error("Login failed:", error);
       let errorMessage = "An unknown error occurred.";
@@ -102,6 +105,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const switchUserForTesting = async (role: User['role']) => {
+    const testUser = DUMMY_USERS.find(u => u.role === role);
+    if (!testUser || !testUser.email || !testUser.password) {
+      return { success: false, error: 'Test user for this role not found.' };
+    }
+    return await login(testUser.email, testUser.password);
+  };
+
   const logout = async () => {
     await firebaseSignOut(auth);
     setUser(null);
@@ -117,7 +128,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ user, loading, login, logout, updateUser, redirectToDashboard }}>
+    <AppContext.Provider value={{ user, loading, login, switchUserForTesting, logout, updateUser, redirectToDashboard }}>
       {children}
     </AppContext.Provider>
   );
