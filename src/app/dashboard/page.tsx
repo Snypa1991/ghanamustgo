@@ -350,7 +350,7 @@ export default function DashboardPage() {
 
   if (loading || !user || (user.role !== 'biker' && user.role !== 'driver')) {
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+        <div className="flex items-center justify-center min-h-screen">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     );
@@ -365,8 +365,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
-      <div className="relative h-[calc(100vh-16rem)] sm:h-[calc(100vh-4rem)]">
+    <div className="h-[calc(100vh-4rem)] grid lg:grid-cols-3">
+      <div className="lg:col-span-2 h-full relative">
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={containerStyle}
@@ -495,12 +495,14 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="container py-8 sm:hidden">
-          <RideHistory key={historyKey} />
+      <div className="hidden lg:block h-[calc(100vh-4rem)] overflow-y-auto border-l p-4">
+        <RideHistory key={historyKey} />
       </div>
 
     </div>
   );
 }
+
+    
 
     

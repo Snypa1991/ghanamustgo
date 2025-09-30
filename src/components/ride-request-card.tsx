@@ -5,11 +5,10 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Ride, User, DUMMY_USERS } from '@/lib/dummy-data';
-import { Check, MapPin, X, Loader2, Flag, Navigation, User as UserIcon } from 'lucide-react';
+import { Check, MapPin, X, Loader2, Flag, Navigation } from 'lucide-react';
 import type { TripStatus } from '@/app/dashboard/page';
 import { Progress } from './ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Separator } from './ui/separator';
 
 interface RideRequestCardProps {
     ride: Ride;
@@ -168,4 +167,5 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
     return null;
 }
 
+    
     
