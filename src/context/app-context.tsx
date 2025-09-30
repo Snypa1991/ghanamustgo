@@ -4,7 +4,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User, DUMMY_USERS } from '@/lib/dummy-data';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 
@@ -12,10 +12,11 @@ interface AppContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   switchUserForTesting: (role: User['role']) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateUser: (user: User) => void;
-  redirectToDashboard: (targetUser: User) => void;
+  redirectToDashboard: (targetUser: User | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -79,13 +80,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle setting the user and redirecting
+      // onAuthStateChanged will handle setting the user.
       const appUser = DUMMY_USERS.find(u => u.email === userCredential.user.email);
-      if (appUser) {
-        redirectToDashboard(appUser);
-        return { success: true };
-      }
-       return { success: false, error: 'User data not found after login.' };
+      redirectToDashboard(appUser || null);
+      return { success: true };
     } catch (error: any) {
       console.error("Login failed:", error);
       let errorMessage = "An unknown error occurred.";
@@ -104,18 +102,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return { success: false, error: errorMessage };
     }
   };
+  
+  const signup = async (name: string, email: string, password: string) => {
+    setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: name });
+      // onAuthStateChanged will handle the new user state
+      return { success: true };
+    } catch (error: any) {
+        console.error("Signup failed:", error);
+        setLoading(false);
+        return { success: false, error: error.message || 'Could not create account.' };
+    }
+  };
 
   const switchUserForTesting = async (role: User['role']) => {
+    setLoading(true);
     const testUser = DUMMY_USERS.find(u => u.role === role);
-    if (!testUser || !testUser.email || !testUser.password) {
+    if (!testUser) {
+      setLoading(false);
       return { success: false, error: 'Test user for this role not found.' };
     }
-    return await login(testUser.email, testUser.password);
+    
+    // Bypass Firebase for test users and set them directly
+    setUser(testUser);
+    redirectToDashboard(testUser);
+    setLoading(false);
+    return { success: true };
   };
 
   const logout = async () => {
     await firebaseSignOut(auth);
     setUser(null);
+    setLoading(false);
     router.push('/login');
   };
   
@@ -128,7 +148,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ user, loading, login, switchUserForTesting, logout, updateUser, redirectToDashboard }}>
+    <AppContext.Provider value={{ user, loading, login, signup, switchUserForTesting, logout, updateUser, redirectToDashboard }}>
       {children}
     </AppContext.Provider>
   );
