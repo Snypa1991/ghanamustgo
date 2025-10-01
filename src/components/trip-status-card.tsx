@@ -3,14 +3,12 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Ride, User } from '@/lib/dummy-data';
-import { Loader2, User as UserIcon, Star, CheckCircle } from 'lucide-react';
+import { Loader2, Star, CheckCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Separator } from './ui/separator';
 import { MopedIcon } from './icons';
 import { Car } from 'lucide-react';
 import { Button } from './ui/button';
-import { useState } from 'react';
-import RideReviewDialog from './ride-review-dialog';
+import { RideReviewDialog } from './ride-review-dialog';
 
 
 type BookingStep = 'confirming' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
@@ -117,7 +115,7 @@ export default function TripStatusCard({ step, driver, ride, onReviewAndFinish }
                 <CardContent>
                     <div className="text-center p-4 rounded-lg bg-muted">
                         <p className="text-sm text-muted-foreground">Total Fare</p>
-                        <p className="text-3xl font-bold text-primary">${ride.fare.toFixed(2)}</p>
+                        <p className="text-3xl font-bold text-primary">GH₵{ride.fare.toFixed(2)}</p>
                     </div>
                 </CardContent>
                 <CardFooter className="flex-col gap-2">
@@ -125,7 +123,7 @@ export default function TripStatusCard({ step, driver, ride, onReviewAndFinish }
                     <RideReviewDialog 
                         ride={ride} 
                         otherUser={driver}
-                        onReviewPublished={handleReviewPublished}
+                        onReviewSubmit={handleReviewPublished}
                     >
                          <Button className="w-full">
                             <Star className="mr-2 h-4 w-4" /> Rate & Finish

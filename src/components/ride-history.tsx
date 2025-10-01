@@ -11,7 +11,7 @@ import { Car, Dot, History, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
-import RideReviewDialog from './ride-review-dialog';
+import { RideReviewDialog } from './ride-review-dialog';
 import { MopedIcon } from './icons';
 
 export default function RideHistory() {
@@ -112,7 +112,7 @@ export default function RideHistory() {
                     <div className="text-right space-y-2 flex-shrink-0 sm:w-36 flex flex-col items-end">
                        <div className="flex items-center justify-end gap-2">
                            {partnerRole === 'biker' ? <MopedIcon className="h-5 w-5 text-muted-foreground" /> : <Car className="h-5 w-5 text-muted-foreground" />}
-                            <p className="font-bold text-lg">${ride.fare.toFixed(2)}</p>
+                            <p className="font-bold text-lg">GH₵{ride.fare.toFixed(2)}</p>
                         </div>
                         <Badge
                             variant={ride.status === 'completed' ? 'default' : 'destructive'}
@@ -120,11 +120,11 @@ export default function RideHistory() {
                         >
                             {ride.status}
                         </Badge>
-                        {canReview && (
+                        {canReview && otherUser && (
                             <RideReviewDialog 
                                 ride={ride} 
-                                otherUser={otherUser!} 
-                                onReviewPublished={handleReviewPublished}
+                                otherUser={otherUser} 
+                                onReviewSubmit={handleReviewPublished}
                             />
                         )}
                     </div>
@@ -134,5 +134,3 @@ export default function RideHistory() {
     </div>
   );
 }
-
-    
