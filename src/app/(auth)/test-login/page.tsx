@@ -74,7 +74,7 @@ export default function TestLoginPage() {
            {testRoles.map(({ role, title, icon: Icon }) => (
                 <Button 
                     key={role}
-                    variant="outline"
+                    variant="secondary"
                     className="h-20 flex-col gap-2"
                     onClick={() => handleLogin(role)}
                     disabled={!!isSubmitting}
