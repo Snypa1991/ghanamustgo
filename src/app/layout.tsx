@@ -1,48 +1,38 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/layout/header';
-import Footer from '@/components/layout/footer';
-import { cn } from '@/lib/utils';
-import { AppProvider } from '@/context/app-context';
-import { Analytics } from "@vercel/analytics/react"
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import type { Metadata, Viewport } from "next";
+import { Inter, Fira_Code, Poppins, PT_Sans } from "next/font/google";
+import "./globals.css";
+import { AppProvider } from "@/context/app-context";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const firaCode = Fira_Code({ subsets: ["latin"], variable: "--font-mono" });
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-body" });
+const ptSans = PT_Sans({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-headline" });
 
 export const metadata: Metadata = {
-  title: 'Ghana Must Go',
-  description: 'Your all-in-one app for rides, dispatch, food, and more.',
-  manifest: '/manifest.json',
-  icons: { 
-    icon: '/icon.svg',
-    apple: '/icons/icon-192x192.png'
-  },
+  title: "Ghana Must Go",
+  description: "A super-app for all your needs",
+  manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#003300",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>)
+{
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
-        <meta name="theme-color" content="#003300" />
-      </head>
-      <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
-        <AppProvider>
+    <html lang="en" className={`${inter.variable} ${firaCode.variable} ${poppins.variable} ${ptSans.variable}`}>
+      <AppProvider>
+        <body className="font-sans">
           <Header />
-          <main className="flex-grow bg-background">{children}</main>
+          <main className="flex-grow">{children}</main>
           <Footer />
-          <Toaster />
-        </AppProvider>
-        <Analytics />
-        <SpeedInsights />
-      </body>
+        </body>
+      </AppProvider>
     </html>
   );
 }

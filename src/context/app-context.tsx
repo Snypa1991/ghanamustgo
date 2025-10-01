@@ -1,173 +1,54 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { User, DUMMY_USERS } from '@/lib/dummy-data';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
 
-
-interface AppContextType {
+// Define the shape of the context data
+interface AuthContextType {
   user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  switchUserForTesting: (role: User['role']) => Promise<{ success: boolean; error?: string }>;
+  login: (userData: any) => void; // This will be a placeholder
   logout: () => void;
-  updateUser: (user: User) => void;
-  redirectToDashboard: (targetUser: User | null) => void;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+// Create the context
+const AppContext = createContext<AuthContextType | undefined>(undefined);
 
+// Create the provider component
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-
-  const redirectToDashboard = useCallback((targetUser: User | null) => {
-    if (!targetUser) {
-        router.push('/login');
-        return;
-    };
-    
-    if (targetUser.role === 'unassigned') {
-      router.push('/role-selection');
-    } else if (targetUser.role === 'admin') {
-      router.push('/admin/dashboard');
-    } else if (targetUser.role === 'biker' || targetUser.role === 'driver') {
-      router.push('/dashboard');
-    } else if (targetUser.role === 'vendor') {
-      router.push('/vendor/dashboard');
-    } else {
-      router.push('/book');
-    }
-  }, [router]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setLoading(true);
-      if (firebaseUser) {
-        // Find existing user first from our dummy data
-        let appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
-        
-        if (appUser) {
-            // Ensure the ID from firebase is used for consistency
-            appUser.id = firebaseUser.uid;
-            setUser(appUser);
-        } else {
-            // Handle users created via signup form that are not in dummy data
-            const newUser: User = {
-                id: firebaseUser.uid,
-                name: firebaseUser.displayName || 'New User',
-                email: firebaseUser.email!,
-                role: 'unassigned' // Default role for new signups
-            };
-            // Add to DUMMY_USERS for this session if they don't exist
-            if (!DUMMY_USERS.some(u => u.id === newUser.id)) {
-                DUMMY_USERS.push(newUser); 
-            }
-            setUser(newUser);
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
     });
 
+    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const appUser = DUMMY_USERS.find(u => u.email === userCredential.user.email);
-      
-      // onAuthStateChanged will set the user, but we can redirect immediately
-      if (appUser) {
-          redirectToDashboard(appUser);
-      } else {
-          // This case handles newly signed up users who might not be in the initial DUMMY_USERS
-          const newUser: User = {
-            id: userCredential.user.uid,
-            name: userCredential.user.displayName || 'New User',
-            email: userCredential.user.email!,
-            role: 'unassigned'
-          }
-          redirectToDashboard(newUser);
-      }
-      
-      return { success: true };
-    } catch (error: any) {
-      console.error("Login failed:", error);
-      let errorMessage = "An unknown error occurred.";
-      if (error.code) {
-        switch (error.code) {
-            case 'auth/user-not-found':
-            case 'auth/wrong-password':
-            case 'auth/invalid-credential':
-                errorMessage = 'Invalid email or password. Please try again.';
-                break;
-            default:
-                errorMessage = error.message;
-        }
-      }
-      setLoading(false);
-      return { success: false, error: errorMessage };
-    }
-  };
-  
-  const signup = async (name: string, email: string, password: string) => {
-    setLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: name });
-      // onAuthStateChanged will handle the new user state
-      return { success: true };
-    } catch (error: any) {
-        console.error("Signup failed:", error);
-        setLoading(false);
-        return { success: false, error: error.message || 'Could not create account.' };
-    }
+  // Login function (placeholder, actual login logic will be on the login page)
+  const login = (userData: any) => {
+    // This function is now a placeholder.
+    // The onAuthStateChanged listener will automatically update the user state.
   };
 
-  const switchUserForTesting = async (role: User['role']) => {
-    setLoading(true);
-    const testUser = DUMMY_USERS.find(u => u.role === role);
-    if (testUser) {
-        setUser(testUser);
-        redirectToDashboard(testUser);
-        setLoading(false);
-        return { success: true };
-    } else {
-        setLoading(false);
-        return { success: false, error: "Test user for that role not found." };
-    }
-};
-
+  // Logout function
   const logout = async () => {
-    await firebaseSignOut(auth);
-    setUser(null);
-    setLoading(false);
-    router.push('/login');
-  };
-  
-  const updateUser = (updatedUser: User) => {
-    setUser(updatedUser);
-    const userIndex = DUMMY_USERS.findIndex(u => u.id === updatedUser.id);
-    if (userIndex !== -1) {
-      DUMMY_USERS[userIndex] = updatedUser;
+    try {
+      await signOut(auth);
+      // The onAuthStateChanged listener will automatically set the user to null.
+    } catch (error) {
+      console.error("Error signing out: ", error);
     }
   };
 
-  return (
-    <AppContext.Provider value={{ user, loading, login, signup, switchUserForTesting, logout, updateUser, redirectToDashboard }}>
-      {children}
-    </AppContext.Provider>
-  );
+  const value = { user, login, logout };
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
+// Create the custom hook to use the auth context
 export function useAuth() {
   const context = useContext(AppContext);
   if (context === undefined) {

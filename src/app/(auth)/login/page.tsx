@@ -1,153 +1,102 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { GhanaMustGoIcon } from '@/components/icons';
-import { useAuth } from '@/context/app-context';
-import { useToast } from '@/hooks/use-toast';
-import { DUMMY_USERS } from '@/lib/dummy-data';
-import { Loader2, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/app-context";
+import { useRouter } from "next/navigation";
+
+const formSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
 
 export default function LoginPage() {
-  const [step, setStep] = useState(1);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const { toast } = useToast();
-  const { user, login, redirectToDashboard } = useAuth();
+  const { login } = useAuth();
+  const router = useRouter();
 
-  useEffect(() => {
-    if (user) {
-        redirectToDashboard(user);
-    }
-  }, [user, redirectToDashboard]);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    const isDummy = DUMMY_USERS.some(user => user.email === email && user.password);
-    
-    if (isDummy) {
-      // The login function in context will handle both dummy and real users now
-      const result = await login(email, 'password'); // Use dummy password
-       if (!result.success) {
-            toast({
-                variant: 'destructive',
-                title: 'Login Failed',
-                description: result.error,
-            });
-            setIsLoading(false);
-        }
-        // Success is handled by useEffect
-    } else {
-      setStep(2);
-      setIsLoading(false);
-    }
-  };
-
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const result = await login(email, password);
-
-    if (!result.success) {
-      toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: result.error,
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await fetch("https://gmg-api-5lcn.onrender.com/api/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
       });
-      setIsLoading(false);
+
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      const data = await response.json();
+      login(data.user);
+      toast({ title: "Login successful" });
+      router.push("/"); 
+    } catch (error) {
+      toast({ title: "Error", description: "An error occurred during login", variant: "destructive" });
     }
-    // Success is handled by useEffect
-  };
+  }
 
   return (
-    <div className="flex items-center justify-center min-h-screen sm:min-h-[calc(100vh-10rem)] py-12 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />
-          <CardTitle className="mt-4 font-headline text-2xl">
-            {step === 1 ? 'Sign In' : 'Enter Password'}
-          </CardTitle>
-          <CardDescription>
-            {step === 1 ? "Enter your email to continue." : `Signing in as ${email}`}
-          </CardDescription>
-        </CardHeader>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+      <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-lg shadow-lg">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold">Welcome Back!</h1>
+          <p className="text-muted-foreground">Sign in to continue to your account</p>
+        </div>
 
-        {step === 1 ? (
-          <form onSubmit={handleEmailSubmit}>
-            <CardContent>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="okada@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex-col gap-4">
-              <Button type="submit" className="w-full" disabled={isLoading || !email}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
-                Continue
-              </Button>
-            </CardFooter>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="user@email.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full">Login</Button>
           </form>
-        ) : (
-          <form onSubmit={handlePasswordSubmit}>
-            <CardContent className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                  autoFocus
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex-col gap-4">
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In
-              </Button>
-               <Button variant="link" onClick={() => { setStep(1); setPassword(''); }}>
-                Back to email
-              </Button>
-            </CardFooter>
-          </form>
-        )}
+        </Form>
 
-        <CardFooter className="flex-col gap-4 border-t pt-6">
-            <div className="text-center text-sm">
-                Don't have an account?{' '}
-                <Link href="/signup" className="underline text-primary hover:text-primary/80">
-                    Sign up
-                </Link>
-            </div>
-             <div className="text-center text-sm">
-                Or use the{' '}
-                <Link href="/test-login" className="underline text-primary hover:text-primary/80">
-                    Quick Test Login
-                </Link>
-            </div>
-        </CardFooter>
-      </Card>
+        <div className="text-center">
+          <p className="text-sm">
+            Don&apos;t have an account? <Link href="/signup" className="font-medium text-primary hover:underline">Sign up</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

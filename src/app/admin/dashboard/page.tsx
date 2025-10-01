@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useAuth } from '@/context/app-context';
+import { useAuth } from '@/hooks/use-auth';
 import { Shield, Bot, Package, Star, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ListingFeeSuggestion from '@/components/listing-fee-suggestion';
