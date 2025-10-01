@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/context/app-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -10,21 +11,45 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { LogOut, UserCircle } from 'lucide-react';
+import { LogOut, UserCircle, LogIn, UserPlus } from 'lucide-react';
 
 export function UserNav() {
   const { user, logout } = useAuth();
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
-        <Link href="/login" passHref>
-          <Button variant="outline">Login</Button>
-        </Link>
-        <Link href="/signup" passHref>
-          <Button>Sign Up</Button>
-        </Link>
-      </div>
+       <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback><UserCircle/></AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">Guest</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                Not logged in
+              </p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+           <DropdownMenuItem asChild>
+            <Link href="/login">
+              <LogIn className="mr-2 h-4 w-4" />
+              <span>Login</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/signup">
+              <UserPlus className="mr-2 h-4 w-4" />
+              <span>Sign Up</span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
