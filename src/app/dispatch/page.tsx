@@ -190,7 +190,15 @@ export default function DispatchPage() {
 
 
   if (loadError) {
-    return <div>Error loading maps. Please check your API key.</div>;
+    return (
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
+            <h2 className="text-2xl font-bold mb-4">Map Error</h2>
+            <p className="text-lg mb-2">The map could not be loaded.</p>
+            <p className="text-muted-foreground text-center max-w-md">
+                This can happen if the Google Maps API key is invalid or has expired, or if there are network issues. Please check the browser console for more details.
+            </p>
+        </div>
+    );
   }
 
   return (
@@ -344,7 +352,7 @@ export default function DispatchPage() {
                     <CardDescription>We are finding a nearby rider for your package. You will be notified shortly.</CardDescription>
                 </CardHeader>
                  <CardContent className="flex justify-center">
-                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                    <Loader2 className-="h-8 w-8 text-primary animate-spin" />
                  </CardContent>
                  <CardFooter>
                     <Button variant="outline" className="w-full" onClick={handleNewDispatch}>Start a New Dispatch</Button>

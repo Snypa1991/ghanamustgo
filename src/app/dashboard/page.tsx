@@ -32,7 +32,7 @@ export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const { isLoaded } = useJsApiLoader({
+  const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
   });
@@ -346,6 +346,18 @@ export default function DashboardPage() {
     
     return undefined;
   }, [user, isLoaded]);
+
+  if (loadError) {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <h2 className="text-2xl font-bold mb-4">Map Error</h2>
+            <p className="text-lg mb-2">The map could not be loaded.</p>
+            <p className="text-muted-foreground text-center max-w-md">
+                This can happen if the Google Maps API key is invalid or has expired, or if there are network issues. Please check the browser console for more details.
+            </p>
+        </div>
+    );
+  }
   
 
   if (loading || !user || (user.role !== 'biker' && user.role !== 'driver')) {
@@ -506,5 +518,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
