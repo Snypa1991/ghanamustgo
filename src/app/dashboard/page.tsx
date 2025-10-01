@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer, Circle } from '@react-google-maps/api';
-import { Power, Crosshair, Plus, Minus, Loader2 } from 'lucide-react';
+import { Power, Crosshair, Plus, Minus, Loader2, History } from 'lucide-react';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -365,8 +365,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] grid lg:grid-cols-3">
-      <div className="lg:col-span-2 h-full relative">
+    <div className="h-[calc(100vh-4rem)] grid lg:grid-cols-[1fr_400px]">
+      <div className="h-full relative">
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={containerStyle}
@@ -494,15 +494,17 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-
-      <div className="hidden lg:block h-[calc(100vh-4rem)] overflow-y-auto border-l p-4">
-        <RideHistory key={historyKey} />
+      
+      <div className="hidden lg:flex flex-col h-[calc(100vh-4rem)]">
+        <div className="p-4 border-b">
+          <h2 className="text-xl font-headline flex items-center gap-2"><History/> Ride History</h2>
+        </div>
+        <div className="flex-grow overflow-y-auto">
+          <RideHistory key={historyKey} />
+        </div>
       </div>
-
     </div>
   );
 }
-
-    
 
     
