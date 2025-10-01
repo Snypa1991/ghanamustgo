@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-import { Car, Loader2, Navigation, Bot, Package, PersonStanding, X } from 'lucide-react';
+import { Car, Loader2, Navigation, Bot, Package, PersonStanding, X, Bike } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MopedIcon } from '@/components/icons';
@@ -25,6 +25,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Input } from '@/components/ui/input';
 
 type BookingType = 'ride' | 'dispatch';
+type VehicleType = 'bike' | 'car';
 type BookingStep = 'details' | 'selection' | 'confirming' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
 type PinningLocation = 'start' | 'end' | null;
 
@@ -48,6 +49,7 @@ export default function BookPage() {
   const { toast } = useToast();
 
   const [bookingType, setBookingType] = useState<BookingType>('ride');
+  const [vehicleType, setVehicleType] = useState<VehicleType>('bike');
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const [step, setStep] = useState<BookingStep>('details');
   const [ridePrices, setRidePrices] = useState({ okada: 0, taxi: 0 });
@@ -59,7 +61,7 @@ export default function BookPage() {
   
   const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
   const [assignedDriver, setAssignedDriver] = useState<User | null>(null);
-  const [currentRide, setCurrentRide] = useState<Ride | null>(null);
+  const [currentRide, setCurrentRide = useState<Ride | null>(null);
   
   const [pinningLocation, setPinningLocation] = useState<PinningLocation>(null);
 
@@ -112,8 +114,8 @@ export default function BookPage() {
   ) => {
     if (status === 'OK' && response) {
       setDirections(response);
-      if (bookingType === 'ride') {
-        const distanceInKm = (response.routes[0].legs[0].distance?.value ?? 0) / 1000;
+      const distanceInKm = (response.routes[0].legs[0].distance?.value ?? 0) / 1000;
+       if (bookingType === 'ride') {
         setRidePrices({
             okada: Math.max(5, distanceInKm * 1.5),
             taxi: Math.max(10, distanceInKm * 2.5),
@@ -153,10 +155,10 @@ export default function BookPage() {
     setIsSheetOpen(false);
   }
 
-  const handleConfirmBooking = (rideType: 'okada' | 'taxi') => {
+  const handleConfirmBooking = () => {
     setStep('confirming');
 
-    const driverRole = rideType === 'okada' ? 'biker' : 'driver';
+    const driverRole = vehicleType === 'bike' ? 'biker' : 'driver';
     const availableDrivers = DUMMY_USERS.filter(u => u.role === driverRole);
     const driver = availableDrivers[Math.floor(Math.random() * availableDrivers.length)];
     
@@ -167,7 +169,7 @@ export default function BookPage() {
       startLocation,
       endLocation,
       fare: bookingType === 'ride' 
-        ? (rideType === 'okada' ? ridePrices.okada : ridePrices.taxi) 
+        ? (vehicleType === 'bike' ? ridePrices.okada : ridePrices.taxi) 
         : (dispatchFee?.suggestedFee || 0),
       date: new Date().toISOString(),
       status: 'cancelled',
@@ -332,11 +334,11 @@ export default function BookPage() {
   
   useEffect(() => {
     setDirections(null);
-  }, [bookingType]);
+  }, [bookingType, vehicleType]);
 
   const isTripInProgress = step === 'confirming' || step === 'enroute-to-pickup' || step === 'enroute-to-destination' || step === 'completed';
 
-  const renderActionButton = (rideType: 'okada' | 'taxi') => {
+  const renderConfirmButton = () => {
     if (!user) {
         return (
              <Link href="/login" className="w-full">
@@ -344,35 +346,30 @@ export default function BookPage() {
             </Link>
         )
     }
+
+    const price = bookingType === 'ride' 
+        ? (vehicleType === 'bike' ? ridePrices.okada.toFixed(2) : ridePrices.taxi.toFixed(2))
+        : (dispatchFee?.suggestedFee.toFixed(2));
+    
+    const disabled = !startLocation || !endLocation || (bookingType === 'dispatch' && !dispatchFee);
+    const buttonText = bookingType === 'ride' ? 'Confirm Ride' : 'Confirm & Find Rider';
+
+
     return (
         <Button 
-            variant="outline" 
-            className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50" 
-            onClick={() => handleConfirmBooking(rideType)}
-            disabled={!startLocation || !endLocation}
+            className="w-full h-auto p-4 flex items-center justify-between" 
+            onClick={handleConfirmBooking}
+            disabled={disabled}
         >
             <div className='flex items-center gap-4 text-left'>
-                {rideType === 'okada' ? <MopedIcon className="h-10 w-10 text-primary" /> : <Car className="h-10 w-10 text-primary" />}
+                {vehicleType === 'bike' ? <MopedIcon className="h-10 w-10" /> : <Car className="h-10 w-10" />}
                 <div>
-                    <p className="font-bold text-lg">Book {rideType === 'okada' ? 'Okada' : 'Taxi'}</p>
-                    <p className="text-sm text-muted-foreground">{rideType === 'okada' ? 'Quick & affordable' : 'Comfortable & private'}</p>
+                    <p className="font-bold text-lg">{buttonText}</p>
+                    <p className="text-sm text-muted-foreground">{vehicleType === 'bike' ? 'Quick & affordable' : 'Comfortable & private'}</p>
                 </div>
             </div>
-            <p className="text-lg font-bold">GH₵{rideType === 'okada' ? ridePrices.okada.toFixed(2) : ridePrices.taxi.toFixed(2)}</p>
+            <p className="text-lg font-bold">GH₵{price}</p>
         </Button>
-    )
-  }
-
-  const renderDispatchButton = () => {
-     if (!user) {
-        return (
-            <Link href="/login" className="w-full">
-                <Button className="w-full">Login to Dispatch</Button>
-            </Link>
-        )
-    }
-    return (
-        <Button onClick={() => handleConfirmBooking('okada')} className="w-full" disabled={!startLocation || !endLocation || !dispatchFee}>Confirm & Find Rider</Button>
     )
   }
 
@@ -422,8 +419,8 @@ export default function BookPage() {
              <Card className="shadow-2xl">
                 <ScrollArea className="max-h-[70vh]">
                      <CardHeader className="text-center">
-                        <CardTitle className="text-2xl font-bold font-headline">{bookingType === 'ride' ? 'Choose a ride' : 'Confirm Dispatch'}</CardTitle>
-                        <CardDescription>{bookingType === 'ride' ? 'Select a vehicle that suits your needs' : 'Review the details and confirm your request'}</CardDescription>
+                        <CardTitle className="text-2xl font-bold font-headline">Confirm Your Request</CardTitle>
+                        <CardDescription>Review the details and confirm your request</CardDescription>
                          {aiResult && bookingType === 'ride' && (
                           <Alert className="text-left text-sm bg-primary/5 border-primary/20 mt-2">
                               <Bot className="h-4 w-4" />
@@ -440,20 +437,9 @@ export default function BookPage() {
                         )}
                     </CardHeader>
                      <CardContent className="space-y-4">
-                        {bookingType === 'ride' ? (
-                            <>
-                              {renderActionButton('okada')}
-                              {renderActionButton('taxi')}
-                            </>                      
-                        ) : (
-                          <div className="text-center p-4 rounded-lg bg-muted">
-                              <p className="text-sm text-muted-foreground">Delivery Fee</p>
-                              <p className="text-4xl font-bold text-primary">GH₵ {dispatchFee?.suggestedFee.toFixed(2)}</p>
-                          </div>
-                        )}
+                        {renderConfirmButton()}
                     </CardContent>
                     <CardFooter className="flex-col gap-3 pt-4">
-                         {bookingType === 'dispatch' && renderDispatchButton()}
                         <Button variant="link" onClick={() => { setStep('details'); setIsSheetOpen(true); }}>Back</Button>
                     </CardFooter>
                  </ScrollArea>
@@ -478,6 +464,12 @@ export default function BookPage() {
                             <ToggleGroupItem value="ride" aria-label="Request a ride"><PersonStanding className="h-4 w-4 mr-2"/>Ride</ToggleGroupItem>
                             <ToggleGroupItem value="dispatch" aria-label="Send a package"><Package className="h-4 w-4 mr-2"/>Dispatch</ToggleGroupItem>
                         </ToggleGroup>
+
+                        <ToggleGroup type="single" value={vehicleType} onValueChange={(value: VehicleType) => value && setVehicleType(value)} className="grid grid-cols-2">
+                            <ToggleGroupItem value="bike" aria-label="Choose bike"><Bike className="h-4 w-4 mr-2"/>Bike</ToggleGroupItem>
+                            <ToggleGroupItem value="car" aria-label="Choose car"><Car className="h-4 w-4 mr-2"/>Car</ToggleGroupItem>
+                        </ToggleGroup>
+
                         <RouteOptimization 
                             startLocation={startLocation}
                             endLocation={endLocation}
@@ -496,7 +488,7 @@ export default function BookPage() {
                         {bookingType === 'ride' && (
                             <Button className="w-full" onClick={() => handleGetEstimate()} disabled={isLoading || !startLocation || !endLocation}>
                                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Navigation className="mr-2 h-4 w-4"/>}
-                                Find Ride Options
+                                Get Estimate
                             </Button>
                         )}
                      </div>
