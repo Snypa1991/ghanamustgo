@@ -78,6 +78,7 @@ export type Ride = {
   fare: number;
   date: string;
   status: 'completed' | 'cancelled';
+  vehicleType?: 'bike' | 'car';
   rating?: number;
   review?: string;
   reviewBy?: 'rider' | 'partner';
@@ -94,6 +95,7 @@ export let DUMMY_RIDES: Ride[] = [
     fare: 15.00,
     date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
     status: 'completed',
+    vehicleType: 'bike',
     rating: 5,
     review: 'Kofi was a fast and safe rider. Got me to my destination in no time!',
     reviewBy: 'rider',
@@ -107,6 +109,7 @@ export let DUMMY_RIDES: Ride[] = [
     fare: 25.00,
     date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
     status: 'completed',
+    vehicleType: 'car',
     rating: 4,
     review: 'Ama was a great passenger. Friendly and polite.',
     reviewBy: 'partner'
@@ -120,6 +123,7 @@ export let DUMMY_RIDES: Ride[] = [
     fare: 12.00,
     date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
     status: 'completed',
+    vehicleType: 'bike',
   },
    {
     id: 'ride-4',
@@ -130,6 +134,7 @@ export let DUMMY_RIDES: Ride[] = [
     fare: 30.00,
     date: new Date(Date.now() - 1000 * 60 * 60 * 7).toISOString(),
     status: 'cancelled',
+    vehicleType: 'bike',
   },
   {
     id: 'ride-5',
@@ -140,6 +145,7 @@ export let DUMMY_RIDES: Ride[] = [
     fare: 10.00,
     date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
     status: 'completed',
+    vehicleType: 'car',
     rating: 5,
     review: 'Very pleasant trip.',
     reviewBy: 'partner',

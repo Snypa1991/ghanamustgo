@@ -112,15 +112,21 @@ export default function DashboardPage() {
           if (status === 'OK' && results && results[0]) {
               const pickupAddress = results[0].formatted_address;
               
+              const vehicleType = user.role === 'biker' ? 'bike' : 'car';
+              const fare = vehicleType === 'bike' 
+                  ? Math.floor(Math.random() * (20 - 8 + 1)) + 8 // 8-20 GHS for bike
+                  : Math.floor(Math.random() * (40 - 15 + 1)) + 15; // 15-40 GHS for car
+
               const newRide: Ride = {
                   id: `ride-sim-${Date.now()}`,
                   userId: randomPassenger.id,
                   driverId: user!.id,
                   startLocation: pickupAddress,
                   endLocation: "Osu Oxford Street",
-                  fare: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+                  fare: fare,
                   date: new Date().toISOString(),
-                  status: 'cancelled',
+                  status: 'cancelled', // Default status
+                  vehicleType: vehicleType,
               };
               
               setCurrentRideRequest(newRide);
