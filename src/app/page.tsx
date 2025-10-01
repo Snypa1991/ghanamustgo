@@ -106,13 +106,45 @@ export default function Home() {
                 </CardContent>
                 <CardFooter className="p-6 pt-0 w-full">
                   <Link href={feature.href} className="w-full">
-                    <Button variant="ghost" className="w-full text-accent border border-accent hover:bg-accent hover:text-accent-foreground">
+                    <Button variant="outline" className="w-full text-primary border border-primary hover:bg-primary hover:text-primary-foreground">
                       {feature.cta} <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
                 </CardFooter>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+       <section className="bg-muted py-12 md:py-20 lg:py-24">
+        <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl font-headline">Sell on Our Marketplace</h2>
+            <p className="text-lg text-muted-foreground">
+              Reach thousands of customers in your city. List your products, from artisan crafts to everyday goods, and grow your business with us.
+            </p>
+            <div className="flex gap-4 pt-4">
+              <Link href="/marketplace">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                  Explore Market
+                </Button>
+              </Link>
+              <Link href="/marketplace/list-item">
+                <Button size="lg" variant="secondary">
+                  Start Selling
+                </Button>
+              </Link>
+            </div>
+          </div>
+          <div className="relative aspect-video bg-background rounded-lg shadow-md overflow-hidden">
+             <Image
+                src="https://images.unsplash.com/photo-1528698827598-95324919d353?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsb2NhbCUyMG1hcmtldCUyMHNob3B8ZW58MHx8fHwxNzU5MjA0OTM4fDA&ixlib=rb-4.1.0&q=80&w=1080"
+                alt="Local market stall"
+                fill
+                className="object-cover"
+                data-ai-hint="local market"
+              />
           </div>
         </div>
       </section>
