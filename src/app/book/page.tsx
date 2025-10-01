@@ -21,6 +21,7 @@ import DispatchForm from '@/components/dispatch-form';
 import type { SuggestDeliveryFeeOutput } from '@/ai/flows/suggest-delivery-fee';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 type BookingType = 'ride' | 'dispatch';
 type BookingStep = 'details' | 'selection' | 'confirming' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
@@ -119,14 +120,6 @@ export default function BookPage() {
   };
   
   async function handleGetEstimate(values?: any) {
-    if(!user) {
-        toast({
-            variant: 'destructive',
-            title: 'Not logged in',
-            description: 'Please log in or sign up to book a ride.'
-        });
-        return;
-    }
     setIsLoading(true);
     setAiResult(null);
     setDirections(null); 
@@ -155,7 +148,6 @@ export default function BookPage() {
   }
 
   const handleConfirmBooking = (rideType: 'okada' | 'taxi') => {
-    if (!user) return;
     setStep('confirming');
 
     const driverRole = rideType === 'okada' ? 'biker' : 'driver';
@@ -164,7 +156,7 @@ export default function BookPage() {
     
     const newRide: Ride = {
       id: `ride-${Date.now()}`,
-      userId: user.id,
+      userId: user!.id,
       driverId: driver.id,
       startLocation,
       endLocation,
@@ -332,9 +324,50 @@ export default function BookPage() {
 
   const isTripInProgress = step === 'confirming' || step === 'enroute-to-pickup' || step === 'enroute-to-destination' || step === 'completed';
 
+  const renderActionButton = (rideType: 'okada' | 'taxi') => {
+    if (!user) {
+        return (
+             <Link href="/login" className="w-full">
+                <Button variant="outline" className="w-full">Login to Book</Button>
+            </Link>
+        )
+    }
+    return (
+        <Button 
+            variant="outline" 
+            className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50" 
+            onClick={() => handleConfirmBooking(rideType)}
+            disabled={!startLocation || !endLocation}
+        >
+            <div className='flex items-center gap-4 text-left'>
+                {rideType === 'okada' ? <MopedIcon className="h-10 w-10 text-primary" /> : <Car className="h-10 w-10 text-primary" />}
+                <div>
+                    <p className="font-bold text-lg">Book {rideType === 'okada' ? 'Okada' : 'Taxi'}</p>
+                    <p className="text-sm text-muted-foreground">{rideType === 'okada' ? 'Quick & affordable' : 'Comfortable & private'}</p>
+                </div>
+            </div>
+            <p className="text-lg font-bold">GH₵{rideType === 'okada' ? ridePrices.okada.toFixed(2) : ridePrices.taxi.toFixed(2)}</p>
+        </Button>
+    )
+  }
+
+  const renderDispatchButton = () => {
+     if (!user) {
+        return (
+            <Link href="/login" className="w-full">
+                <Button className="w-full">Login to Dispatch</Button>
+            </Link>
+        )
+    }
+    return (
+        <Button onClick={() => handleConfirmBooking('okada')} className="w-full" disabled={!startLocation || !endLocation || !dispatchFee}>Confirm & Find Rider</Button>
+    )
+  }
+
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] w-full">
-      <div className={cn("w-full", isTripInProgress ? "h-full" : "h-[60vh]")}>
+      <div className="w-full h-[60vh]">
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={containerStyle}
@@ -396,9 +429,10 @@ export default function BookPage() {
                                 endLocation={endLocation}
                                 onRouteUpdate={handleRouteUpdate} 
                                 onPinLocation={setPinningLocation}
-                                onSubmit={handleGetEstimate} 
-                                isLoading={isLoading}
+                                onSubmit={() => {}} 
+                                isLoading={false}
                                 submitButtonText={bookingType === 'ride' ? 'Find Ride' : 'Get Estimate'}
+                                hideSubmit
                             />
                             {bookingType === 'dispatch' && (
                                 <div className="pt-4 border-t">
@@ -406,6 +440,12 @@ export default function BookPage() {
                                     <DispatchForm onSubmit={handleGetEstimate} isLoading={isLoading} />
                                 </div>
                             )}
+                             {bookingType === 'ride' && (
+                                <Button className="w-full" onClick={() => handleGetEstimate()} disabled={isLoading || !startLocation || !endLocation}>
+                                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Navigation className="mr-2 h-4 w-4"/>}
+                                    Find Ride Options
+                                </Button>
+                             )}
                         </CardContent>
                       </>
                     )}
@@ -434,26 +474,8 @@ export default function BookPage() {
                           <CardContent className="space-y-4 px-1">
                               {bookingType === 'ride' ? (
                                   <>
-                                    <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50" onClick={() => handleConfirmBooking('okada')}>
-                                        <div className='flex items-center gap-4 text-left'>
-                                            <MopedIcon className="h-10 w-10 text-primary" />
-                                            <div>
-                                                <p className="font-bold text-lg">Book Okada</p>
-                                                <p className="text-sm text-muted-foreground">Quick & affordable</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-lg font-bold">GH₵{ridePrices.okada.toFixed(2)}</p>
-                                    </Button>
-                                    <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50" onClick={() => handleConfirmBooking('taxi')}>
-                                        <div className='flex items-center gap-4 text-left'>
-                                            <Car className="h-10 w-10 text-primary" />
-                                            <div>
-                                                <p className="font-bold text-lg">Book Taxi</p>
-                                                <p className="text-sm text-muted-foreground">Comfortable & private</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-lg font-bold">GH₵{ridePrices.taxi.toFixed(2)}</p>
-                                    </Button>
+                                    {renderActionButton('okada')}
+                                    {renderActionButton('taxi')}
                                   </>                      
                               ) : (
                                 <div className="text-center p-4 rounded-lg bg-muted">
@@ -463,9 +485,7 @@ export default function BookPage() {
                               )}
                           </CardContent>
                           <CardFooter className="flex-col gap-3 pt-4 px-1">
-                               {bookingType === 'dispatch' && (
-                                <Button onClick={() => handleConfirmBooking('okada')} className="w-full">Confirm & Find Rider</Button>
-                               )}
+                               {bookingType === 'dispatch' && renderDispatchButton()}
                               <Button variant="link" onClick={() => setStep('details')}>Back</Button>
                           </CardFooter>
                       </>
@@ -478,3 +498,5 @@ export default function BookPage() {
     </div>
   );
 }
+
+    

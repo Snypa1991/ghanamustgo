@@ -25,6 +25,7 @@ interface RouteOptimizationProps {
   onSubmit: (values: RouteOptimizationFormValues) => void;
   isLoading: boolean;
   submitButtonText?: string;
+  hideSubmit?: boolean;
 }
 
 export default function RouteOptimization({ 
@@ -34,7 +35,8 @@ export default function RouteOptimization({
     onPinLocation,
     onSubmit, 
     isLoading,
-    submitButtonText = 'Find Ride'
+    submitButtonText = 'Find Ride',
+    hideSubmit = false,
 }: RouteOptimizationProps) {
   
   const form = useForm<RouteOptimizationFormValues>({
@@ -111,7 +113,7 @@ export default function RouteOptimization({
               />
             </div>
           </div>
-          { onSubmit &&
+          { !hideSubmit &&
           <div className="mt-4">
             <Button type="submit" disabled={isLoading} className="w-full h-11" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
@@ -124,3 +126,5 @@ export default function RouteOptimization({
     </div>
   );
 }
+
+    

@@ -16,6 +16,8 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import PaymentButton from './payment-button';
 import { ScrollArea } from './ui/scroll-area';
+import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 interface BiddingCardProps {
     itemId: string;
@@ -30,6 +32,7 @@ type BidFormValues = z.infer<typeof bidSchema>;
 
 export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps) {
     const { user } = useAuth();
+    const { toast } = useToast();
     const [bids, setBids] = useState<Bid[]>(() => DUMMY_BIDS.filter(b => b.itemId === itemId).sort((a, b) => b.amount - a.amount));
     const [isLoading, setIsLoading] = useState(false);
 
@@ -52,14 +55,10 @@ export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps)
 
 
     function onSubmit(values: BidFormValues) {
-        if (!user) {
-            alert("Please log in to place a bid.");
-            return;
-        }
         if (values.amount <= highestBid) {
             form.setError("amount", {
                 type: "manual",
-                message: `Your bid must be higher than the current highest bid ($${highestBid.toFixed(2)})`,
+                message: `Your bid must be higher than GH₵${highestBid.toFixed(2)})`,
             });
             return;
         }
@@ -70,12 +69,13 @@ export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps)
             const newBid: Bid = {
                 id: `bid-${Date.now()}`,
                 itemId: itemId,
-                userId: user.id,
+                userId: user!.id,
                 amount: values.amount,
                 timestamp: new Date().toISOString(),
             };
             DUMMY_BIDS.unshift(newBid);
             setBids(prevBids => [newBid, ...prevBids].sort((a, b) => b.amount - a.amount));
+            toast({ title: "Bid Placed!", description: `Your bid of GH₵${values.amount.toFixed(2)} is now the highest.` });
             setIsLoading(false);
         }, 1000);
     }
@@ -93,7 +93,7 @@ export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps)
             <CardContent className="space-y-6">
                 <div className="text-center">
                     <p className="text-sm text-muted-foreground">Current Highest Bid</p>
-                    <p className="text-4xl font-bold text-primary">${highestBid.toFixed(2)}</p>
+                    <p className="text-4xl font-bold text-primary">GH₵{highestBid.toFixed(2)}</p>
                 </div>
                 
                  {userIsHighestBidder && (
@@ -108,30 +108,38 @@ export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps)
                 )}
 
                 {!userIsHighestBidder && (
-                    <Form {...form}>
+                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <FormField
                                 control={form.control}
                                 name="amount"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Your Bid Amount (USD)</FormLabel>
+                                        <FormLabel>Your Bid Amount (GH₵)</FormLabel>
                                         <FormControl>
                                             <div className="relative">
                                                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                                    <span className="text-muted-foreground sm:text-sm">$</span>
+                                                    <span className="text-muted-foreground sm:text-sm">GH₵</span>
                                                 </div>
-                                                <Input type="number" step="0.01" className="pl-7" {...field} />
+                                                <Input type="number" step="0.01" className="pl-10" {...field} />
                                             </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full" disabled={isLoading || !user}>
-                                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gavel className="mr-2 h-4 w-4" />}
-                                {user ? 'Place Bid' : 'Log in to Bid'}
-                            </Button>
+                            {user ? (
+                                <Button type="submit" className="w-full" disabled={isLoading}>
+                                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gavel className="mr-2 h-4 w-4" />}
+                                    Place Bid
+                                </Button>
+                            ) : (
+                                <Link href="/login" className="w-full block">
+                                    <Button className="w-full">
+                                        Login to Place Bid
+                                    </Button>
+                                </Link>
+                            )}
                         </form>
                     </Form>
                 )}
@@ -154,11 +162,11 @@ export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps)
                                               <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(bid.timestamp), { addSuffix: true })}</p>
                                           </div>
                                       </div>
-                                      <p className="font-bold text-sm">${bid.amount.toFixed(2)}</p>
+                                      <p className="font-bold text-sm">GH₵{bid.amount.toFixed(2)}</p>
                                   </li>
                               )
                           })}
-                           <li className="text-center text-sm text-muted-foreground pt-2">Starting Price: ${startingPrice.toFixed(2)}</li>
+                           <li className="text-center text-sm text-muted-foreground pt-2">Starting Price: GH₵{startingPrice.toFixed(2)}</li>
                       </ul>
                     </ScrollArea>
                 </div>
@@ -166,3 +174,5 @@ export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps)
         </Card>
     );
 }
+
+    
