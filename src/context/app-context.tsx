@@ -46,6 +46,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log("Auth state changed, user:", firebaseUser);
       setLoading(true);
       if (firebaseUser) {
         // Find existing user first
@@ -150,9 +151,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 };
 
   const logout = async () => {
+    console.log("Logout initiated");
     await firebaseSignOut(auth);
     setUser(null);
     setLoading(false);
+    console.log("Logout completed, redirecting to login");
     router.push('/login');
   };
   
