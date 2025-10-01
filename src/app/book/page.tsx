@@ -61,7 +61,7 @@ export default function BookPage() {
   
   const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
   const [assignedDriver, setAssignedDriver] = useState<User | null>(null);
-  const [currentRide, setCurrentRide = useState<Ride | null>(null);
+  const [currentRide, setCurrentRide] = useState<Ride | null>(null);
   
   const [pinningLocation, setPinningLocation] = useState<PinningLocation>(null);
 
@@ -499,5 +499,3 @@ export default function BookPage() {
     </div>
   );
 }
-
-    
