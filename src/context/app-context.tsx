@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -14,7 +15,7 @@ interface AppContextType {
   logout: () => void;
   switchUserForTesting: (role: User['role']) => Promise<{ success: boolean; error?: string }>;
   redirectToDashboard: (user: User) => void;
-  updateUser: (user: User) => void; // Add this
+  updateUser: (user: User) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -46,11 +47,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   useEffect(() => {
+    let isInitialCheck = true;
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        // This is a real user. We can create a "local" user object from it.
-        // In a real app, you'd fetch profile data from Firestore.
-        // For now, we'll check if they match a dummy user or create a new one.
         const existingUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
         if (existingUser) {
             setUser(existingUser);
@@ -59,26 +58,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 id: firebaseUser.uid,
                 email: firebaseUser.email!,
                 name: firebaseUser.displayName || 'New User',
-                role: 'unassigned', // Default role for new signups
+                role: 'unassigned',
             };
             DUMMY_USERS.push(newUser);
             setUser(newUser);
         }
       } else {
-        // No Firebase user. We might still have a test user.
-        // We let logout() handle setting user to null.
+        // If it's not the initial check and there's a user set (i.e. a test user),
+        // but no firebaseUser, it means a real user signed out.
+        // We should not log out a test user.
+        if (!isInitialCheck && user && DUMMY_USERS.some(u => u.id === user.id && u.password)) {
+             // This was a real user, now they are logged out.
+             setUser(null);
+        }
       }
       setLoading(false);
+      isInitialCheck = false;
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle setting the user
       return { success: true };
     } catch (error: any) {
       setLoading(false);
@@ -90,7 +94,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       try {
         await createUserWithEmailAndPassword(auth, email, password);
-        // onAuthStateChanged will handle the new user
         return { success: true };
       } catch (error: any) {
         setLoading(false);
@@ -100,11 +103,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     setLoading(true);
-    // Sign out from firebase if the user is a real one
     if (auth.currentUser) {
         await firebaseSignOut(auth);
     }
-    // Clear local user state for both real and test users
     setUser(null);
     setLoading(false);
     router.push('/login');
@@ -112,7 +113,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const switchUserForTesting = async (role: User['role']) => {
     setLoading(true);
-     // If there's a real user signed in, sign them out first.
     if (auth.currentUser) {
         await firebaseSignOut(auth);
     }
@@ -136,7 +136,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         DUMMY_USERS[userIndex] = updatedUser;
     }
   }
-
 
   const value = { user, loading, login, signup, logout, switchUserForTesting, redirectToDashboard, updateUser };
 
