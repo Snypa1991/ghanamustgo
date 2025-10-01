@@ -8,25 +8,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useAuth } from '@/context/app-context';
+import { MopedIcon } from '@/components/icons';
 
 
 const features = [
   {
-    title: 'Book a Ride',
-    description: 'Fast and reliable rides to get you where you need to be.',
+    title: 'Book Okada',
+    description: 'Fast and reliable motorcycle rides to get you through the city traffic.',
+    icon: MopedIcon,
+    href: '/book',
+    cta: 'Book Now',
+  },
+   {
+    title: 'Book Taxi',
+    description: 'Comfortable and private car rides for your convenience.',
     icon: Car,
     href: '/book',
     cta: 'Book Now',
   },
   {
-    title: 'Order Food',
-    description: 'Get your favorite meals delivered to your doorstep, fast.',
-    icon: UtensilsCrossed,
-    href: '/food',
-    cta: 'Order Now',
-  },
-  {
-    title: 'Send a Package',
+    title: 'Dispatch Now',
     description: 'Affordable and secure on-demand dispatch services.',
     icon: Package,
     href: '/dispatch',
