@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/app-context";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -19,7 +20,7 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -29,25 +30,20 @@ export default function LoginPage() {
       password: "",
     },
   });
+  
+  useEffect(() => {
+    if (!loading && user) {
+        router.push('/');
+    }
+  }, [user, loading, router]);
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const response = await fetch("https://gmg-api-5lcn.onrender.com/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const data = await response.json();
-      login(data.user);
-      toast({ title: "Login successful" });
-      router.push("/"); 
-    } catch (error) {
-      toast({ title: "Error", description: "An error occurred during login", variant: "destructive" });
+    const result = await login(values.email, values.password);
+    if (result.success) {
+        toast({ title: "Login successful" });
+    } else {
+        toast({ title: "Error", description: result.error || "An error occurred during login", variant: "destructive" });
     }
   }
 
@@ -94,6 +90,11 @@ export default function LoginPage() {
         <div className="text-center">
           <p className="text-sm">
             Don&apos;t have an account? <Link href="/signup" className="font-medium text-primary hover:underline">Sign up</Link>
+          </p>
+          <p className="text-sm mt-2">
+            <Link href="/test-login" className="text-xs text-muted-foreground hover:underline">
+              Quick Test Login
+            </Link>
           </p>
         </div>
       </div>

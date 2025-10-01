@@ -20,7 +20,7 @@ const formSchema = z.object({
 
 export default function SignupPage() {
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -33,23 +33,12 @@ export default function SignupPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const response = await fetch("https://gmg-api-5lcn.onrender.com/api/v1/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        throw new Error("Signup failed");
-      }
-
-      const data = await response.json();
-      login(data.user);
-      toast({ title: "Signup successful" });
-      router.push("/");
-    } catch (error) {
-      toast({ title: "Error", description: "An error occurred during signup", variant: "destructive" });
+    const result = await signup(values.name, values.email, values.password);
+    if (result.success) {
+      toast({ title: "Signup successful", description: "Please choose your role." });
+      // The auth listener will redirect to role selection.
+    } else {
+       toast({ title: "Error", description: result.error || "An error occurred during signup", variant: "destructive" });
     }
   }
 
