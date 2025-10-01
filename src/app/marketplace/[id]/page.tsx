@@ -12,10 +12,10 @@ import BiddingCard from '@/components/bidding-card';
 import { notFound } from 'next/navigation';
 
 const items = [
-  { id: '1', name: 'Traditional Kente Cloth', price: 150.00, imageId: 'marketplace-item-1', description: "This vibrant and authentic Kente cloth is hand-woven by master artisans in Ghana. Made from high-quality cotton and rayon, it features traditional patterns rich in symbolism. Perfect for special occasions, cultural events, or as a stunning piece of home decor. Dimensions: 12 yards.", gallery: ['marketplace-item-1', 'kente-detail-1', 'kente-detail-2'] },
-  { id: '2', name: 'Handmade Leather Sandals', price: 45.00, imageId: 'marketplace-item-2', description: "Step out in style with these comfortable and durable handmade leather sandals. Crafted by local cobblers, they feature intricate beadwork and a sturdy sole, perfect for the tropical climate. A true blend of tradition and modern fashion.", gallery: ['marketplace-item-2', 'sandals-detail-1', 'sandals-detail-2'] },
-  { id: '3', name: 'Beaded Jewelry Set', price: 75.00, imageId: 'marketplace-item-3', description: "Adorn yourself with this exquisite beaded jewelry set, including a necklace, bracelet, and earrings. Each bead is carefully selected and strung to create a unique and colorful accessory that tells a story. A beautiful gift for a loved one.", gallery: ['marketplace-item-3', 'jewelry-detail-1', 'jewelry-detail-2'] },
-  { id: '4', name: 'Carved Wooden Mask', price: 90.00, imageId: 'marketplace-item-4', description: "A striking and authentic carved wooden mask, handcrafted from a single piece of sese wood. This piece of art represents a traditional Adinkra symbol and adds a touch of African heritage to any room. Ideal for collectors and art enthusiasts.", gallery: ['marketplace-item-4', 'mask-detail-1', 'mask-detail-2'] },
+  { id: '1', name: 'Traditional Kente Cloth', price: 150.00, imageId: 'marketplace-item-1', description: "This vibrant and authentic Kente cloth is hand-woven by master artisans in Ghana. Made from high-quality cotton and rayon, it features traditional patterns rich in symbolism. Perfect for special occasions, cultural events, or as a stunning piece of home decor. Dimensions: 12 yards.", gallery: ['marketplace-item-1', 'kente-detail-1', 'kente-detail-2'], imageHint: "kente cloth" },
+  { id: '2', name: 'Handmade Leather Sandals', price: 45.00, imageId: 'marketplace-item-2', description: "Step out in style with these comfortable and durable handmade leather sandals. Crafted by local cobblers, they feature intricate beadwork and a sturdy sole, perfect for the tropical climate. A true blend of tradition and modern fashion.", gallery: ['marketplace-item-2', 'sandals-detail-1', 'sandals-detail-2'], imageHint: "leather sandals" },
+  { id: '3', name: 'Beaded Jewelry Set', price: 75.00, imageId: 'marketplace-item-3', description: "Adorn yourself with this exquisite beaded jewelry set, including a necklace, bracelet, and earrings. Each bead is carefully selected and strung to create a unique and colorful accessory that tells a story. A beautiful gift for a loved one.", gallery: ['marketplace-item-3', 'jewelry-detail-1', 'jewelry-detail-2'], imageHint: "beaded jewelry" },
+  { id: '4', name: 'Carved Wooden Mask', price: 90.00, imageId: 'marketplace-item-4', description: "A striking and authentic carved wooden mask, handcrafted from a single piece of sese wood. This piece of art represents a traditional Adinkra symbol and adds a touch of African heritage to any room. Ideal for collectors and art enthusiasts.", gallery: ['marketplace-item-4', 'mask-detail-1', 'mask-detail-2'], imageHint: "wooden mask" },
 ];
 
 // Add dummy images for gallery
@@ -40,7 +40,7 @@ export default function MarketplaceItemPage({ params }: { params: { id: string }
   }
 
   return (
-    <div className="container py-12">
+    <div className="container py-8 md:py-12">
         <Link href="/marketplace" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Marketplace
@@ -76,8 +76,8 @@ export default function MarketplaceItemPage({ params }: { params: { id: string }
                 
                 <Card>
                     <CardContent className="p-6">
-                        <h1 className="text-3xl font-bold font-headline mb-2">{item.name}</h1>
-                        <p className="text-lg text-muted-foreground mb-6">By Yaw Vendor</p>
+                        <h1 className="text-2xl md:text-3xl font-bold font-headline mb-2">{item.name}</h1>
+                        <p className="text-base md:text-lg text-muted-foreground mb-6">By Yaw Vendor</p>
                         
                         <h2 className="font-bold text-lg mb-2">Description</h2>
                         <p className="text-muted-foreground leading-relaxed">{item.description}</p>
@@ -115,7 +115,7 @@ export default function MarketplaceItemPage({ params }: { params: { id: string }
                 </Card>
             </div>
             
-            <div className="w-full">
+            <div className="w-full lg:sticky lg:top-24">
                 <BiddingCard itemId={item.id} startingPrice={item.price} />
             </div>
         </div>

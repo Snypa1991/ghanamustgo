@@ -53,7 +53,7 @@ export default function VehicleDetails({ role }: VehicleDetailsProps) {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="license-plate">License Plate Number</Label>
                         <Input id="license-plate" placeholder="GT 1234-24" />
@@ -90,7 +90,7 @@ export default function VehicleDetails({ role }: VehicleDetailsProps) {
                     <div>
                         <Label>Image Preview</Label>
                         <div className="mt-2 relative">
-                             <img src={imagePreview} alt="Vehicle Preview" className="rounded-md object-cover w-full max-h-64" />
+                             <img src={imagePreview} alt="Vehicle Preview" className="rounded-md object-cover w-full aspect-video" />
                              <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                                 Looks Clear
                              </div>

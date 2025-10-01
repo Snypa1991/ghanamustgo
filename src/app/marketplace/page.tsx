@@ -11,10 +11,10 @@ import { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 
 const items = [
-  { id: '1', name: 'Traditional Kente Cloth', price: '150.00', imageId: 'marketplace-item-1' },
-  { id: '2', name: 'Handmade Leather Sandals', price: '45.00', imageId: 'marketplace-item-2' },
-  { id: '3', name: 'Beaded Jewelry Set', price: '75.00', imageId: 'marketplace-item-3' },
-  { id: '4', name: 'Carved Wooden Mask', price: '90.00', imageId: 'marketplace-item-4' },
+  { id: '1', name: 'Traditional Kente Cloth', price: '150.00', imageId: 'marketplace-item-1', imageHint: 'kente cloth' },
+  { id: '2', name: 'Handmade Leather Sandals', price: '45.00', imageId: 'marketplace-item-2', imageHint: 'leather sandals' },
+  { id: '3', name: 'Beaded Jewelry Set', price: '75.00', imageId: 'marketplace-item-3', imageHint: 'beaded jewelry' },
+  { id: '4', name: 'Carved Wooden Mask', price: '90.00', imageId: 'marketplace-item-4', imageHint: 'wooden mask' },
 ];
 
 export default function MarketplacePage() {
@@ -30,8 +30,8 @@ export default function MarketplacePage() {
   }, [searchQuery]);
 
   return (
-    <div className="container py-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+    <div className="container py-8 md:py-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 md:mb-12">
         <div className="text-left">
           <Store className="h-12 w-12 text-primary" />
           <h1 className="mt-4 text-4xl font-bold font-headline">Marketplace</h1>
@@ -47,8 +47,8 @@ export default function MarketplacePage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Link href="/marketplace/list-item">
-                <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} className="w-full sm:w-auto">
+            <Link href="/marketplace/list-item" className="w-full sm:w-auto">
+                <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} className="w-full">
                     <Tag className="mr-2 h-4 w-4" />
                     Sell Your Item
                 </Button>
@@ -57,7 +57,7 @@ export default function MarketplacePage() {
       </div>
 
       {filteredItems.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredItems.map((item) => {
             const image = PlaceHolderImages.find(p => p.id === item.imageId);
             return (
@@ -70,7 +70,7 @@ export default function MarketplacePage() {
                             alt={item.name}
                             fill
                             className="object-cover transition-transform duration-300 group-hover:scale-105"
-                            data-ai-hint={image.imageHint}
+                            data-ai-hint={item.imageHint}
                         />
                     </div>
                   )}

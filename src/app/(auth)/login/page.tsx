@@ -1,116 +1,153 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { GhanaMustGoIcon } from '@/components/icons';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/app-context';
-import { DUMMY_USERS, User } from '@/lib/dummy-data';
-import { useEffect } from 'react';
-import { Loader2, User as UserIcon, Bike, Car, Store, Shield, UserPlus } from 'lucide-react';
-
-const roleIcons: Record<User['role'], React.ReactNode> = {
-    user: <UserIcon className="h-6 w-6" />,
-    biker: <Bike className="h-6 w-6" />,
-    driver: <Car className="h-6 w-6" />,
-    vendor: <Store className="h-6 w-6" />,
-    admin: <Shield className="h-6 w-6" />,
-    unassigned: <UserPlus className="h-6 w-6" />,
-};
-
+import { useToast } from '@/hooks/use-toast';
+import { DUMMY_USERS } from '@/lib/dummy-data';
+import { Loader2, Mail, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { user: loggedInUser, loading, switchUserForTesting } = useAuth();
+  const { login, switchUserForTesting } = useAuth();
 
-  const redirectToDashboard = (user: User) => {
-    if (user.role === 'unassigned') {
-      router.push('/role-selection');
-    } else if (user.role === 'admin') {
-      router.push('/admin/dashboard');
-    } else if (user.role === 'biker' || user.role === 'driver') {
-      router.push('/dashboard');
-    } else if (user.role === 'vendor') {
-      router.push('/vendor/dashboard');
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const isDummy = DUMMY_USERS.some(user => user.email === email && user.password);
+    
+    if (isDummy) {
+      handleDummyLogin();
     } else {
-      router.push('/book');
+      setStep(2);
     }
   };
 
-  useEffect(() => {
-    if (!loading && loggedInUser) {
-      redirectToDashboard(loggedInUser);
-    }
-  }, [loggedInUser, loading, router]);
-
-
-  const handleLogin = (role: User['role']) => {
-    const userToLogin = DUMMY_USERS.find(user => user.role === role);
-    if (userToLogin) {
-        switchUserForTesting(userToLogin.role).then(result => {
-            if (result.success) {
-                toast({
-                    title: 'Logged In',
-                    description: `You are now logged in as ${userToLogin.name} (${userToLogin.role}).`,
-                });
-            } else {
-                toast({
-                    variant: 'destructive',
-                    title: 'Login Failed',
-                    description: result.error || `Failed to log in as ${role}`
-                });
-            }
-        });
-    } else {
-        toast({
-            variant: 'destructive',
-            title: 'Login Failed',
-            description: `No dummy user found for role: ${role}`,
-        });
+  const handleDummyLogin = async () => {
+    setIsLoading(true);
+    const dummyUser = DUMMY_USERS.find(user => user.email === email);
+    if(dummyUser) {
+        const result = await switchUserForTesting(dummyUser.role);
+        if (!result.success) {
+            toast({
+                variant: 'destructive',
+                title: 'Login Failed',
+                description: result.error,
+            });
+            setIsLoading(false);
+        }
+        // Success will trigger redirection via AuthContext effect
     }
   };
 
-  if (loading || loggedInUser) {
-    return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
-            <Loader2 className="h-10 w-10 animate-spin text-primary"/>
-        </div>
-    );
-  }
 
-  const roles: User['role'][] = ['user', 'biker', 'driver', 'vendor', 'admin', 'unassigned'];
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const result = await login(email, password);
+
+    if (result.success) {
+      toast({
+        title: 'Login Successful',
+        description: 'You are now logged in.',
+      });
+      // Redirect is handled by the auth context
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: result.error,
+      });
+    }
+    setIsLoading(false);
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen sm:min-h-[calc(100vh-10rem)] py-12 px-4">
+    <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />
-          <CardTitle className="mt-4 font-headline text-2xl">Select a Role</CardTitle>
+          <CardTitle className="mt-4 font-headline text-2xl">
+            {step === 1 ? 'Sign In' : 'Enter Password'}
+          </CardTitle>
           <CardDescription>
-            Choose a role to log in and test the application.
+            {step === 1 ? "Enter your email to continue." : `Signing in as ${email}`}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {roles.map(role => (
-                    <Button 
-                        key={role} 
-                        onClick={() => handleLogin(role)} 
-                        variant="secondary" 
-                        className="h-24 flex flex-col gap-2 items-center justify-center"
-                    >
-                        {roleIcons[role]}
-                        <span className="capitalize text-sm font-medium">{role}</span>
-                    </Button>
-                ))}
-            </div>
-        </CardContent>
-        <CardFooter className="flex-col gap-4">
-             <div className="text-center text-sm text-muted-foreground">
-                This is a development login page for testing purposes.
+
+        {step === 1 ? (
+          <form onSubmit={handleEmailSubmit}>
+            <CardContent>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="okada@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                />
               </div>
+            </CardContent>
+            <CardFooter className="flex-col gap-4">
+              <Button type="submit" className="w-full" disabled={isLoading || !email}>
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                Continue
+              </Button>
+            </CardFooter>
+          </form>
+        ) : (
+          <form onSubmit={handlePasswordSubmit}>
+            <CardContent className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="flex-col gap-4">
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Sign In
+              </Button>
+               <Button variant="link" onClick={() => { setStep(1); setPassword(''); }}>
+                Back to email
+              </Button>
+            </CardFooter>
+          </form>
+        )}
+
+        <CardFooter className="flex-col gap-4 border-t pt-6">
+            <div className="text-center text-sm">
+                Don't have an account?{' '}
+                <Link href="/signup" className="underline text-primary hover:text-primary/80">
+                    Sign up
+                </Link>
+            </div>
+             <div className="text-center text-sm">
+                Or use the{' '}
+                <Link href="/test-login" className="underline text-primary hover:text-primary/80">
+                    Quick Test Login
+                </Link>
+            </div>
         </CardFooter>
       </Card>
     </div>
