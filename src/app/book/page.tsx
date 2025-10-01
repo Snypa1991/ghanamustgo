@@ -19,6 +19,8 @@ import { useToast } from '@/hooks/use-toast';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import DispatchForm from '@/components/dispatch-form';
 import type { SuggestDeliveryFeeOutput } from '@/ai/flows/suggest-delivery-fee';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 type BookingType = 'ride' | 'dispatch';
 type BookingStep = 'details' | 'selection' | 'confirming' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
@@ -117,6 +119,14 @@ export default function BookPage() {
   };
   
   async function handleGetEstimate(values?: any) {
+    if(!user) {
+        toast({
+            variant: 'destructive',
+            title: 'Not logged in',
+            description: 'Please log in or sign up to book a ride.'
+        });
+        return;
+    }
     setIsLoading(true);
     setAiResult(null);
     setDirections(null); 
@@ -323,146 +333,150 @@ export default function BookPage() {
   const isTripInProgress = step === 'confirming' || step === 'enroute-to-pickup' || step === 'enroute-to-destination' || step === 'completed';
 
   return (
-    <div className="relative h-[calc(100vh-4rem)] w-full">
-      {isLoaded ? (
-        <GoogleMap
-          mapContainerStyle={containerStyle}
-          center={center}
-          zoom={12}
-          options={{ streetViewControl: false, mapTypeControl: false, fullscreenControl: false, zoomControl: true, gestureHandling: isTripInProgress ? 'none' : 'cooperative' }}
-          onLoad={onMapLoad}
-          onUnmount={onUnmount}
-          onClick={onMapClick}
-        >
-          {shouldRenderDirectionsService && !directions && (
-            <DirectionsService
-              options={{ destination: endLocation, origin: startLocation, travelMode: google.maps.TravelMode.DRIVING }}
-              callback={directionsCallback}
-            />
-          )}
-          {directions && (
-            <DirectionsRenderer
-              options={{ directions, suppressMarkers: true, polylineOptions: { strokeColor: 'hsl(var(--primary))', strokeOpacity: 0.8, strokeWeight: 6 }}}
-            />
-          )}
-           {directions && directions.routes[0]?.legs[0]?.start_location && !isTripInProgress &&(
-             <Marker position={directions.routes[0].legs[0].start_location} icon={startMarkerIcon}/>
-           )}
-           {directions && directions.routes[0]?.legs[0]?.end_location && !isTripInProgress && (
-             <Marker position={directions.routes[0].legs[0].end_location} icon={endMarkerIcon}/>
-           )}
-           {isTripInProgress && driverPosition && (
-              <Marker position={driverPosition} icon={driverMarkerIcon}/>
-           )}
-           {isTripInProgress && directions && directions.routes[0]?.legs[0]?.start_location && (
-                <Marker position={directions.routes[0].legs[0].start_location} icon={startMarkerIcon}/>
+    <div className="flex flex-col h-[calc(100vh-4rem)] w-full">
+      <div className={cn("w-full transition-all duration-300", isTripInProgress ? "h-full" : "h-[60%]")}>
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={center}
+            zoom={12}
+            options={{ streetViewControl: false, mapTypeControl: false, fullscreenControl: false, zoomControl: true, gestureHandling: 'cooperative' }}
+            onLoad={onMapLoad}
+            onUnmount={onUnmount}
+            onClick={onMapClick}
+          >
+            {shouldRenderDirectionsService && !directions && (
+              <DirectionsService
+                options={{ destination: endLocation, origin: startLocation, travelMode: google.maps.TravelMode.DRIVING }}
+                callback={directionsCallback}
+              />
             )}
-           {isTripInProgress && directions && directions.routes[0]?.legs[0]?.end_location && (
-             <Marker position={directions.routes[0].legs[0].end_location} icon={endMarkerIcon}/>
-           )}
-        </GoogleMap>
-      ) : (
-        <Skeleton className="absolute inset-0" />
-      )}
-
-      <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-auto sm:right-8 sm:w-full sm:max-w-sm">
-        {isTripInProgress ? (
-          <TripStatusCard step={step} driver={assignedDriver} ride={currentRide} onReviewAndFinish={handleReviewAndFinish} />
+            {directions && (
+              <DirectionsRenderer
+                options={{ directions, suppressMarkers: true, polylineOptions: { strokeColor: 'hsl(var(--primary))', strokeOpacity: 0.8, strokeWeight: 6 }}}
+              />
+            )}
+             {directions && directions.routes[0]?.legs[0]?.start_location && (
+               <Marker position={directions.routes[0].legs[0].start_location} icon={startMarkerIcon}/>
+             )}
+             {directions && directions.routes[0]?.legs[0]?.end_location && (
+               <Marker position={directions.routes[0].legs[0].end_location} icon={endMarkerIcon}/>
+             )}
+             {isTripInProgress && driverPosition && (
+                <Marker position={driverPosition} icon={driverMarkerIcon}/>
+             )}
+          </GoogleMap>
         ) : (
-          <Card className="shadow-2xl">
-            {step === 'details' && (
-              <>
-                <CardHeader>
-                  <CardTitle className="font-headline text-2xl">Get a Ride or Send a Package</CardTitle>
-                  <CardDescription>Choose your service and enter route details.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <ToggleGroup type="single" value={bookingType} onValueChange={(value: BookingType) => value && setBookingType(value)} className="grid grid-cols-2">
-                        <ToggleGroupItem value="ride" aria-label="Request a ride"><PersonStanding className="h-4 w-4 mr-2"/>Ride</ToggleGroupItem>
-                        <ToggleGroupItem value="dispatch" aria-label="Send a package"><Package className="h-4 w-4 mr-2"/>Dispatch</ToggleGroupItem>
-                    </ToggleGroup>
-                    <RouteOptimization 
-                        startLocation={startLocation}
-                        endLocation={endLocation}
-                        onRouteUpdate={handleRouteUpdate} 
-                        onPinLocation={setPinningLocation}
-                        onSubmit={handleGetEstimate} 
-                        isLoading={isLoading}
-                        submitButtonText={bookingType === 'ride' ? 'Find Ride' : 'Get Estimate'}
-                    />
-                    {bookingType === 'dispatch' && (
-                        <div className="pt-4 border-t">
-                            <h3 className="text-lg font-medium mb-2">Package Details</h3>
-                            <DispatchForm onSubmit={handleGetEstimate} isLoading={isLoading} />
-                        </div>
-                    )}
-                </CardContent>
-              </>
-            )}
-
-            {step === 'selection' && (
-              <>
-                  <CardHeader>
-                      <CardTitle className="text-2xl font-bold font-headline text-center">{bookingType === 'ride' ? 'Choose a ride' : 'Confirm Dispatch'}</CardTitle>
-                      <CardDescription className="text-center">{bookingType === 'ride' ? 'Select a vehicle that suits your needs' : 'Review the details and confirm your request'}</CardDescription>
-                       {aiResult && bookingType === 'ride' && (
-                        <Alert className="text-center text-sm bg-primary/5 border-primary/20 mt-2">
-                            <Bot className="h-4 w-4" />
-                            <AlertTitle className="font-semibold">Smart Route Suggestion</AlertTitle>
-                            <AlertDescription>{aiResult.optimizedRoute}</AlertDescription>
-                        </Alert>
-                      )}
-                      {dispatchFee && bookingType === 'dispatch' && (
-                        <Alert className="text-center text-sm bg-primary/5 border-primary/20 mt-2">
-                            <Bot className="h-4 w-4" />
-                            <AlertTitle className="font-semibold">AI Suggested Fee</AlertTitle>
-                            <AlertDescription>{dispatchFee.reasoning}</AlertDescription>
-                        </Alert>
-                      )}
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                      {bookingType === 'ride' ? (
-                          <>
-                            <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50" onClick={() => handleConfirmBooking('okada')}>
-                                <div className='flex items-center gap-4 text-left'>
-                                    <MopedIcon className="h-10 w-10 text-primary" />
-                                    <div>
-                                        <p className="font-bold text-lg">Book Okada</p>
-                                        <p className="text-sm text-muted-foreground">Quick & affordable</p>
-                                    </div>
-                                </div>
-                                <p className="text-lg font-bold">GH₵{ridePrices.okada.toFixed(2)}</p>
-                            </Button>
-                            <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50" onClick={() => handleConfirmBooking('taxi')}>
-                                <div className='flex items-center gap-4 text-left'>
-                                    <Car className="h-10 w-10 text-primary" />
-                                    <div>
-                                        <p className="font-bold text-lg">Book Taxi</p>
-                                        <p className="text-sm text-muted-foreground">Comfortable & private</p>
-                                    </div>
-                                </div>
-                                <p className="text-lg font-bold">GH₵{ridePrices.taxi.toFixed(2)}</p>
-                            </Button>
-                          </>                      
-                      ) : (
-                        <div className="text-center p-4 rounded-lg bg-muted">
-                            <p className="text-sm text-muted-foreground">Delivery Fee</p>
-                            <p className="text-4xl font-bold text-primary">GH₵ {dispatchFee?.suggestedFee.toFixed(2)}</p>
-                        </div>
-                      )}
-                  </CardContent>
-                  <CardFooter className="flex-col gap-3 pt-4">
-                       {bookingType === 'dispatch' && (
-                        <Button onClick={() => handleConfirmBooking('okada')} className="w-full">Confirm & Find Rider</Button>
-                       )}
-                      <Button variant="link" onClick={() => setStep('details')}>Back</Button>
-                  </CardFooter>
-              </>
-            )}
-          </Card>
+          <Skeleton className="h-full w-full" />
         )}
+      </div>
+
+      <div className="flex-grow bg-background border-t-2 border-primary">
+         <ScrollArea className="h-full">
+            <div className="container py-4 md:py-6">
+                {isTripInProgress ? (
+                  <div className="max-w-md mx-auto">
+                    <TripStatusCard step={step} driver={assignedDriver} ride={currentRide} onReviewAndFinish={handleReviewAndFinish} />
+                  </div>
+                ) : (
+                  <Card className="shadow-none border-none max-w-md mx-auto">
+                    {step === 'details' && (
+                      <>
+                        <CardHeader className="px-1">
+                          <CardTitle className="font-headline text-2xl">Get a Ride or Send a Package</CardTitle>
+                          <CardDescription>Choose your service and enter route details.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4 px-1">
+                            <ToggleGroup type="single" value={bookingType} onValueChange={(value: BookingType) => value && setBookingType(value)} className="grid grid-cols-2">
+                                <ToggleGroupItem value="ride" aria-label="Request a ride"><PersonStanding className="h-4 w-4 mr-2"/>Ride</ToggleGroupItem>
+                                <ToggleGroupItem value="dispatch" aria-label="Send a package"><Package className="h-4 w-4 mr-2"/>Dispatch</ToggleGroupItem>
+                            </ToggleGroup>
+                            <RouteOptimization 
+                                startLocation={startLocation}
+                                endLocation={endLocation}
+                                onRouteUpdate={handleRouteUpdate} 
+                                onPinLocation={setPinningLocation}
+                                onSubmit={handleGetEstimate} 
+                                isLoading={isLoading}
+                                submitButtonText={bookingType === 'ride' ? 'Find Ride' : 'Get Estimate'}
+                            />
+                            {bookingType === 'dispatch' && (
+                                <div className="pt-4 border-t">
+                                    <h3 className="text-lg font-medium mb-2">Package Details</h3>
+                                    <DispatchForm onSubmit={handleGetEstimate} isLoading={isLoading} />
+                                </div>
+                            )}
+                        </CardContent>
+                      </>
+                    )}
+
+                    {step === 'selection' && (
+                      <>
+                          <CardHeader className="px-1 text-center">
+                              <CardTitle className="text-2xl font-bold font-headline">{bookingType === 'ride' ? 'Choose a ride' : 'Confirm Dispatch'}</CardTitle>
+                              <CardDescription>{bookingType === 'ride' ? 'Select a vehicle that suits your needs' : 'Review the details and confirm your request'}</CardDescription>
+                               {aiResult && bookingType === 'ride' && (
+                                <Alert className="text-left text-sm bg-primary/5 border-primary/20 mt-2">
+                                    <Bot className="h-4 w-4" />
+                                    <AlertTitle className="font-semibold">Smart Route Suggestion</AlertTitle>
+                                    <AlertDescription>{aiResult.optimizedRoute}</AlertDescription>
+                                </Alert>
+                              )}
+                              {dispatchFee && bookingType === 'dispatch' && (
+                                <Alert className="text-left text-sm bg-primary/5 border-primary/20 mt-2">
+                                    <Bot className="h-4 w-4" />
+                                    <AlertTitle className="font-semibold">AI Suggested Fee</AlertTitle>
+                                    <AlertDescription>{dispatchFee.reasoning}</AlertDescription>
+                                </Alert>
+                              )}
+                          </CardHeader>
+
+                          <CardContent className="space-y-4 px-1">
+                              {bookingType === 'ride' ? (
+                                  <>
+                                    <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50" onClick={() => handleConfirmBooking('okada')}>
+                                        <div className='flex items-center gap-4 text-left'>
+                                            <MopedIcon className="h-10 w-10 text-primary" />
+                                            <div>
+                                                <p className="font-bold text-lg">Book Okada</p>
+                                                <p className="text-sm text-muted-foreground">Quick & affordable</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-lg font-bold">GH₵{ridePrices.okada.toFixed(2)}</p>
+                                    </Button>
+                                    <Button variant="outline" className="w-full h-auto p-4 flex items-center justify-between border-2 hover:border-primary hover:bg-accent/50" onClick={() => handleConfirmBooking('taxi')}>
+                                        <div className='flex items-center gap-4 text-left'>
+                                            <Car className="h-10 w-10 text-primary" />
+                                            <div>
+                                                <p className="font-bold text-lg">Book Taxi</p>
+                                                <p className="text-sm text-muted-foreground">Comfortable & private</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-lg font-bold">GH₵{ridePrices.taxi.toFixed(2)}</p>
+                                    </Button>
+                                  </>                      
+                              ) : (
+                                <div className="text-center p-4 rounded-lg bg-muted">
+                                    <p className="text-sm text-muted-foreground">Delivery Fee</p>
+                                    <p className="text-4xl font-bold text-primary">GH₵ {dispatchFee?.suggestedFee.toFixed(2)}</p>
+                                </div>
+                              )}
+                          </CardContent>
+                          <CardFooter className="flex-col gap-3 pt-4 px-1">
+                               {bookingType === 'dispatch' && (
+                                <Button onClick={() => handleConfirmBooking('okada')} className="w-full">Confirm & Find Rider</Button>
+                               )}
+                              <Button variant="link" onClick={() => setStep('details')}>Back</Button>
+                          </CardFooter>
+                      </>
+                    )}
+                  </Card>
+                )}
+            </div>
+         </ScrollArea>
       </div>
     </div>
   );
 }
+
+    
