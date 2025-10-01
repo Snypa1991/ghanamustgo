@@ -1,31 +1,23 @@
 {
-    "name": "Ghana Must Go",
-    "short_name": "GhanaMustGo",
-    "description": "Your all-in-one app for rides, dispatch, food, and more in Ghana.",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#003300",
-    "theme_color": "#003300",
-    "icons": [
-        {
-            "src": "/icon.svg",
-            "sizes": "any",
-            "type": "image/svg+xml"
-        },
-        {
-            "src": "/icons/icon-144x144.png",
-            "type": "image/png",
-            "sizes": "144x144"
-        },
-        {
-            "src": "/icons/icon-192x192.png",
-            "type": "image/png",
-            "sizes": "192x192"
-        },
-        {
-            "src": "/icons/icon-512x512.png",
-            "type": "image/png",
-            "sizes": "512x512"
-        }
-    ]
+  "name": "Ghana Must Go",
+  "short_name": "GhanaMustGo",
+  "description": "Your City, Connected. Rides, deliveries, food, and local goods—all in one app.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF2E1",
+  "theme_color": "#FF8C00",
+  "icons": [
+    {
+      "src": "/icon.png?width=192&height=192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.png?width=512&height=512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
