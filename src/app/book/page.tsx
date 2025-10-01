@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-import { Car, Loader2, Navigation, Bot, Package, PersonStanding } from 'lucide-react';
+import { Car, Loader2, Navigation, Bot, Package, PersonStanding, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MopedIcon } from '@/components/icons';
@@ -20,8 +20,9 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import DispatchForm from '@/components/dispatch-form';
 import type { SuggestDeliveryFeeOutput } from '@/ai/flows/suggest-delivery-fee';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Input } from '@/components/ui/input';
 
 type BookingType = 'ride' | 'dispatch';
 type BookingStep = 'details' | 'selection' | 'confirming' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
@@ -66,6 +67,9 @@ export default function BookPage() {
   const animationRef = useRef<number>();
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -90,6 +94,7 @@ export default function BookPage() {
             } else {
                 setEndLocation(address);
             }
+            setIsSheetOpen(true);
         } else {
             toast({
                 variant: 'destructive',
@@ -145,6 +150,7 @@ export default function BookPage() {
     
     setIsLoading(false);
     setStep('selection');
+    setIsSheetOpen(false);
   }
 
   const handleConfirmBooking = (rideType: 'okada' | 'taxi') => {
@@ -164,7 +170,7 @@ export default function BookPage() {
         ? (rideType === 'okada' ? ridePrices.okada : ridePrices.taxi) 
         : (dispatchFee?.suggestedFee || 0),
       date: new Date().toISOString(),
-      status: 'cancelled', // Will be updated to 'completed' later
+      status: 'cancelled',
     };
 
     setCurrentRide(newRide);
@@ -198,9 +204,9 @@ export default function BookPage() {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (step === 'enroute-to-pickup') {
-      timer = setTimeout(() => setStep('enroute-to-destination'), 10000); // 10s to pickup
+      timer = setTimeout(() => setStep('enroute-to-destination'), 10000); 
     } else if (step === 'enroute-to-destination') {
-      timer = setTimeout(() => handleCompleteRide(), 15000); // 15s to destination
+      timer = setTimeout(() => handleCompleteRide(), 15000); 
     }
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -312,13 +318,19 @@ export default function BookPage() {
     if (pinningLocation) {
         toast({ title: 'Select a location', description: `Click on the map to set your ${pinningLocation} point.` });
         if (mapRef.current) mapRef.current.setOptions({ draggableCursor: 'crosshair' });
+        setIsSheetOpen(false);
     } else {
         if (mapRef.current) mapRef.current.setOptions({ draggableCursor: undefined });
     }
   }, [pinningLocation, toast]);
 
   useEffect(() => {
-    setStep('details');
+    if (step !== 'details') {
+        setIsSheetOpen(false);
+    }
+  }, [step]);
+  
+  useEffect(() => {
     setDirections(null);
   }, [bookingType]);
 
@@ -401,52 +413,15 @@ export default function BookPage() {
         <Skeleton className="h-full w-full" />
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 sm:max-w-md sm:left-auto">
-        {isTripInProgress ? (
-          <TripStatusCard step={step} driver={assignedDriver} ride={currentRide} onReviewAndFinish={handleReviewAndFinish} />
-        ) : (
-          <Card className="shadow-2xl">
-            <ScrollArea className="max-h-[calc(100vh-8rem-6rem)] sm:max-h-[70vh]">
-              {step === 'details' && (
-                <>
-                  <CardHeader>
-                    <CardTitle className="font-headline text-2xl">Get a Ride or Send a Package</CardTitle>
-                    <CardDescription>Choose your service and enter route details.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                      <ToggleGroup type="single" value={bookingType} onValueChange={(value: BookingType) => value && setBookingType(value)} className="grid grid-cols-2">
-                          <ToggleGroupItem value="ride" aria-label="Request a ride"><PersonStanding className="h-4 w-4 mr-2"/>Ride</ToggleGroupItem>
-                          <ToggleGroupItem value="dispatch" aria-label="Send a package"><Package className="h-4 w-4 mr-2"/>Dispatch</ToggleGroupItem>
-                      </ToggleGroup>
-                      <RouteOptimization 
-                          startLocation={startLocation}
-                          endLocation={endLocation}
-                          onRouteUpdate={handleRouteUpdate} 
-                          onPinLocation={setPinningLocation}
-                          onSubmit={() => {}} 
-                          isLoading={false}
-                          submitButtonText={bookingType === 'ride' ? 'Find Ride' : 'Get Estimate'}
-                          hideSubmit
-                      />
-                      {bookingType === 'dispatch' && (
-                          <div className="pt-4 border-t">
-                              <h3 className="text-lg font-medium mb-2">Package Details</h3>
-                              <DispatchForm onSubmit={handleGetEstimate} isLoading={isLoading} />
-                          </div>
-                      )}
-                       {bookingType === 'ride' && (
-                          <Button className="w-full" onClick={() => handleGetEstimate()} disabled={isLoading || !startLocation || !endLocation}>
-                              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Navigation className="mr-2 h-4 w-4"/>}
-                              Find Ride Options
-                          </Button>
-                       )}
-                  </CardContent>
-                </>
-              )}
-
-              {step === 'selection' && (
-                <>
-                    <CardHeader className="text-center">
+      {isTripInProgress ? (
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 sm:max-w-md sm:left-auto">
+            <TripStatusCard step={step} driver={assignedDriver} ride={currentRide} onReviewAndFinish={handleReviewAndFinish} />
+        </div>
+      ) : step === 'selection' ? (
+         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 sm:max-w-md sm:left-auto">
+             <Card className="shadow-2xl">
+                <ScrollArea className="max-h-[70vh]">
+                     <CardHeader className="text-center">
                         <CardTitle className="text-2xl font-bold font-headline">{bookingType === 'ride' ? 'Choose a ride' : 'Confirm Dispatch'}</CardTitle>
                         <CardDescription>{bookingType === 'ride' ? 'Select a vehicle that suits your needs' : 'Review the details and confirm your request'}</CardDescription>
                          {aiResult && bookingType === 'ride' && (
@@ -464,8 +439,7 @@ export default function BookPage() {
                           </Alert>
                         )}
                     </CardHeader>
-
-                    <CardContent className="space-y-4">
+                     <CardContent className="space-y-4">
                         {bookingType === 'ride' ? (
                             <>
                               {renderActionButton('okada')}
@@ -480,14 +454,58 @@ export default function BookPage() {
                     </CardContent>
                     <CardFooter className="flex-col gap-3 pt-4">
                          {bookingType === 'dispatch' && renderDispatchButton()}
-                        <Button variant="link" onClick={() => setStep('details')}>Back</Button>
+                        <Button variant="link" onClick={() => { setStep('details'); setIsSheetOpen(true); }}>Back</Button>
                     </CardFooter>
-                </>
-              )}
-            </ScrollArea>
-          </Card>
-        )}
-      </div>
+                 </ScrollArea>
+            </Card>
+        </div>
+      ) : (
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+                 <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <Card className="shadow-2xl p-4 cursor-pointer hover:bg-muted" onClick={() => setIsSheetOpen(true)}>
+                        <Input placeholder="Where to?" className="text-lg pointer-events-none" />
+                    </Card>
+                 </div>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh]">
+                 <SheetHeader>
+                    <SheetTitle className="font-headline text-2xl">Get a Ride or Send a Package</SheetTitle>
+                 </SheetHeader>
+                 <ScrollArea className="h-[calc(85vh-4rem)]">
+                     <div className="p-4 space-y-4">
+                        <ToggleGroup type="single" value={bookingType} onValueChange={(value: BookingType) => value && setBookingType(value)} className="grid grid-cols-2">
+                            <ToggleGroupItem value="ride" aria-label="Request a ride"><PersonStanding className="h-4 w-4 mr-2"/>Ride</ToggleGroupItem>
+                            <ToggleGroupItem value="dispatch" aria-label="Send a package"><Package className="h-4 w-4 mr-2"/>Dispatch</ToggleGroupItem>
+                        </ToggleGroup>
+                        <RouteOptimization 
+                            startLocation={startLocation}
+                            endLocation={endLocation}
+                            onRouteUpdate={handleRouteUpdate} 
+                            onPinLocation={setPinningLocation}
+                            onSubmit={() => {}} 
+                            isLoading={false}
+                            hideSubmit
+                        />
+                        {bookingType === 'dispatch' && (
+                            <div className="pt-4 border-t">
+                                <h3 className="text-lg font-medium mb-2">Package Details</h3>
+                                <DispatchForm onSubmit={handleGetEstimate} isLoading={isLoading} />
+                            </div>
+                        )}
+                        {bookingType === 'ride' && (
+                            <Button className="w-full" onClick={() => handleGetEstimate()} disabled={isLoading || !startLocation || !endLocation}>
+                                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Navigation className="mr-2 h-4 w-4"/>}
+                                Find Ride Options
+                            </Button>
+                        )}
+                     </div>
+                 </ScrollArea>
+            </SheetContent>
+        </Sheet>
+      )}
     </div>
   );
 }
+
+    
