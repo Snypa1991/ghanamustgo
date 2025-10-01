@@ -228,33 +228,68 @@ export default function BookPage() {
     let path: google.maps.LatLng[];
     let duration: number;
 
+    // Simulate driver starting from a random nearby point for pickup
     if (step === 'enroute-to-pickup') {
-        const startLeg = route.legs[0];
-        const driverStartLat = startLeg.start_location.lat() + (Math.random() - 0.5) * 0.02;
-        const driverStartLng = startLeg.start_location.lng() + (Math.random() - 0.5) * 0.02;
-        const driverStartPoint = new window.google.maps.LatLng(driverStartLat, driverStartLng);
-        path = [driverStartPoint, startLeg.start_location];
-        duration = 10000; 
-    } else { 
-        path = route.overview_path;
-        duration = 15000;
-    }
-
-    let startTime: number;
-    const animate = (timestamp: number) => {
-        if (!startTime) startTime = timestamp;
-        const progress = (timestamp - startTime) / duration;
-
-        if (progress < 1) {
-            const point = window.google.maps.geometry.spherical.interpolate(path[0], path[path.length - 1], progress);
-            setDriverPosition(point);
-            animationRef.current = requestAnimationFrame(animate);
+      const startLeg = route.legs[0];
+      const driverStartLat = startLeg.start_location.lat() + (Math.random() - 0.5) * 0.02;
+      const driverStartLng = startLeg.start_location.lng() + (Math.random() - 0.5) * 0.02;
+      const driverStartPoint = new window.google.maps.LatLng(driverStartLat, driverStartLng);
+      
+      // We need a route from the driver's start to the user's pickup
+      const directionsService = new window.google.maps.DirectionsService();
+      directionsService.route({
+        origin: driverStartPoint,
+        destination: startLeg.start_location,
+        travelMode: google.maps.TravelMode.DRIVING,
+      }, (result, status) => {
+        if (status === 'OK' && result) {
+          animatePath(result.routes[0].overview_path, 10000);
         } else {
-            setDriverPosition(path[path.length - 1]);
+            // Fallback to straight line if service fails
+            animatePath([driverStartPoint, startLeg.start_location], 10000);
         }
-    };
+      });
+    } else { // 'enroute-to-destination'
+      // Animate along the main trip route
+      animatePath(route.overview_path, 15000);
+    }
+    
+    const animatePath = (path: google.maps.LatLng[], duration: number) => {
+        if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
-    animationRef.current = requestAnimationFrame(animate);
+        const pathDistance = window.google.maps.geometry.spherical.computeLength(path);
+        let startTime: number;
+
+        const animate = (timestamp: number) => {
+            if (!startTime) startTime = timestamp;
+            const progress = (timestamp - startTime) / duration;
+
+            if (progress < 1) {
+                const travelledDistance = progress * pathDistance;
+                let currentDistance = 0;
+
+                for (let i = 0; i < path.length - 1; i++) {
+                    const segmentStart = path[i];
+                    const segmentEnd = path[i+1];
+                    const segmentDistance = window.google.maps.geometry.spherical.computeDistanceBetween(segmentStart, segmentEnd);
+                    
+                    if (currentDistance + segmentDistance >= travelledDistance) {
+                        const remainingDistance = travelledDistance - currentDistance;
+                        const segmentProgress = remainingDistance / segmentDistance;
+                        const point = window.google.maps.geometry.spherical.interpolate(segmentStart, segmentEnd, segmentProgress);
+                        setDriverPosition(point);
+                        break;
+                    }
+                    currentDistance += segmentDistance;
+                }
+                animationRef.current = requestAnimationFrame(animate);
+            } else {
+                setDriverPosition(path[path.length - 1]);
+            }
+        };
+
+        animationRef.current = requestAnimationFrame(animate);
+    }
 
     return () => {
         if (animationRef.current) {
