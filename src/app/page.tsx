@@ -105,7 +105,7 @@ export default function Home() {
                   <p className="text-muted-foreground">{feature.description}</p>
                 </CardContent>
                 <CardFooter className="p-6 pt-0 w-full">
-                  <Link href={feature.href} passHref className="w-full">
+                  <Link href={user ? feature.href : '/login'} passHref className="w-full">
                     <Button variant="outline" className="w-full text-primary border border-primary hover:bg-primary hover:text-primary-foreground">
                       {feature.cta} <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -125,12 +125,12 @@ export default function Home() {
               Reach thousands of customers in your city. List your products, from artisan crafts to everyday goods, and grow your business with us.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Link href="/marketplace" passHref>
+              <Link href={user ? "/marketplace" : "/login"} passHref>
                 <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   Explore Market
                 </Button>
               </Link>
-              <Link href="/marketplace/list-item" passHref>
+              <Link href={user ? "/marketplace/list-item" : "/login"} passHref>
                 <Button size="lg" variant="secondary">
                   Start Selling
                 </Button>
