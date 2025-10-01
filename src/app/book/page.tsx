@@ -173,6 +173,7 @@ export default function BookPage() {
         : (dispatchFee?.suggestedFee || 0),
       date: new Date().toISOString(),
       status: 'cancelled',
+      vehicleType: vehicleType,
     };
 
     setCurrentRide(newRide);
@@ -421,13 +422,6 @@ export default function BookPage() {
                      <CardHeader className="text-center">
                         <CardTitle className="text-2xl font-bold font-headline">Confirm Your Request</CardTitle>
                         <CardDescription>Review the details and confirm your request</CardDescription>
-                         {aiResult && bookingType === 'ride' && (
-                          <Alert className="text-left text-sm bg-primary/5 border-primary/20 mt-2">
-                              <Bot className="h-4 w-4" />
-                              <AlertTitle className="font-semibold">Smart Route Suggestion</AlertTitle>
-                              <AlertDescription>{aiResult.optimizedRoute}</AlertDescription>
-                          </Alert>
-                        )}
                         {dispatchFee && bookingType === 'dispatch' && (
                           <Alert className="text-left text-sm bg-primary/5 border-primary/20 mt-2">
                               <Bot className="h-4 w-4" />
@@ -499,3 +493,5 @@ export default function BookPage() {
     </div>
   );
 }
+
+    
