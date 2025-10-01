@@ -300,7 +300,7 @@ export default function DispatchPage() {
                     />
                   </CardContent>
                   <CardFooter>
-                     <Button type="submit" disabled={isLoading} className="w-full h-11" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                     <Button type="submit" disabled={isLoading} className="w-full h-11">
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Package className="mr-2 h-4 w-4" />}
                         Get Delivery Fee
                      </Button>

@@ -88,7 +88,7 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
                     <Button variant="outline" size="lg" onClick={onDecline}>
                         <X className="mr-2 h-4 w-4" /> Decline
                     </Button>
-                    <Button size="lg" onClick={onAccept} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                    <Button size="lg" onClick={onAccept}>
                         <Check className="mr-2 h-4 w-4" /> Accept
                     </Button>
                 </CardFooter>
@@ -129,7 +129,7 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
                     <TripDetails />
                 </CardContent>
                  <CardFooter>
-                    <Button className="w-full" onClick={onStartTrip} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                    <Button className="w-full" onClick={onStartTrip}>
                         <Navigation className="mr-2 h-4 w-4" /> Arrived / Start Trip
                     </Button>
                 </CardFooter>
@@ -166,6 +166,3 @@ export default function RideRequestCard({ ride, status, onAccept, onDecline, onS
 
     return null;
 }
-
-    
-    

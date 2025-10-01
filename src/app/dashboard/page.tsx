@@ -13,6 +13,7 @@ import { DUMMY_RIDES, Ride, DUMMY_USERS } from '@/lib/dummy-data';
 import RideRequestCard from '@/components/ride-request-card';
 import RideHistory from '@/components/ride-history';
 import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const containerStyle = {
   width: '100%',

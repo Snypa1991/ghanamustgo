@@ -96,7 +96,7 @@ export default function ReviewSummarizer() {
               />
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isLoading} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+            <Button type="submit" disabled={isLoading}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}
               Summarize Reviews
             </Button>

@@ -74,6 +74,7 @@ export default function BiddingCard({ itemId, startingPrice }: BiddingCardProps)
                 amount: values.amount,
                 timestamp: new Date().toISOString(),
             };
+            DUMMY_BIDS.unshift(newBid);
             setBids(prevBids => [newBid, ...prevBids].sort((a, b) => b.amount - a.amount));
             setIsLoading(false);
         }, 1000);

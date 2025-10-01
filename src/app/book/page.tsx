@@ -162,7 +162,7 @@ export default function BookPage() {
         ? (rideType === 'okada' ? ridePrices.okada : ridePrices.taxi) 
         : (dispatchFee?.suggestedFee || 0),
       date: new Date().toISOString(),
-      status: 'cancelled', 
+      status: 'cancelled', // Will be updated to 'completed' later
     };
 
     setCurrentRide(newRide);
@@ -301,7 +301,7 @@ export default function BookPage() {
   }, [assignedDriver, isLoaded]);
 
   useEffect(() => {
-    if (step === 'details' && startLocation && endLocation) {
+    if (step === 'details') {
       setDirections(null);
     }
   }, [step, startLocation, endLocation]);

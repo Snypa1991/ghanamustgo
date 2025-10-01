@@ -149,7 +149,6 @@ export default function FoodPage() {
             </div>
             <Button 
                 className="w-full h-12" 
-                style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}
                 disabled={cartItems.length === 0}
                 onClick={handlePlaceOrder}
             >

@@ -10,7 +10,7 @@ import { GhanaMustGoIcon } from '@/components/icons';
 import { useAuth } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { DUMMY_USERS } from '@/lib/dummy-data';
-import { Loader2, Mail, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -70,7 +70,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
+    <div className="flex items-center justify-center min-h-screen sm:min-h-[calc(100vh-10rem)] py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />

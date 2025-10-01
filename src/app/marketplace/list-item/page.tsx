@@ -40,7 +40,7 @@ export default function ListItemPage() {
                 </div>
             </CardContent>
              <CardFooter>
-                 <Button className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                 <Button className="w-full">
                      <Tag className="mr-2 h-4 w-4" />
                      List Item for Sale
                  </Button>

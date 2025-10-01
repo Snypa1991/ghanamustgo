@@ -21,7 +21,6 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/app-context';
 
 
 type Role = 'user' | 'partner' | 'vendor';
@@ -174,7 +173,7 @@ export default function SignupPage() {
                     </RadioGroup>
                 </CardContent>
                 <CardFooter className="flex-col gap-4">
-                     <Button className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} onClick={() => setStep(2)}>
+                     <Button className="w-full" onClick={() => setStep(2)}>
                         Continue
                     </Button>
                     <div className="text-center text-sm">
@@ -295,7 +294,7 @@ export default function SignupPage() {
                     )}
                 </CardContent>
                 <CardFooter className="flex-col gap-4">
-                    <Button className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} onClick={handleVerification} disabled={isCheckingImage || (blurResult?.isBlurry ?? false)}>
+                    <Button className="w-full" onClick={handleVerification} disabled={isCheckingImage || (blurResult?.isBlurry ?? false)}>
                         <Upload className="mr-2 h-4 w-4" />
                         Submit for Verification
                     </Button>

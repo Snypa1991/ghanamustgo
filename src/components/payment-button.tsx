@@ -40,7 +40,6 @@ const PaymentButton = ({ amount }: PaymentButtonProps) => {
                 initializePayment({onSuccess, onClose});
             }}
             className="w-full font-bold"
-            style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}
         >
             Pay with Paystack
         </Button>
