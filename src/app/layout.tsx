@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppProvider } from "@/context/app-context";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const firaCode = Fira_Code({ subsets: ["latin"], variable: "--font-mono" });
@@ -14,10 +15,22 @@ export const metadata: Metadata = {
   title: "Ghana Must Go",
   description: "A super-app for all your needs",
   manifest: "/manifest.json",
+  icons: {
+    apple: "/apple-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Ghana Must Go",
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#003300",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -31,6 +44,7 @@ export default function RootLayout({
           <Header />
           <main className="flex-grow">{children}</main>
           <Footer />
+          <Toaster />
         </body>
       </AppProvider>
     </html>
