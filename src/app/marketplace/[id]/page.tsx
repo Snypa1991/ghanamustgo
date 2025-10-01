@@ -45,8 +45,8 @@ export default function MarketplaceItemPage({ params }: { params: { id: string }
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Marketplace
         </Link>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-            <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            <div className="md:col-span-2 space-y-8">
                 <Carousel className="w-full">
                     <CarouselContent>
                         {item.gallery.map((imageId, index) => {
@@ -82,7 +82,7 @@ export default function MarketplaceItemPage({ params }: { params: { id: string }
                         <h2 className="font-bold text-lg mb-2">Description</h2>
                         <p className="text-muted-foreground leading-relaxed">{item.description}</p>
                         
-                        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                                     <CheckCircle className="h-5 w-5 text-primary" />
@@ -115,7 +115,7 @@ export default function MarketplaceItemPage({ params }: { params: { id: string }
                 </Card>
             </div>
             
-            <div className="w-full lg:sticky lg:top-24">
+            <div className="w-full md:sticky md:top-24">
                 <BiddingCard itemId={item.id} startingPrice={item.price} />
             </div>
         </div>

@@ -52,14 +52,14 @@ export default function Home() {
           />
         )}
         <div className="absolute inset-0 bg-black/50" />
-        <div className="relative container mx-auto flex h-full flex-col items-center justify-center text-center text-white">
+        <div className="relative container mx-auto flex h-full flex-col items-center justify-center text-center text-white px-4">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl font-headline">
             Your City, Connected.
           </h1>
           <p className="mt-4 max-w-2xl text-lg sm:text-xl">
             Rides, deliveries, and local goods—all in one app. Akwaaba to Ghana Must Go.
           </p>
-          <div className="mt-8 flex gap-4">
+          <div className="mt-8 flex flex-col sm:flex-row gap-4">
             {user ? (
                <Link href="/book">
                   <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -68,7 +68,7 @@ export default function Home() {
                </Link>
             ) : (
               <>
-                 <Link href="/login">
+                 <Link href="/signup">
                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                       Get Started
                   </Button>
@@ -92,7 +92,7 @@ export default function Home() {
               From commuting to cravings, we've got you covered.
             </p>
           </div>
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
+          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <Card key={feature.title} className="flex flex-col text-center items-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
@@ -124,7 +124,7 @@ export default function Home() {
             <p className="text-lg text-muted-foreground">
               Reach thousands of customers in your city. List your products, from artisan crafts to everyday goods, and grow your business with us.
             </p>
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link href="/marketplace">
                 <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   Explore Market

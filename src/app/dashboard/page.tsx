@@ -349,10 +349,10 @@ export default function DashboardPage() {
 
   if (loadError) {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] p-4 text-center">
             <h2 className="text-2xl font-bold mb-4">Map Error</h2>
             <p className="text-lg mb-2">The map could not be loaded.</p>
-            <p className="text-muted-foreground text-center max-w-md">
+            <p className="text-muted-foreground max-w-md">
                 This can happen if the Google Maps API key is invalid or has expired, or if there are network issues. Please check the browser console for more details.
             </p>
         </div>
@@ -362,7 +362,7 @@ export default function DashboardPage() {
 
   if (loading || !user || (user.role !== 'biker' && user.role !== 'driver')) {
     return (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     );
@@ -377,7 +377,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] grid lg:grid-cols-[1fr_400px]">
+    <div className="h-[calc(100vh-4rem)] grid md:grid-cols-[1fr_400px]">
       <div className="h-full relative">
         {isLoaded ? (
           <GoogleMap
@@ -492,7 +492,7 @@ export default function DashboardPage() {
             </div>
           )}
         
-        {tripStatus !== 'none' && currentRideRequest && (
+        {tripStatus !== 'none' && currentRideRequest ? (
           <div className="absolute bottom-4 left-4 right-4 z-10 sm:left-auto sm:w-full sm:max-w-sm">
               <RideRequestCard 
                   ride={currentRideRequest}
@@ -504,10 +504,21 @@ export default function DashboardPage() {
                   isCompleting={isCompleting}
               />
           </div>
+        ) : (
+          <div className="md:hidden absolute bottom-4 left-4 right-4 z-10">
+             <Card>
+                <CardHeader>
+                  <CardTitle className="font-headline flex items-center gap-2"><History /> Recent Rides</CardTitle>
+                </CardHeader>
+                <CardContent className="px-0">
+                  <RideHistory key={historyKey} />
+                </CardContent>
+             </Card>
+          </div>
         )}
       </div>
       
-      <div className="hidden lg:flex flex-col h-[calc(100vh-4rem)]">
+      <div className="hidden md:flex flex-col h-[calc(100vh-4rem)]">
         <div className="p-4 border-b">
           <h2 className="text-xl font-headline flex items-center gap-2"><History/> Ride History</h2>
         </div>

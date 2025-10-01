@@ -36,8 +36,8 @@ export default function AdminDashboardPage() {
         <p className="mt-2 text-lg text-muted-foreground">Smart Tools & Platform Management</p>
       </div>
 
-      <Tabs defaultValue="route-optimization" className="w-full" orientation="vertical">
-        <TabsList className="w-full md:w-auto md:grid md:grid-cols-1 md:h-auto mb-6">
+      <Tabs defaultValue="route-optimization" className="w-full flex flex-col md:flex-row gap-6">
+        <TabsList className="w-full md:w-48 flex-col h-auto">
           <TabsTrigger value="route-optimization" className="w-full justify-start">
             <Bot className="mr-2 h-4 w-4" />
             Route Optimizer
@@ -51,15 +51,17 @@ export default function AdminDashboardPage() {
             Review Summarizer
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="route-optimization" className="mt-0">
-            <AdminRouteOptimization />
-        </TabsContent>
-        <TabsContent value="fee-suggestion" className="mt-0">
-            <ListingFeeSuggestion />
-        </TabsContent>
-        <TabsContent value="review-summarizer" className="mt-0">
-            <ReviewSummarizer />
-        </TabsContent>
+        <div className="flex-1">
+          <TabsContent value="route-optimization" className="mt-0">
+              <AdminRouteOptimization />
+          </TabsContent>
+          <TabsContent value="fee-suggestion" className="mt-0">
+              <ListingFeeSuggestion />
+          </TabsContent>
+          <TabsContent value="review-summarizer" className="mt-0">
+              <ReviewSummarizer />
+          </TabsContent>
+        </div>
       </Tabs>
     </div>
   );

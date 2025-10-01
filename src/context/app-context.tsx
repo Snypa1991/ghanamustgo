@@ -46,20 +46,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log("Auth state changed, user:", firebaseUser);
       setLoading(true);
       if (firebaseUser) {
-        // Find existing user first
+        // Find existing user first from our dummy data
         let appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
+        
         if (appUser) {
+            // Ensure the ID from firebase is used for consistency
+            appUser.id = firebaseUser.uid;
             setUser(appUser);
         } else {
-            // Handle users created via signup form
+            // Handle users created via signup form that are not in dummy data
             const newUser: User = {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'New User',
                 email: firebaseUser.email!,
-                role: 'unassigned'
+                role: 'unassigned' // Default role for new signups
             };
             // Add to DUMMY_USERS for this session if they don't exist
             if (!DUMMY_USERS.some(u => u.id === newUser.id)) {
@@ -80,9 +82,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle setting the user.
       const appUser = DUMMY_USERS.find(u => u.email === userCredential.user.email);
-      redirectToDashboard(appUser || null);
+      
+      // onAuthStateChanged will set the user, but we can redirect immediately
+      if (appUser) {
+          redirectToDashboard(appUser);
+      } else {
+          // This case handles newly signed up users who might not be in the initial DUMMY_USERS
+          const newUser: User = {
+            id: userCredential.user.uid,
+            name: userCredential.user.displayName || 'New User',
+            email: userCredential.user.email!,
+            role: 'unassigned'
+          }
+          redirectToDashboard(newUser);
+      }
+      
       return { success: true };
     } catch (error: any) {
       console.error("Login failed:", error);
@@ -120,42 +135,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const switchUserForTesting = async (role: User['role']) => {
     setLoading(true);
     const testUser = DUMMY_USERS.find(u => u.role === role);
-    if (!testUser || !testUser.email || !testUser.password) {
+    if (testUser) {
+        setUser(testUser);
+        redirectToDashboard(testUser);
         setLoading(false);
-        return { success: false, error: "Test user not found or missing credentials." };
-    }
-
-    try {
-        await signInWithEmailAndPassword(auth, testUser.email, testUser.password);
-        // onAuthStateChanged will manage the user state and redirection will be handled
-        // by the effect hook on the login page.
         return { success: true };
-    } catch (error: any) {
-        console.error("Test user login failed:", error);
-        // If the test user doesn't exist in Firebase, create it.
-        if (error.code === 'auth/user-not-found') {
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, testUser.email, testUser.password);
-                await updateProfile(userCredential.user, { displayName: testUser.name });
-                return { success: true };
-            } catch (creationError: any) {
-                console.error("Test user creation failed:", creationError);
-                 setLoading(false);
-                return { success: false, error: creationError.message };
-            }
-        } else {
-            setLoading(false);
-            return { success: false, error: error.message };
-        }
+    } else {
+        setLoading(false);
+        return { success: false, error: "Test user for that role not found." };
     }
 };
 
   const logout = async () => {
-    console.log("Logout initiated");
     await firebaseSignOut(auth);
     setUser(null);
     setLoading(false);
-    console.log("Logout completed, redirecting to login");
     router.push('/login');
   };
   

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,25 +20,25 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { login, switchUserForTesting } = useAuth();
+  const { user, login, redirectToDashboard } = useAuth();
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+        redirectToDashboard(user);
+    }
+  }, [user, redirectToDashboard]);
+
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+
     const isDummy = DUMMY_USERS.some(user => user.email === email && user.password);
     
     if (isDummy) {
-      handleDummyLogin();
-    } else {
-      setStep(2);
-    }
-  };
-
-  const handleDummyLogin = async () => {
-    setIsLoading(true);
-    const dummyUser = DUMMY_USERS.find(user => user.email === email);
-    if(dummyUser) {
-        const result = await switchUserForTesting(dummyUser.role);
-        if (!result.success) {
+      // The login function in context will handle both dummy and real users now
+      const result = await login(email, 'password'); // Use dummy password
+       if (!result.success) {
             toast({
                 variant: 'destructive',
                 title: 'Login Failed',
@@ -46,30 +46,27 @@ export default function LoginPage() {
             });
             setIsLoading(false);
         }
-        // Success will trigger redirection via AuthContext effect
+        // Success is handled by useEffect
+    } else {
+      setStep(2);
+      setIsLoading(false);
     }
   };
-
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     const result = await login(email, password);
 
-    if (result.success) {
-      toast({
-        title: 'Login Successful',
-        description: 'You are now logged in.',
-      });
-      // Redirect is handled by the auth context
-    } else {
+    if (!result.success) {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
         description: result.error,
       });
+      setIsLoading(false);
     }
-    setIsLoading(false);
+    // Success is handled by useEffect
   };
 
   return (
@@ -120,6 +117,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
+                  autoFocus
                 />
               </div>
             </CardContent>

@@ -56,7 +56,7 @@ export default function AdminRouteOptimization() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="startLocation"
@@ -119,7 +119,7 @@ export default function AdminRouteOptimization() {
               <AlertTitle className="font-headline text-primary">Optimized Route</AlertTitle>
               <AlertDescription className="whitespace-pre-wrap">{result.optimizedRoute}</AlertDescription>
             </Alert>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium">Travel Time</CardTitle>
