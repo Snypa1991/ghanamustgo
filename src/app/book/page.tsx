@@ -334,7 +334,7 @@ export default function BookPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] w-full">
-      <div className={cn("w-full transition-all duration-300", isTripInProgress ? "h-full" : "h-[60%]")}>
+      <div className={cn("w-full", isTripInProgress ? "h-full" : "h-[60vh]")}>
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={containerStyle}
@@ -478,5 +478,3 @@ export default function BookPage() {
     </div>
   );
 }
-
-    
