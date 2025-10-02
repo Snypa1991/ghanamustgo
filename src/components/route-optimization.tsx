@@ -115,7 +115,7 @@ export default function RouteOptimization({
           </div>
           { !hideSubmit &&
           <div className="mt-4">
-            <Button type="submit" disabled={isLoading} className="w-full h-11" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+            <Button type="submit" disabled={isLoading} className="w-full h-11">
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
               {submitButtonText}
             </Button>

@@ -60,7 +60,6 @@ export default function BookPage() {
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
   
-  const [aiResult, setAiResult] = useState<OptimizeRouteWithAIOutput | null>(null);
   const [assignedDriver, setAssignedDriver] = useState<User | null>(null);
   const [currentRide, setCurrentRide] = useState<Ride | null>(null);
   
@@ -131,11 +130,6 @@ export default function BookPage() {
               okada: okadaPrice,
               taxi: taxiPrice,
           });
-          setAiResult({
-            estimatedTravelTime: response.routes[0].legs[0].duration?.text || `${Math.round(durationInMinutes)} mins`,
-            optimizedRoute: 'Standard route calculated.',
-            fuelSavingsEstimate: 'N/A'
-          })
       }
     } else {
       console.error(`Directions request failed due to ${status}`);
@@ -154,7 +148,6 @@ export default function BookPage() {
     }
 
     setIsLoading(true);
-    setAiResult(null);
     setDirections(null);
     setDispatchFee(null);
 
@@ -262,7 +255,6 @@ export default function BookPage() {
     setAssignedDriver(null);
     setStartLocation('');
     setEndLocation('');
-    setAiResult(null);
     setDispatchFee(null);
     setRidePrices(null);
     setDriverPosition(null);
@@ -416,10 +408,20 @@ export default function BookPage() {
   useEffect(() => {
     if (pinningLocation) {
         toast({ title: 'Select a location', description: `Click on the map to set your ${pinningLocation} point.` });
-        if (mapRef.current) mapRef.current.setOptions({ draggableCursor: 'crosshair' });
+        if (mapRef.current) {
+          mapRef.current.setOptions({ 
+            draggableCursor: 'crosshair',
+            gestureHandling: 'auto'
+          });
+        }
         setIsSheetOpen(false);
     } else {
-        if (mapRef.current) mapRef.current.setOptions({ draggableCursor: undefined });
+        if (mapRef.current) {
+           mapRef.current.setOptions({ 
+            draggableCursor: undefined,
+            gestureHandling: 'cooperative'
+          });
+        }
     }
   }, [pinningLocation, toast]);
 
@@ -433,7 +435,6 @@ export default function BookPage() {
     setDirections(null);
     setRidePrices(null);
     setDispatchFee(null);
-    setAiResult(null);
   }, [bookingType, vehicleType]);
 
   const isTripInProgress = step === 'confirming' || step === 'enroute-to-pickup' || step === 'enroute-to-destination' || step === 'completed';
@@ -447,7 +448,7 @@ export default function BookPage() {
                     {vehicleType === 'bike' ? <MopedIcon className="h-10 w-10" /> : <Car className="h-10 w-10" />}
                     <div>
                         <p className="font-bold text-lg">Confirm {vehicleType === 'bike' ? 'Okada' : 'Taxi'}</p>
-                        <p className="text-sm text-muted-foreground">{vehicleType === 'bike' ? 'Quick & affordable' : 'Comfortable & private'}</p>
+                        <p className="text-sm">Quick &amp; affordable</p>
                     </div>
                 </div>
                 <p className="text-lg font-bold">GH₵{price.toFixed(2)}</p>
@@ -462,7 +463,7 @@ export default function BookPage() {
                     {vehicleType === 'bike' ? <MopedIcon className="h-10 w-10" /> : <Car className="h-10 w-10" />}
                     <div>
                         <p className="font-bold text-lg">Confirm Dispatch</p>
-                        <p className="text-sm text-muted-foreground">Send your package securely</p>
+                        <p className="text-sm">Send your package securely</p>
                     </div>
                 </div>
                 <p className="text-lg font-bold">GH₵{dispatchFee.suggestedFee.toFixed(2)}</p>
@@ -494,7 +495,13 @@ export default function BookPage() {
           mapContainerStyle={containerStyle}
           center={center}
           zoom={12}
-          options={{ streetViewControl: false, mapTypeControl: false, fullscreenControl: false, zoomControl: true, gestureHandling: 'cooperative' }}
+          options={{ 
+            streetViewControl: false, 
+            mapTypeControl: false, 
+            fullscreenControl: false, 
+            zoomControl: true, 
+            gestureHandling: pinningLocation ? 'auto' : 'cooperative' // Make map interactive only when pinning
+          }}
           onLoad={onMapLoad}
           onUnmount={onUnmount}
           onClick={onMapClick}
@@ -544,11 +551,11 @@ export default function BookPage() {
                      <CardHeader className="text-center">
                         <CardTitle className="text-2xl font-bold font-headline">Confirm Your Request</CardTitle>
                         <CardDescription>Select your service and confirm the details.</CardDescription>
-                         {(aiResult) && (
-                          <Alert className="text-left text-sm bg-primary/5 border-primary/20 mt-2">
+                         {(directions) && (
+                          <Alert className="text-left text-sm mt-2">
                               <AlertTitle className="font-semibold">Route Details</AlertTitle>
                               <AlertDescription>
-                                {aiResult.estimatedTravelTime}
+                                {directions.routes[0].legs[0].duration?.text}
                               </AlertDescription>
                           </Alert>
                         )}
