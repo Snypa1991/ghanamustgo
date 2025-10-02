@@ -14,6 +14,7 @@ import RideRequestCard from '@/components/ride-request-card';
 import RideHistory from '@/components/ride-history';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const containerStyle = {
   width: '100%',
@@ -517,14 +518,22 @@ export default function DashboardPage() {
         ) : (
           isOnline && (
             <div className="md:hidden absolute bottom-4 left-4 right-4 z-10">
-              <Card>
-                  <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><History /> Recent Rides</CardTitle>
-                  </CardHeader>
-                  <CardContent className="px-0 max-h-60 overflow-y-auto">
-                    <RideHistory key={historyKey} />
-                  </CardContent>
-              </Card>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button className="w-full shadow-lg">
+                    <History className="mr-2 h-4 w-4" />
+                    Ride History
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="max-h-[85vh] flex flex-col">
+                  <SheetHeader>
+                    <SheetTitle className="font-headline text-2xl">Recent Rides</SheetTitle>
+                  </SheetHeader>
+                  <div className="flex-grow overflow-y-auto -mx-4">
+                     <RideHistory key={historyKey} />
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
            )
         )}
