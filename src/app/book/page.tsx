@@ -174,13 +174,13 @@ export default function BookPage() {
   
   // This effect will run when `directions` are set, and it will calculate the dispatch fee
   useEffect(() => {
-    if (step === 'selection' && bookingType === 'dispatch' && directions && !dispatchFee) {
+    if (bookingType === 'dispatch' && step === 'selection' && directions && !dispatchFee) {
       const calculateFee = async () => {
         setIsLoading(true);
-        const distanceInKm = directions?.routes[0]?.legs[0]?.distance?.value ? directions.routes[0].legs[0].distance.value / 1000 : 10;
+        const distanceInKm = directions.routes[0]?.legs[0]?.distance?.value ? directions.routes[0].legs[0].distance.value / 1000 : 10;
         
         // This is a bit of a workaround because we don't have the form values here.
-        // We'll use some default values.
+        // We'll use some default values for package size, as the form isn't visible at this stage.
         const defaultDispatchValues = { packageSize: 'medium', urgency: 'standard' };
 
         const response = await getSuggestedDeliveryFee({
@@ -198,7 +198,7 @@ export default function BookPage() {
       }
       calculateFee();
     }
-  }, [step, bookingType, directions, toast, dispatchFee]);
+  }, [bookingType, step, directions, toast, dispatchFee]);
 
 
   const handleConfirmBooking = () => {
@@ -642,3 +642,5 @@ export default function BookPage() {
     </div>
   );
 }
+
+    
