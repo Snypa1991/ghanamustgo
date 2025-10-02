@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { AppLogo } from '@/components/icons';
+import { GhanaMustGoIcon } from '@/components/icons';
 
 export const runtime = 'edge';
 
@@ -25,7 +25,7 @@ export default function Icon() {
           borderRadius: '8px',
         }}
       >
-        <AppLogo style={{ transform: 'scale(0.8)' }} />
+        <GhanaMustGoIcon style={{ transform: 'scale(0.8)' }} />
       </div>
     ),
     {

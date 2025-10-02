@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { AppLogo } from '@/components/icons';
+import { GhanaMustGoIcon } from '@/components/icons';
 
 export const runtime = 'edge';
 
@@ -23,7 +23,7 @@ export default function Icon() {
           justifyContent: 'center',
         }}
       >
-        <AppLogo />
+        <GhanaMustGoIcon />
       </div>
     ),
     {

@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#003300",
+  themeColor: "#FF8C00",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -39,14 +39,14 @@ export default function RootLayout({
 {
   return (
     <html lang="en" className={`${inter.variable} ${firaCode.variable} ${poppins.variable} ${ptSans.variable}`}>
-      <AppProvider>
-        <body className="font-sans">
+      <body>
+        <AppProvider>
           <Header />
           <main className="flex-grow">{children}</main>
           <Footer />
           <Toaster />
-        </body>
-      </AppProvider>
+        </AppProvider>
+      </body>
     </html>
   );
 }

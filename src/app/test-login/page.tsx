@@ -2,7 +2,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { AppLogo } from '@/components/icons';
+import { GhanaMustGoIcon } from '@/components/icons';
 import { useAuth } from '@/context/app-context';
 import { Loader2, User as UserIcon, Shield, Store, Car } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -64,7 +64,7 @@ export default function TestLoginPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <AppLogo className="mx-auto h-16 w-auto text-primary" />
+          <GhanaMustGoIcon className="mx-auto h-16 w-auto text-primary" />
           <CardTitle className="mt-4 font-headline text-2xl">Quick Test Login</CardTitle>
           <CardDescription>
             Select a role to instantly log in as a test user.

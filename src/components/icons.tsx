@@ -1,27 +1,16 @@
 import React from 'react';
 
-export const AppLogo = (props: React.SVGProps<SVGSVGElement>) => (
+export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 100 100"
       {...props}
     >
         <g>
-            <path 
-                d="M 50,15 A 35,35 0 1 1 15,50" 
-                fill="none" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth="12" 
-                strokeLinecap="round"
-            />
-            <path 
-                d="M 50,15 A 35,35 0 0 0 85,50" 
-                fill="none" 
-                stroke="hsl(var(--accent))" 
-                strokeWidth="12" 
-                strokeLinecap="round"
-            />
-            <circle cx="50" cy="50" r="10" fill="hsl(var(--primary))"/>
+            <rect x="15" y="30" width="70" height="50" fill="hsl(var(--background))" stroke="hsl(var(--foreground))" strokeWidth="4" rx="5" />
+            <path d="M 15 40 H 85 M 15 50 H 85 M 15 60 H 85 M 15 70 H 85" stroke="hsl(var(--primary))" strokeWidth="4" />
+            <path d="M 30 40 V 80 M 45 40 V 80 M 60 40 V 80 M 75 40 V 80" stroke="hsl(var(--accent))" strokeWidth="4" />
+            <path d="M 35 30 A 15 15 0 0 1 65 30" fill="none" stroke="hsl(var(--foreground))" strokeWidth="4" />
         </g>
     </svg>
 );
