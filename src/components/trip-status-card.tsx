@@ -11,7 +11,7 @@ import { Button } from './ui/button';
 import { RideReviewDialog } from './ride-review-dialog';
 
 
-type BookingStep = 'confirming' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
+type BookingStep = 'waiting' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
 
 interface TripStatusCardProps {
     step: BookingStep;
@@ -60,7 +60,7 @@ export default function TripStatusCard({ step, driver, ride, onReviewAndFinish }
     }
 
 
-    if (step === 'confirming') {
+    if (step === 'waiting') {
         return (
             <Card className="shadow-2xl">
                 <CardHeader>
@@ -136,3 +136,5 @@ export default function TripStatusCard({ step, driver, ride, onReviewAndFinish }
 
     return null;
 }
+
+    

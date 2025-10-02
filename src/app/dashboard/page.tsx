@@ -9,11 +9,10 @@ import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { DUMMY_RIDES, Ride, DUMMY_USERS } from '@/lib/dummy-data';
+import { DUMMY_RIDES, Ride, DUMMY_USERS, DUMMY_PENDING_RIDES } from '@/lib/dummy-data';
 import RideRequestCard from '@/components/ride-request-card';
 import RideHistory from '@/components/ride-history';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const containerStyle = {
@@ -36,7 +35,8 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    libraries: ['geometry']
   });
 
   const [isOnline, setIsOnline] = useState(false);
@@ -54,16 +54,6 @@ export default function DashboardPage() {
 
   const mapRef = useRef<google.maps.Map | null>(null);
   
-  // Use refs to hold the latest state for access within setInterval closure
-  const tripStatusRef = useRef(tripStatus);
-  const currentPositionRef = useRef(currentPosition);
-  const radiusRef = useRef(radius);
-  useEffect(() => {
-    tripStatusRef.current = tripStatus;
-    currentPositionRef.current = currentPosition;
-    radiusRef.current = radius;
-  });
-
   useEffect(() => {
     if (!loading && (!user || (user.role !== 'biker' && user.role !== 'driver'))) {
       router.push('/login');
@@ -76,6 +66,8 @@ export default function DashboardPage() {
 
   const onMapUnmount = useCallback(() => {
     mapRef.current = null;
+    if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
+    if (requestTimeoutRef.current) clearTimeout(requestTimeoutRef.current);
   }, []);
 
   const onUserInteraction = () => {
@@ -92,78 +84,40 @@ export default function DashboardPage() {
     }
   }
 
- const startRequestSimulator = useCallback(() => {
+  const startRequestPolling = useCallback(() => {
     if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
 
-    const generateRequest = () => {
-      // Access state via refs to get the latest values inside the interval
-      const currentTripStatus = tripStatusRef.current;
-      const currentPos = currentPositionRef.current;
-      
-      if (currentTripStatus !== 'none' || !currentPos || !isLoaded || !user) {
-        return;
-      }
-      
-      const passengers = DUMMY_USERS.filter(u => u.role === 'user' || u.role === 'unassigned');
-      const randomPassenger = passengers[Math.floor(Math.random() * passengers.length)];
-      
-      const currentRadius = radiusRef.current;
-      const angle = Math.random() * 2 * Math.PI;
-      const distance = Math.random() * currentRadius;
-      const earthRadius = 6371000;
+    const checkForRequests = () => {
+        if (tripStatus !== 'none' || !currentPosition || !isLoaded || !user) return;
 
-      const lat1 = currentPos.lat * Math.PI / 180;
-      const lon1 = currentPos.lng * Math.PI / 180;
-      
-      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance / earthRadius) + Math.cos(lat1) * Math.sin(distance / earthRadius) * Math.cos(angle));
-      const lon2 = lon1 + Math.atan2(Math.sin(angle) * Math.sin(distance / earthRadius) * Math.cos(lat1), Math.cos(distance / earthRadius) - Math.sin(lat1) * Math.sin(lat2));
+        const vehicleType = user.role === 'biker' ? 'bike' : 'car';
+        const suitableRequestIndex = DUMMY_PENDING_RIDES.findIndex(req => {
+            if (req.status !== 'requesting' || req.vehicleType !== vehicleType || !req.startLocationCoords) return false;
 
-      const pickupLat = lat2 * 180 / Math.PI;
-      const pickupLng = lon2 * 180 / Math.PI;
+            const requestLocation = new window.google.maps.LatLng(req.startLocationCoords.lat, req.startLocationCoords.lng);
+            const driverLocation = new window.google.maps.LatLng(currentPosition.lat, currentPosition.lng);
+            const distance = window.google.maps.geometry.spherical.computeDistanceBetween(driverLocation, requestLocation);
 
-      const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ location: { lat: pickupLat, lng: pickupLng } }, (results, status) => {
-          if (status === 'OK' && results && results[0]) {
-              const pickupAddress = results[0].formatted_address;
-              
-              const vehicleType = user.role === 'biker' ? 'bike' : 'car';
-              const fare = vehicleType === 'bike' 
-                  ? Math.floor(Math.random() * (20 - 8 + 1)) + 8 // 8-20 GHS for bike
-                  : Math.floor(Math.random() * (40 - 15 + 1)) + 15; // 15-40 GHS for car
+            return distance <= radius;
+        });
 
-              const newRide: Ride = {
-                  id: `ride-sim-${Date.now()}`,
-                  userId: randomPassenger.id,
-                  driverId: user!.id,
-                  startLocation: pickupAddress,
-                  endLocation: "Osu Oxford Street",
-                  fare: fare,
-                  date: new Date().toISOString(),
-                  status: 'cancelled', // Default status
-                  vehicleType: vehicleType,
-              };
-              
-              setCurrentRideRequest(newRide);
-              setTripStatus('requesting');
-          } else {
-              toast({
-                  variant: 'destructive',
-                  title: 'Simulation Error',
-                  description: 'Could not generate a nearby ride request.',
-              })
-          }
-      });
-    };
-    
-    requestIntervalRef.current = setInterval(generateRequest, 12000);
-  }, [isLoaded, user, toast]);
-
-    const stopRequestSimulator = () => {
-        if (requestIntervalRef.current) {
-            clearInterval(requestIntervalRef.current);
-            requestIntervalRef.current = null;
+        if (suitableRequestIndex !== -1) {
+            const rideRequest = DUMMY_PENDING_RIDES[suitableRequestIndex];
+            setCurrentRideRequest(rideRequest);
+            setTripStatus('requesting');
         }
     };
+    
+    requestIntervalRef.current = setInterval(checkForRequests, 5000); // Check every 5 seconds
+  }, [isLoaded, user, tripStatus, currentPosition, radius]);
+
+
+  const stopRequestPolling = () => {
+      if (requestIntervalRef.current) {
+          clearInterval(requestIntervalRef.current);
+          requestIntervalRef.current = null;
+      }
+  };
     
   const handleCompleteRide = useCallback(() => {
     if (currentRideRequest) {
@@ -175,6 +129,10 @@ export default function DashboardPage() {
         };
         DUMMY_RIDES.unshift(completedRide);
         setHistoryKey(Date.now());
+        
+        // Remove from pending rides
+        const index = DUMMY_PENDING_RIDES.findIndex(r => r.id === currentRideRequest.id);
+        if (index > -1) DUMMY_PENDING_RIDES.splice(index, 1);
     }
 
     setDirections(null);
@@ -248,17 +206,19 @@ export default function DashboardPage() {
 
     useEffect(() => {
         if (isOnline) {
-            startRequestSimulator();
+            startRequestPolling();
         } else {
-            stopRequestSimulator();
+            stopRequestPolling();
         }
-        return stopRequestSimulator; // Cleanup on unmount
-    }, [isOnline, startRequestSimulator]);
+        return stopRequestPolling; // Cleanup on unmount
+    }, [isOnline, startRequestPolling]);
 
 
     useEffect(() => {
         let tripTimer: NodeJS.Timeout | null = null;
-        if (tripStatus === 'enroute-to-destination') {
+        if (tripStatus === 'enroute-to-pickup') {
+            tripTimer = setTimeout(() => handleStartTrip(), 10000);
+        } else if (tripStatus === 'enroute-to-destination') {
             tripTimer = setTimeout(() => {
                 setIsCompleting(true);
                 setTimeout(() => {
@@ -288,19 +248,37 @@ export default function DashboardPage() {
     
     if (newIsOnline) {
       setUserInteracted(false); 
+      toast({title: 'You are now online', description: 'Waiting for ride requests...'})
+    } else {
+      toast({title: 'You are now offline'})
     }
   };
 
   const handleAcceptRide = () => {
+    if (!currentRideRequest || !user) return;
     if (requestTimeoutRef.current) {
         clearTimeout(requestTimeoutRef.current);
         requestTimeoutRef.current = null;
     }
+    
+    const rideIndex = DUMMY_PENDING_RIDES.findIndex(r => r.id === currentRideRequest.id);
+    if (rideIndex > -1) {
+        DUMMY_PENDING_RIDES[rideIndex].status = 'accepted';
+        DUMMY_PENDING_RIDES[rideIndex].driverId = user.id;
+        setCurrentRideRequest(DUMMY_PENDING_RIDES[rideIndex]);
+    }
+
     setDirections(null); 
     setTripStatus('enroute-to-pickup');
   };
   
   const handleStartTrip = () => {
+    if (!currentRideRequest) return;
+    const rideIndex = DUMMY_PENDING_RIDES.findIndex(r => r.id === currentRideRequest.id);
+    if (rideIndex > -1) {
+        DUMMY_PENDING_RIDES[rideIndex].status = 'enroute-to-destination';
+        setCurrentRideRequest(DUMMY_PENDING_RIDES[rideIndex]);
+    }
     setDirections(null); 
     setTripStatus('enroute-to-destination');
   };
@@ -413,8 +391,8 @@ export default function DashboardPage() {
              {shouldRenderDirections && directionsOrigin && directionsDestination && !directions && (
                 <DirectionsService
                     options={{
-                        destination: directionsDestination,
-                        origin: directionsOrigin,
+                        destination: directionsDestination as string,
+                        origin: directionsOrigin as google.maps.LatLngLiteral,
                         travelMode: google.maps.TravelMode.DRIVING,
                     }}
                     callback={directionsCallback}
@@ -551,3 +529,4 @@ export default function DashboardPage() {
   );
 }
 
+    

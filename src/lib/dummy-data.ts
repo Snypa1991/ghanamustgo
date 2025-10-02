@@ -72,12 +72,13 @@ export const DUMMY_BIDS: Bid[] = [
 export type Ride = {
   id: string;
   userId: string;
-  driverId: string;
+  driverId: string | null;
   startLocation: string;
+  startLocationCoords?: { lat: number; lng: number };
   endLocation: string;
   fare: number;
   date: string;
-  status: 'completed' | 'cancelled';
+  status: 'requesting' | 'accepted' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed' | 'cancelled';
   vehicleType?: 'bike' | 'car';
   rating?: number;
   review?: string;
@@ -151,3 +152,7 @@ export let DUMMY_RIDES: Ride[] = [
     reviewBy: 'partner',
   },
 ];
+
+export let DUMMY_PENDING_RIDES: Ride[] = [];
+
+    

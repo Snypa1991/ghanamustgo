@@ -11,10 +11,9 @@ import { MopedIcon } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/app-context';
 import { getSuggestedDeliveryFee } from '@/app/actions';
-import type { OptimizeRouteWithAIOutput } from '@/ai/flows/optimize-route-with-ai';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import RouteOptimization from '@/components/route-optimization';
-import { DUMMY_RIDES, DUMMY_USERS, Ride, User } from '@/lib/dummy-data';
+import { DUMMY_RIDES, DUMMY_USERS, Ride, User, DUMMY_PENDING_RIDES } from '@/lib/dummy-data';
 import TripStatusCard from '@/components/trip-status-card';
 import { useToast } from '@/hooks/use-toast';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -26,7 +25,7 @@ import { Input } from '@/components/ui/input';
 
 type BookingType = 'ride' | 'dispatch';
 type VehicleType = 'bike' | 'car';
-type BookingStep = 'details' | 'selection' | 'confirming' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
+type BookingStep = 'details' | 'selection' | 'waiting' | 'enroute-to-pickup' | 'enroute-to-destination' | 'completed';
 type PinningLocation = 'start' | 'end' | null;
 
 const containerStyle = {
@@ -67,6 +66,7 @@ export default function BookPage() {
 
   const [driverPosition, setDriverPosition] = useState<google.maps.LatLng | null>(null);
   const animationRef = useRef<number>();
+  const pollingRef = useRef<NodeJS.Timeout>();
 
   const mapRef = useRef<google.maps.Map | null>(null);
   
@@ -78,9 +78,8 @@ export default function BookPage() {
 
   const onUnmount = useCallback(() => {
     mapRef.current = null;
-    if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-    }
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (pollingRef.current) clearInterval(pollingRef.current);
   }, []);
 
   const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
@@ -205,45 +204,59 @@ export default function BookPage() {
 
 
   const handleConfirmBooking = () => {
-    if (!user) {
+    if (!user || !directions) {
         toast({ title: 'Please log in', description: 'You must be logged in to book a service.'});
         router.push('/login');
         return;
     }
-    setStep('confirming');
+    setStep('waiting');
     toast({ title: "Finding your driver...", description: "This will take a moment." });
 
-    const driverRole = vehicleType === 'bike' ? 'biker' : 'driver';
-    const availableDrivers = DUMMY_USERS.filter(u => u.role === driverRole);
-    const driver = availableDrivers[Math.floor(Math.random() * availableDrivers.length)];
-    
     const newRide: Ride = {
       id: `ride-${Date.now()}`,
       userId: user!.id,
-      driverId: driver.id,
-      startLocation,
+      driverId: null,
+      startLocation: startLocation,
+      startLocationCoords: {
+          lat: directions.routes[0].legs[0].start_location.lat(),
+          lng: directions.routes[0].legs[0].start_location.lng(),
+      },
       endLocation,
       fare: bookingType === 'ride' 
         ? (vehicleType === 'bike' ? (ridePrices?.okada || 0) : (ridePrices?.taxi || 0)) 
         : (dispatchFee?.suggestedFee || 0),
       date: new Date().toISOString(),
-      status: 'cancelled', // Default
+      status: 'requesting',
       vehicleType: vehicleType,
     };
-
+    
+    // Add to the public pool of requests
+    DUMMY_PENDING_RIDES.push(newRide);
     setCurrentRide(newRide);
 
-    setTimeout(() => {
-      setAssignedDriver(driver);
-      setStep('enroute-to-pickup');
-      toast({ title: "Driver Found!", description: `${driver.name} is on the way.` });
-    }, 4000);
+    // Start polling to see if a driver has accepted
+    pollingRef.current = setInterval(() => {
+        const acceptedRide = DUMMY_PENDING_RIDES.find(r => r.id === newRide.id && r.status === 'accepted');
+        if (acceptedRide && acceptedRide.driverId) {
+            clearInterval(pollingRef.current);
+            const driver = DUMMY_USERS.find(u => u.id === acceptedRide.driverId);
+            if (driver) {
+                setAssignedDriver(driver);
+                setCurrentRide(acceptedRide);
+                setStep('enroute-to-pickup');
+                toast({ title: "Driver Found!", description: `${driver.name} is on the way.` });
+            }
+        }
+    }, 2000);
   };
 
   const handleCompleteRide = () => {
     if(currentRide){
       const completedRide: Ride = {...currentRide, status: 'completed' };
       DUMMY_RIDES.unshift(completedRide);
+      // Remove from pending
+      const index = DUMMY_PENDING_RIDES.findIndex(r => r.id === currentRide.id);
+      if (index > -1) DUMMY_PENDING_RIDES.splice(index, 1);
     }
     setStep('completed');
   }
@@ -258,18 +271,27 @@ export default function BookPage() {
     setDispatchFee(null);
     setRidePrices(null);
     setDriverPosition(null);
+    setIsSheetOpen(true);
   }
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (step === 'enroute-to-pickup') {
-      timer = setTimeout(() => setStep('enroute-to-destination'), 10000); 
+      timer = setTimeout(() => {
+        setStep('enroute-to-destination');
+        const rideIndex = DUMMY_PENDING_RIDES.findIndex(r => r.id === currentRide?.id);
+        if (rideIndex > -1) DUMMY_PENDING_RIDES[rideIndex].status = 'enroute-to-destination';
+      }, 10000); 
     } else if (step === 'enroute-to-destination') {
-      timer = setTimeout(() => handleCompleteRide(), 15000); 
+      timer = setTimeout(() => {
+        handleCompleteRide();
+         const rideIndex = DUMMY_PENDING_RIDES.findIndex(r => r.id === currentRide?.id);
+        if (rideIndex > -1) DUMMY_PENDING_RIDES[rideIndex].status = 'completed';
+      }, 15000); 
     }
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+  }, [step, currentRide]);
 
 
   useEffect(() => {
@@ -437,7 +459,7 @@ export default function BookPage() {
     setDispatchFee(null);
   }, [bookingType, vehicleType]);
 
-  const isTripInProgress = step === 'confirming' || step === 'enroute-to-pickup' || step === 'enroute-to-destination' || step === 'completed';
+  const isTripInProgress = step === 'waiting' || step === 'enroute-to-pickup' || step === 'enroute-to-destination' || step === 'completed';
 
   const renderSelectionCard = () => {
     if (bookingType === 'ride' && ridePrices) {
@@ -623,3 +645,5 @@ export default function BookPage() {
     </div>
   );
 }
+
+    
