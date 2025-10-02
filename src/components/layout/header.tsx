@@ -37,8 +37,8 @@ export default function Header() {
         </Link>
 
         
-        <div className="flex items-center gap-4">
-          <div className="hidden md:block">
+        <div className="flex items-center gap-2">
+          <div>
              <UserNav />
           </div>
          
