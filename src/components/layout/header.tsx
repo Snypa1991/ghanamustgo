@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Package, UtensilsCrossed, Store, Menu, Car, Shield, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTrigger } from '@/components/ui/sheet';
-import { GhanaMustGoIcon } from '@/components/icons';
+import { AppLogo } from '@/components/icons';
 import { useAuth } from '@/context/app-context';
 import { Separator } from '../ui/separator';
 import { UserNav } from './user-nav';
@@ -32,7 +32,8 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between">
         
         <Link href="/" className="flex items-center space-x-2">
-          <GhanaMustGoIcon className="h-12 w-auto text-primary" />
+          <AppLogo className="h-8 w-auto text-primary" />
+           <span className="font-bold font-headline text-lg">Ghana Must Go</span>
         </Link>
 
         
@@ -51,7 +52,8 @@ export default function Header() {
             <SheetContent side="right">
               <SheetHeader>
                 <Link href="/" className="flex items-center space-x-2">
-                  <GhanaMustGoIcon className="h-12 w-auto text-primary" />
+                  <AppLogo className="h-8 w-auto" />
+                   <span className="font-bold font-headline text-lg">Ghana Must Go</span>
                 </Link>
               </SheetHeader>
               <Separator className="my-4" />

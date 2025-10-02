@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { GhanaMustGoIcon } from '@/components/icons';
+import { AppLogo } from '@/components/icons';
 import { User, Store, Car, Loader2 } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
@@ -88,7 +88,7 @@ export default function RoleSelectionPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-            <GhanaMustGoIcon className="mx-auto h-10 w-10 text-primary" />
+            <AppLogo className="mx-auto h-10 w-10 text-primary" />
             <CardTitle className="mt-4 font-headline text-2xl">Choose Your Role</CardTitle>
             <CardDescription>Welcome, {user.name}! How will you be using the app?</CardDescription>
         </CardHeader>

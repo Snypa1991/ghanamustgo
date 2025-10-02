@@ -1,52 +1,28 @@
 import React from 'react';
 
-export const GhanaMustGoIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const AppLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 160 80"
+      viewBox="0 0 100 100"
       {...props}
     >
-      <defs>
-        <pattern id="gmg-pattern" viewBox="0 0 24 24" width="20%" height="25%" patternContentUnits="userSpaceOnUse">
-          <path d="M0 0h12v12H0z" fill="#CE1126"/>
-          <path d="M12 0h12v12H12z" fill="#fff"/>
-          <path d="M0 12h12v12H0z" fill="#fff"/>
-          <path d="M12 12h12v12H12z" fill="#003087"/>
-        </pattern>
-      </defs>
-
-      <g transform="translate(10, 10)">
-        {/* Bag Body */}
-        <path d="M12 25L8 30 H62 L58 25 H12Z" fill="#CE1126"/>
-        <path d="M58 25 L50 65 H20 L12 25 Z" fill="url(#gmg-pattern)"/>
-        {/* Handles */}
-        <path d="M28 25L30 18 H40 L42 25" stroke="black" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      </g>
-      
-      <g transform="translate(75, 5)">
-        <text
-            x="0"
-            y="35"
-            dominantBaseline="middle"
-            fontFamily="Poppins, sans-serif"
-            fontSize="18"
-            fontWeight="bold"
-            fill="#CE1126"
-        >
-            GHANA
-        </text>
-        <text
-            x="0"
-            y="60"
-            dominantBaseline="middle"
-            fontFamily="Poppins, sans-serif"
-            fontSize="18"
-            fontWeight="bold"
-            fill="#006B3F"
-        >
-            MUST GO
-        </text>
-      </g>
+        <g>
+            <path 
+                d="M 50,15 A 35,35 0 1 1 15,50" 
+                fill="none" 
+                stroke="hsl(var(--primary))" 
+                strokeWidth="12" 
+                strokeLinecap="round"
+            />
+            <path 
+                d="M 50,15 A 35,35 0 0 0 85,50" 
+                fill="none" 
+                stroke="hsl(var(--accent))" 
+                strokeWidth="12" 
+                strokeLinecap="round"
+            />
+            <circle cx="50" cy="50" r="10" fill="hsl(var(--primary))"/>
+        </g>
     </svg>
 );
 
