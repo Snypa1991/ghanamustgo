@@ -52,6 +52,16 @@ export default function DashboardPage() {
   const requestTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  
+  // Use refs to hold the latest state for access within setInterval closure
+  const tripStatusRef = useRef(tripStatus);
+  const currentPositionRef = useRef(currentPosition);
+  const radiusRef = useRef(radius);
+  useEffect(() => {
+    tripStatusRef.current = tripStatus;
+    currentPositionRef.current = currentPosition;
+    radiusRef.current = radius;
+  });
 
   useEffect(() => {
     if (!loading && (!user || (user.role !== 'biker' && user.role !== 'driver'))) {
@@ -82,7 +92,10 @@ export default function DashboardPage() {
   }
 
  const startRequestSimulator = useCallback(() => {
+    if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
+
     const generateRequest = () => {
+      // Access state via refs to get the latest values inside the interval
       const currentTripStatus = tripStatusRef.current;
       const currentPos = currentPositionRef.current;
       
@@ -141,7 +154,6 @@ export default function DashboardPage() {
       });
     };
     
-    if (requestIntervalRef.current) clearInterval(requestIntervalRef.current);
     requestIntervalRef.current = setInterval(generateRequest, 12000);
   }, [isLoaded, user, toast]);
 
@@ -179,16 +191,6 @@ export default function DashboardPage() {
       setCurrentRideRequest(null);
       setTripStatus('none');
   }, []);
-
-  const tripStatusRef = useRef(tripStatus);
-  const currentPositionRef = useRef(currentPosition);
-  const radiusRef = useRef(radius);
-  
-  useEffect(() => {
-    tripStatusRef.current = tripStatus;
-    currentPositionRef.current = currentPosition;
-    radiusRef.current = radius;
-  });
 
   useEffect(() => {
     const storedIsOnline = localStorage.getItem('ghana-must-go-isOnline');
@@ -249,6 +251,7 @@ export default function DashboardPage() {
         } else {
             stopRequestSimulator();
         }
+        return stopRequestSimulator; // Cleanup on unmount
     }, [isOnline, startRequestSimulator]);
 
 
@@ -512,16 +515,18 @@ export default function DashboardPage() {
               />
           </div>
         ) : (
-          <div className="md:hidden absolute bottom-4 left-4 right-4 z-10">
-             <Card>
-                <CardHeader>
-                  <CardTitle className="font-headline flex items-center gap-2"><History /> Recent Rides</CardTitle>
-                </CardHeader>
-                <CardContent className="px-0">
-                  <RideHistory key={historyKey} />
-                </CardContent>
-             </Card>
-          </div>
+          isOnline && (
+            <div className="md:hidden absolute bottom-4 left-4 right-4 z-10">
+              <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><History /> Recent Rides</CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-0 max-h-60 overflow-y-auto">
+                    <RideHistory key={historyKey} />
+                  </CardContent>
+              </Card>
+            </div>
+           )
         )}
       </div>
       
@@ -536,3 +541,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
