@@ -1,6 +1,11 @@
-
 // This page is disabled to resolve a route conflict with /src/app/(auth)/test-login/page.tsx.
-// It exports a null component to prevent Next.js from throwing an "Unsupported Server Component" error.
+// By commenting out its contents, we prevent Next.js from treating it as a page and creating a conflicting route.
+
+/*
+"use client";
+import { redirect } from 'next/navigation';
+
 export default function DisabledTestLoginPage() {
-  return null;
+  redirect('/login');
 }
+*/
