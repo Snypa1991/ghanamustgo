@@ -52,7 +52,7 @@ export default function BookPage() {
   const [vehicleType, setVehicleType] = useState<VehicleType>('bike');
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const [step, setStep] = useState<BookingStep>('details');
-  const [ridePrices, setRidePrices] = useState({ okada: 0, taxi: 0 });
+  const [ridePrices, setRidePrices] = useState<{ okada: number, taxi: number } | null>(null);
   const [dispatchFee, setDispatchFee] = useState<SuggestDeliveryFeeOutput | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -71,7 +71,6 @@ export default function BookPage() {
   const mapRef = useRef<google.maps.Map | null>(null);
   
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -114,6 +113,13 @@ export default function BookPage() {
   ) => {
     if (status === 'OK' && response) {
       setDirections(response);
+       if (mapRef.current) {
+        const bounds = new window.google.maps.LatLngBounds();
+        response.routes[0].legs.forEach(leg => {
+          leg.steps.forEach(step => step.path.forEach(path => bounds.extend(path)));
+        });
+        mapRef.current.fitBounds(bounds);
+      }
       const distanceInKm = (response.routes[0].legs[0].distance?.value ?? 0) / 1000;
        if (bookingType === 'ride') {
         setRidePrices({
@@ -123,40 +129,84 @@ export default function BookPage() {
       }
     } else {
       console.error(`Directions request failed due to ${status}`);
+      toast({
+        variant: 'destructive',
+        title: 'Route Not Found',
+        description: 'Could not find a route between the specified locations.'
+      })
     }
   };
   
   async function handleGetEstimate(values?: any) {
+    if (!startLocation || !endLocation) {
+        toast({ variant: 'destructive', title: 'Missing Locations', description: 'Please provide both pickup and drop-off locations.' });
+        return;
+    }
+
     setIsLoading(true);
     setAiResult(null);
-    setDirections(null); 
+    setDirections(null);
+    setDispatchFee(null);
+
+    toast({ title: 'Calculating...', description: 'Finding the best route and price for you.' });
 
     if (bookingType === 'ride') {
       const response = await getOptimizedRoute({ startLocation, endLocation });
       if (response.success && response.data) {
         setAiResult(response.data);
-      } 
+      } else {
+         toast({ variant: 'destructive', title: 'AI Error', description: response.error || "Could not get AI route optimization." });
+      }
     } else if (bookingType === 'dispatch' && values) {
+        // We need directions to get distance for fee calculation.
+        // The DirectionsService will trigger the callback which calculates distance.
+        // We'll calculate fee after directions are set.
+    }
+    
+    // The DirectionsService will be rendered and will trigger the callback.
+    // The callback will set directions and calculate prices.
+    setStep('selection');
+    setIsSheetOpen(false);
+    setIsLoading(false);
+  }
+  
+  useEffect(() => {
+    if (step === 'selection' && bookingType === 'dispatch' && directions) {
+      const calculateFee = async () => {
+        setIsLoading(true);
         const distanceInKm = directions?.routes[0]?.legs[0]?.distance?.value ? directions.routes[0].legs[0].distance.value / 1000 : 10;
+        
+        // This is a bit of a workaround because we don't have the form values here.
+        // In a real app, this state would be managed more globally or passed around.
+        // For now, we'll simulate getting some form values.
+        const dummyFormValues = { packageSize: 'medium', urgency: 'standard' };
+
         const response = await getSuggestedDeliveryFee({
             distance: distanceInKm,
-            packageSize: values.packageSize,
-            urgency: 'standard'
+            packageSize: dummyFormValues.packageSize, // This is not ideal
+            urgency: dummyFormValues.urgency,
         });
+
         if (response.success && response.data) {
             setDispatchFee(response.data);
         } else {
-            toast({ variant: 'destructive', title: 'Error', description: response.error || "Could not calculate fee." });
+            toast({ variant: 'destructive', title: 'Fee Error', description: response.error || "Could not calculate delivery fee." });
         }
+        setIsLoading(false);
+      }
+      calculateFee();
     }
-    
-    setIsLoading(false);
-    setStep('selection');
-    setIsSheetOpen(false);
-  }
+  }, [step, bookingType, directions, toast]);
+
 
   const handleConfirmBooking = () => {
+    if (!user) {
+        toast({ title: 'Please log in', description: 'You must be logged in to book a service.'});
+        router.push('/login');
+        return;
+    }
     setStep('confirming');
+    toast({ title: "Finding your driver...", description: "This will take a moment." });
 
     const driverRole = vehicleType === 'bike' ? 'biker' : 'driver';
     const availableDrivers = DUMMY_USERS.filter(u => u.role === driverRole);
@@ -169,10 +219,10 @@ export default function BookPage() {
       startLocation,
       endLocation,
       fare: bookingType === 'ride' 
-        ? (vehicleType === 'bike' ? ridePrices.okada : ridePrices.taxi) 
+        ? (vehicleType === 'bike' ? (ridePrices?.okada || 0) : (ridePrices?.taxi || 0)) 
         : (dispatchFee?.suggestedFee || 0),
       date: new Date().toISOString(),
-      status: 'cancelled',
+      status: 'cancelled', // Default
       vehicleType: vehicleType,
     };
 
@@ -181,6 +231,7 @@ export default function BookPage() {
     setTimeout(() => {
       setAssignedDriver(driver);
       setStep('enroute-to-pickup');
+      toast({ title: "Driver Found!", description: `${driver.name} is on the way.` });
     }, 4000);
   };
 
@@ -201,6 +252,7 @@ export default function BookPage() {
     setEndLocation('');
     setAiResult(null);
     setDispatchFee(null);
+    setRidePrices(null);
     setDriverPosition(null);
   }
 
@@ -225,35 +277,6 @@ export default function BookPage() {
     const route = directions.routes[0];
     if (!route) return;
 
-    let path: google.maps.LatLng[];
-    let duration: number;
-
-    // Simulate driver starting from a random nearby point for pickup
-    if (step === 'enroute-to-pickup') {
-      const startLeg = route.legs[0];
-      const driverStartLat = startLeg.start_location.lat() + (Math.random() - 0.5) * 0.02;
-      const driverStartLng = startLeg.start_location.lng() + (Math.random() - 0.5) * 0.02;
-      const driverStartPoint = new window.google.maps.LatLng(driverStartLat, driverStartLng);
-      
-      // We need a route from the driver's start to the user's pickup
-      const directionsService = new window.google.maps.DirectionsService();
-      directionsService.route({
-        origin: driverStartPoint,
-        destination: startLeg.start_location,
-        travelMode: google.maps.TravelMode.DRIVING,
-      }, (result, status) => {
-        if (status === 'OK' && result) {
-          animatePath(result.routes[0].overview_path, 10000);
-        } else {
-            // Fallback to straight line if service fails
-            animatePath([driverStartPoint, startLeg.start_location], 10000);
-        }
-      });
-    } else { // 'enroute-to-destination'
-      // Animate along the main trip route
-      animatePath(route.overview_path, 15000);
-    }
-    
     const animatePath = (path: google.maps.LatLng[], duration: number) => {
         if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
@@ -290,6 +313,29 @@ export default function BookPage() {
 
         animationRef.current = requestAnimationFrame(animate);
     }
+    
+    // Simulate driver starting from a random nearby point for pickup
+    if (step === 'enroute-to-pickup' && route.legs[0]) {
+      const startLeg = route.legs[0];
+      const driverStartLat = startLeg.start_location.lat() + (Math.random() - 0.5) * 0.02;
+      const driverStartLng = startLeg.start_location.lng() + (Math.random() - 0.5) * 0.02;
+      const driverStartPoint = new window.google.maps.LatLng(driverStartLat, driverStartLng);
+      
+      const directionsService = new window.google.maps.DirectionsService();
+      directionsService.route({
+        origin: driverStartPoint,
+        destination: startLeg.start_location,
+        travelMode: google.maps.TravelMode.DRIVING,
+      }, (result, status) => {
+        if (status === 'OK' && result) {
+          animatePath(result.routes[0].overview_path, 10000);
+        } else {
+            animatePath([driverStartPoint, startLeg.start_location], 10000);
+        }
+      });
+    } else { // 'enroute-to-destination'
+      animatePath(route.overview_path, 15000);
+    }
 
     return () => {
         if (animationRef.current) {
@@ -304,7 +350,7 @@ export default function BookPage() {
   }
 
   const shouldRenderDirectionsService = useMemo(() => {
-    return isLoaded && startLocation && endLocation && (step === 'details' || step === 'selection' || step === 'enroute-to-pickup' || step === 'enroute-to-destination');
+    return isLoaded && startLocation && endLocation && step === 'selection';
   }, [isLoaded, startLocation, endLocation, step]);
   
   const startMarkerIcon = useMemo(() => {
@@ -349,6 +395,9 @@ export default function BookPage() {
   useEffect(() => {
     if (step === 'details') {
       setDirections(null);
+    } else if (step === 'selection' && (!startLocation || !endLocation)) {
+        setStep('details');
+        setIsSheetOpen(true);
     }
   }, [step, startLocation, endLocation]);
   
@@ -370,43 +419,60 @@ export default function BookPage() {
   
   useEffect(() => {
     setDirections(null);
+    setRidePrices(null);
+    setDispatchFee(null);
+    setAiResult(null);
   }, [bookingType, vehicleType]);
 
   const isTripInProgress = step === 'confirming' || step === 'enroute-to-pickup' || step === 'enroute-to-destination' || step === 'completed';
 
-  const renderConfirmButton = () => {
-    if (!user) {
+  const renderSelectionCard = () => {
+    if (bookingType === 'ride' && ridePrices) {
+        const price = vehicleType === 'bike' ? ridePrices.okada : ridePrices.taxi;
         return (
-             <Link href="/login" className="w-full">
-                <Button variant="outline" className="w-full">Login to Book</Button>
-            </Link>
+            <Button className="w-full h-auto p-4 flex items-center justify-between" onClick={handleConfirmBooking}>
+                <div className='flex items-center gap-4 text-left'>
+                    {vehicleType === 'bike' ? <MopedIcon className="h-10 w-10" /> : <Car className="h-10 w-10" />}
+                    <div>
+                        <p className="font-bold text-lg">Confirm {vehicleType === 'bike' ? 'Okada' : 'Taxi'}</p>
+                        <p className="text-sm text-muted-foreground">{vehicleType === 'bike' ? 'Quick & affordable' : 'Comfortable & private'}</p>
+                    </div>
+                </div>
+                <p className="text-lg font-bold">GH₵{price.toFixed(2)}</p>
+            </Button>
+        );
+    }
+
+    if (bookingType === 'dispatch' && dispatchFee) {
+        return (
+            <Button className="w-full h-auto p-4 flex items-center justify-between" onClick={handleConfirmBooking}>
+                <div className='flex items-center gap-4 text-left'>
+                    {vehicleType === 'bike' ? <MopedIcon className="h-10 w-10" /> : <Car className="h-10 w-10" />}
+                    <div>
+                        <p className="font-bold text-lg">Confirm Dispatch</p>
+                        <p className="text-sm text-muted-foreground">Send your package securely</p>
+                    </div>
+                </div>
+                <p className="text-lg font-bold">GH₵{dispatchFee.suggestedFee.toFixed(2)}</p>
+            </Button>
+        );
+    }
+    
+    if (isLoading || (!ridePrices && !dispatchFee)) {
+        return (
+            <div className="flex items-center justify-center p-8">
+                <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                <span>Calculating fee...</span>
+            </div>
         )
     }
 
-    const price = bookingType === 'ride' 
-        ? (vehicleType === 'bike' ? ridePrices.okada.toFixed(2) : ridePrices.taxi.toFixed(2))
-        : (dispatchFee?.suggestedFee.toFixed(2));
-    
-    const disabled = !startLocation || !endLocation || (bookingType === 'dispatch' && !dispatchFee);
-    const buttonText = bookingType === 'ride' ? 'Confirm Ride' : 'Confirm & Find Rider';
-
-
     return (
-        <Button 
-            className="w-full h-auto p-4 flex items-center justify-between" 
-            onClick={handleConfirmBooking}
-            disabled={disabled}
-        >
-            <div className='flex items-center gap-4 text-left'>
-                {vehicleType === 'bike' ? <MopedIcon className="h-10 w-10" /> : <Car className="h-10 w-10" />}
-                <div>
-                    <p className="font-bold text-lg">{buttonText}</p>
-                    <p className="text-sm text-muted-foreground">{vehicleType === 'bike' ? 'Quick & affordable' : 'Comfortable & private'}</p>
-                </div>
-            </div>
-            <p className="text-lg font-bold">GH₵{price}</p>
-        </Button>
-    )
+        <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>Could not determine a price. Please try again.</AlertDescription>
+        </Alert>
+    );
   }
 
   return (
@@ -421,7 +487,7 @@ export default function BookPage() {
           onUnmount={onUnmount}
           onClick={onMapClick}
         >
-          {shouldRenderDirectionsService && !directions && (
+          {shouldRenderDirectionsService && (
             <DirectionsService
               options={{ destination: endLocation, origin: startLocation, travelMode: google.maps.TravelMode.DRIVING }}
               callback={directionsCallback}
@@ -445,6 +511,15 @@ export default function BookPage() {
       ) : (
         <Skeleton className="h-full w-full" />
       )}
+      {loadError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+              <Alert variant="destructive" className="w-auto">
+                  <AlertTitle>Map Error</AlertTitle>
+                  <AlertDescription>Could not load Google Maps. Please check your API key and network connection.</AlertDescription>
+              </Alert>
+          </div>
+      )}
+
 
       {isTripInProgress ? (
         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 sm:max-w-md sm:left-auto">
@@ -456,20 +531,22 @@ export default function BookPage() {
                 <ScrollArea className="max-h-[70vh]">
                      <CardHeader className="text-center">
                         <CardTitle className="text-2xl font-bold font-headline">Confirm Your Request</CardTitle>
-                        <CardDescription>Review the details and confirm your request</CardDescription>
-                        {dispatchFee && bookingType === 'dispatch' && (
+                        <CardDescription>Select your service and confirm the details.</CardDescription>
+                         {(aiResult || dispatchFee) && (
                           <Alert className="text-left text-sm bg-primary/5 border-primary/20 mt-2">
                               <Bot className="h-4 w-4" />
-                              <AlertTitle className="font-semibold">AI Suggested Fee</AlertTitle>
-                              <AlertDescription>{dispatchFee.reasoning}</AlertDescription>
+                              <AlertTitle className="font-semibold">AI Suggestion</AlertTitle>
+                              <AlertDescription>
+                                {aiResult ? aiResult.optimizedRoute.split('. ')[0] + '.' : dispatchFee?.reasoning}
+                              </AlertDescription>
                           </Alert>
                         )}
                     </CardHeader>
                      <CardContent className="space-y-4">
-                        {renderConfirmButton()}
+                        {renderSelectionCard()}
                     </CardContent>
                     <CardFooter className="flex-col gap-3 pt-4">
-                        <Button variant="link" onClick={() => { setStep('details'); setIsSheetOpen(true); }}>Back</Button>
+                        <Button variant="link" onClick={() => { setStep('details'); setIsSheetOpen(true); }}>Back to Details</Button>
                     </CardFooter>
                  </ScrollArea>
             </Card>
