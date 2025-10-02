@@ -2,14 +2,15 @@
 "use client";
 
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-import { Car, Loader2, Navigation, Bot, Package, PersonStanding, X, Bike } from 'lucide-react';
+import { Car, Loader2, Navigation, Package, PersonStanding, X, Bike } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MopedIcon } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/app-context';
-import { getOptimizedRoute, getSuggestedDeliveryFee } from '@/app/actions';
+import { getSuggestedDeliveryFee } from '@/app/actions';
 import type { OptimizeRouteWithAIOutput } from '@/ai/flows/optimize-route-with-ai';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import RouteOptimization from '@/components/route-optimization';
@@ -20,7 +21,6 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import DispatchForm from '@/components/dispatch-form';
 import type { SuggestDeliveryFeeOutput } from '@/ai/flows/suggest-delivery-fee';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import Link from 'next/link';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 
@@ -71,7 +71,7 @@ export default function BookPage() {
 
   const mapRef = useRef<google.maps.Map | null>(null);
   
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(true);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -122,11 +122,20 @@ export default function BookPage() {
         mapRef.current.fitBounds(bounds);
       }
       const distanceInKm = (response.routes[0].legs[0].distance?.value ?? 0) / 1000;
+      const durationInMinutes = (response.routes[0].legs[0].duration?.value ?? 0) / 60;
+
        if (bookingType === 'ride') {
-        setRidePrices({
-            okada: Math.max(5, distanceInKm * 1.5),
-            taxi: Math.max(10, distanceInKm * 2.5),
-        })
+          const okadaPrice = Math.max(8, distanceInKm * 1.5 + durationInMinutes * 0.2);
+          const taxiPrice = Math.max(15, distanceInKm * 2.5 + durationInMinutes * 0.4);
+          setRidePrices({
+              okada: okadaPrice,
+              taxi: taxiPrice,
+          });
+          setAiResult({
+            estimatedTravelTime: response.routes[0].legs[0].duration?.text || `${Math.round(durationInMinutes)} mins`,
+            optimizedRoute: 'Standard route calculated.',
+            fuelSavingsEstimate: 'N/A'
+          })
       }
     } else {
       console.error(`Directions request failed due to ${status}`);
@@ -151,41 +160,43 @@ export default function BookPage() {
 
     toast({ title: 'Calculating...', description: 'Finding the best route and price for you.' });
 
-    if (bookingType === 'ride') {
-      const response = await getOptimizedRoute({ startLocation, endLocation });
-      if (response.success && response.data) {
-        setAiResult(response.data);
-      } else {
-         toast({ variant: 'destructive', title: 'Routing Error', description: response.error || "Could not get route optimization." });
-      }
-    } else if (bookingType === 'dispatch' && values) {
-        // We need directions to get distance for fee calculation.
-        // The DirectionsService will trigger the callback which calculates distance.
-        // We'll calculate fee after directions are set.
+    if (bookingType === 'dispatch' && values) {
+      const distanceInKm = directions?.routes[0]?.legs[0]?.distance?.value ? directions.routes[0].legs[0].distance.value / 1000 : 10;
+        const response = await getSuggestedDeliveryFee({
+            distance: distanceInKm,
+            packageSize: values.packageSize, 
+            urgency: 'standard' // not in form, hardcoding
+        });
+
+        if (response.success && response.data) {
+            setDispatchFee(response.data);
+        } else {
+            toast({ variant: 'destructive', title: 'Fee Error', description: response.error || "Could not calculate delivery fee." });
+        }
     }
     
-    // The DirectionsService will be rendered and will trigger the callback.
-    // The callback will set directions and calculate prices.
+    // The DirectionsService will be rendered, which triggers directionsCallback
+    // which then calculates prices for ride booking.
     setStep('selection');
     setIsSheetOpen(false);
     setIsLoading(false);
   }
   
+  // This effect will run when `directions` are set, and it will calculate the dispatch fee
   useEffect(() => {
-    if (step === 'selection' && bookingType === 'dispatch' && directions) {
+    if (step === 'selection' && bookingType === 'dispatch' && directions && !dispatchFee) {
       const calculateFee = async () => {
         setIsLoading(true);
         const distanceInKm = directions?.routes[0]?.legs[0]?.distance?.value ? directions.routes[0].legs[0].distance.value / 1000 : 10;
         
         // This is a bit of a workaround because we don't have the form values here.
-        // In a real app, this state would be managed more globally or passed around.
-        // For now, we'll simulate getting some form values.
-        const dummyFormValues = { packageSize: 'medium', urgency: 'standard' };
+        // We'll use some default values.
+        const defaultDispatchValues = { packageSize: 'medium', urgency: 'standard' };
 
         const response = await getSuggestedDeliveryFee({
             distance: distanceInKm,
-            packageSize: dummyFormValues.packageSize, // This is not ideal
-            urgency: dummyFormValues.urgency,
+            packageSize: defaultDispatchValues.packageSize as "small" | "medium" | "large",
+            urgency: defaultDispatchValues.urgency as "standard" | "express",
         });
 
         if (response.success && response.data) {
@@ -197,7 +208,7 @@ export default function BookPage() {
       }
       calculateFee();
     }
-  }, [step, bookingType, directions, toast]);
+  }, [step, bookingType, directions, toast, dispatchFee]);
 
 
   const handleConfirmBooking = () => {
@@ -351,7 +362,7 @@ export default function BookPage() {
   }
 
   const shouldRenderDirectionsService = useMemo(() => {
-    return isLoaded && startLocation && endLocation && (step === 'selection' || step === 'confirming');
+    return isLoaded && startLocation && endLocation && (step === 'selection' || step === 'details');
   }, [isLoaded, startLocation, endLocation, step]);
   
   const startMarkerIcon = useMemo(() => {
@@ -459,11 +470,11 @@ export default function BookPage() {
         );
     }
     
-    if (isLoading || (!ridePrices && !dispatchFee)) {
+    if (isLoading || ((bookingType === 'ride' && !ridePrices) || (bookingType === 'dispatch' && !dispatchFee))) {
         return (
             <div className="flex items-center justify-center p-8">
                 <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                <span>Calculating fee...</span>
+                <span>Calculating price...</span>
             </div>
         )
     }
@@ -533,12 +544,11 @@ export default function BookPage() {
                      <CardHeader className="text-center">
                         <CardTitle className="text-2xl font-bold font-headline">Confirm Your Request</CardTitle>
                         <CardDescription>Select your service and confirm the details.</CardDescription>
-                         {(aiResult || dispatchFee) && (
+                         {(aiResult) && (
                           <Alert className="text-left text-sm bg-primary/5 border-primary/20 mt-2">
-                              <Bot className="h-4 w-4" />
                               <AlertTitle className="font-semibold">Route Details</AlertTitle>
                               <AlertDescription>
-                                {aiResult ? aiResult.estimatedTravelTime : dispatchFee?.reasoning}
+                                {aiResult.estimatedTravelTime}
                               </AlertDescription>
                           </Alert>
                         )}
