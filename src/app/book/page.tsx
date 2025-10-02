@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import { Car, Loader2, Navigation, Package, PersonStanding, X, Bike } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton'; // Import Button from ui/button
 import { useAuth } from '@/context/app-context';
 import { getSuggestedDeliveryFee } from '@/app/actions';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -19,6 +19,7 @@ import DispatchForm from '@/components/dispatch-form';
 import type { SuggestDeliveryFeeOutput } from '@/ai/flows/suggest-delivery-fee';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 type BookingType = 'ride' | 'dispatch';
@@ -40,7 +41,7 @@ export default function BookPage() {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-    libraries: ['places', 'geometry']
+    libraries: ['geometry']
   });
   const { user } = useAuth();
   const { toast } = useToast();
