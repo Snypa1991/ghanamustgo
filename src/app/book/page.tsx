@@ -6,14 +6,12 @@ import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 import { Car, Loader2, Navigation, Package, PersonStanding, X, Bike } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { MopedIcon } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/app-context';
 import { getSuggestedDeliveryFee } from '@/app/actions';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import RouteOptimization from '@/components/route-optimization';
-import { DUMMY_RIDES, DUMMY_USERS, Ride, User, DUMMY_PENDING_RIDES } from '@/lib/dummy-data';
+import { DUMMY_RIDES, DUMMY_USERS, Ride, DUMMY_PENDING_RIDES } from '@/lib/dummy-data';
 import TripStatusCard from '@/components/trip-status-card';
 import { useToast } from '@/hooks/use-toast';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -52,7 +50,7 @@ export default function BookPage() {
   const [vehicleType, setVehicleType] = useState<VehicleType>('bike');
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const [step, setStep] = useState<BookingStep>('details');
-  const [ridePrices, setRidePrices] = useState<{ okada: number, taxi: number } | null>(null);
+  const [ridePrices, setRidePrices] = useState<{ okada: number; taxi: number } | null>(null);
   const [dispatchFee, setDispatchFee] = useState<SuggestDeliveryFeeOutput | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -412,8 +410,7 @@ export default function BookPage() {
     if (!assignedDriver || !isLoaded) return undefined;
     const commonOptions = { fillColor: 'hsl(var(--accent))', fillOpacity: 1, strokeColor: 'white', strokeWeight: 2, anchor: new window.google.maps.Point(12, 12) };
     if (assignedDriver.role === 'biker') {
-        const svgPath = 'M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM8 19h8M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2zM5 11v-5h8M11 6L7 4M13 11V4h-2';
-        return { ...commonOptions, path: svgPath, scale: 1.2 };
+        return { ...commonOptions, path: 'M5.5 22v-6.5h-1V12H6V9.5C6 8.1 7.1 7 8.5 7H11v3H8.5c-.3 0-.5.2-.5.5V12h3l-.5 3.5h-2.5V22h-2.5z M18.5 22v-6.5h-1V12H19V9.5c0-1.4 1.1-2.5 2.5-2.5H24v3h-2.5c-.3 0-.5.2-.5.5V12h3l-.5 3.5h-2.5V22h-2.5z', scale: 1.2, rotation: mapRef.current?.getHeading() ?? 0 };
     }
     return { ...commonOptions, path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW, scale: 6 };
   }, [assignedDriver, isLoaded]);
@@ -467,7 +464,7 @@ export default function BookPage() {
         return (
             <Button className="w-full h-auto p-4 flex items-center justify-between" onClick={handleConfirmBooking}>
                 <div className='flex items-center gap-4 text-left'>
-                    {vehicleType === 'bike' ? <MopedIcon className="h-10 w-10" /> : <Car className="h-10 w-10" />}
+                    {vehicleType === 'bike' ? <Bike className="h-10 w-10" /> : <Car className="h-10 w-10" />}
                     <div>
                         <p className="font-bold text-lg">Confirm {vehicleType === 'bike' ? 'Okada' : 'Taxi'}</p>
                         <p className="text-sm">Quick &amp; affordable</p>
@@ -482,7 +479,7 @@ export default function BookPage() {
         return (
             <Button className="w-full h-auto p-4 flex items-center justify-between" onClick={handleConfirmBooking}>
                 <div className='flex items-center gap-4 text-left'>
-                    {vehicleType === 'bike' ? <MopedIcon className="h-10 w-10" /> : <Car className="h-10 w-10" />}
+                    {vehicleType === 'bike' ? <Bike className="h-10 w-10" /> : <Car className="h-10 w-10" />}
                     <div>
                         <p className="font-bold text-lg">Confirm Dispatch</p>
                         <p className="text-sm">Send your package securely</p>
@@ -612,8 +609,8 @@ export default function BookPage() {
                         </ToggleGroup>
 
                         <ToggleGroup type="single" value={vehicleType} onValueChange={(value: VehicleType) => value && setVehicleType(value)} className="grid grid-cols-2">
-                            <ToggleGroupItem value="bike" aria-label="Choose bike"><Bike className="h-4 w-4 mr-2"/>Bike</ToggleGroupItem>
-                            <ToggleGroupItem value="car" aria-label="Choose car"><Car className="h-4 w-4 mr-2"/>Car</ToggleGroupItem>
+                            <ToggleGroupItem value="bike" aria-label="Choose Okada"><Bike className="h-4 w-4 mr-2"/>Okada</ToggleGroupItem>
+                            <ToggleGroupItem value="car" aria-label="Choose Taxi"><Car className="h-4 w-4 mr-2"/>Taxi</ToggleGroupItem>
                         </ToggleGroup>
 
                         <RouteOptimization 
@@ -645,5 +642,3 @@ export default function BookPage() {
     </div>
   );
 }
-
-    

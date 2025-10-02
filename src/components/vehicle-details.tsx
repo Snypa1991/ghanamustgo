@@ -6,9 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Upload, Loader2, AlertCircle } from 'lucide-react';
-import { MopedIcon } from './icons';
-import { Car } from 'lucide-react';
+import { Upload, Loader2, AlertCircle, Car, Bike } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { checkImage } from '@/app/actions';
 
@@ -45,7 +43,7 @@ export default function VehicleDetails({ role }: VehicleDetailsProps) {
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
-                    {role === 'biker' ? <MopedIcon className="h-6 w-6"/> : <Car/>}
+                    {role === 'biker' ? <Bike className="h-6 w-6"/> : <Car className="h-6 w-6"/>}
                     Vehicle Information
                 </CardTitle>
                 <CardDescription>
@@ -66,7 +64,7 @@ export default function VehicleDetails({ role }: VehicleDetailsProps) {
                  <div className="space-y-2">
                     <Label htmlFor="vehicle-photo">Vehicle Photo</Label>
                     <Input id="vehicle-photo" type="file" accept="image/*" onChange={handleFileChange} />
-                    <p className="text-xs text-muted-foreground">Upload a clear photo of your vehicle.</p>
+                    <p className="text-xs text-muted-foreground">Upload a clear photo of your {role === 'biker' ? 'Okada' : 'Taxi'}.</p>
                 </div>
 
                 {isLoading && (

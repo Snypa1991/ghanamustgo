@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { GhanaMustGoIcon } from '@/components/icons';
-import { User, Store, Car, Loader2 } from 'lucide-react';
+import { User, Store, Car, Loader2, Bike } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/app-context';
@@ -24,7 +24,7 @@ const roles: {name: Role, title: string, description: string, icon: React.Elemen
     },
     {
         name: 'driver',
-        title: 'Driver or Biker',
+        title: 'Taxi or Okada Rider',
         description: 'Offer rides and delivery services.',
         icon: Car,
     },

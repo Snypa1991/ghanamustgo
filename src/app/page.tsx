@@ -3,19 +3,18 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Package, Store, ArrowRight, Car, UtensilsCrossed } from 'lucide-react';
+import { Package, Store, ArrowRight, Car, UtensilsCrossed, Bike } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useAuth } from '@/context/app-context';
-import { MopedIcon } from '@/components/icons';
 
 
 const features = [
   {
     title: 'Book Okada',
     description: 'Fast and reliable motorcycle rides to get you through the city traffic.',
-    icon: MopedIcon,
+    icon: Bike,
     href: '/book',
     cta: 'Book Now',
   },

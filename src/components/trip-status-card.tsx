@@ -3,10 +3,8 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Ride, User } from '@/lib/dummy-data';
-import { Loader2, Star, CheckCircle } from 'lucide-react';
+import { Loader2, Star, CheckCircle, Car, Bike } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { MopedIcon } from './icons';
-import { Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { RideReviewDialog } from './ride-review-dialog';
 
@@ -39,8 +37,8 @@ const DriverDetails = ({ driver, ride }: { driver: User | null, ride: Ride | nul
                     </div>
                 </div>
                 <div className="text-right">
-                    {driver.role === 'biker' ? 
-                        <MopedIcon className="h-10 w-10 text-primary" /> : 
+                    {ride.vehicleType === 'bike' ? 
+                        <Bike className="h-10 w-10 text-primary" /> : 
                         <Car className="h-10 w-10 text-primary" />}
                      <p className="text-xs font-mono bg-primary/20 text-primary-foreground rounded px-1.5 py-0.5 mt-1 inline-block">GT-1234-24</p>
                 </div>
@@ -70,7 +68,7 @@ export default function TripStatusCard({ step, driver, ride, onReviewAndFinish }
                     <Loader2 className="h-16 w-16 text-primary animate-spin" />
                 </CardContent>
                 <CardFooter>
-                     <p className="text-sm text-muted-foreground text-center w-full">Please wait while we connect you with a nearby driver.</p>
+                     <p className="text-sm text-muted-foreground text-center w-full">Please wait while we connect you with a nearby partner.</p>
                 </CardFooter>
             </Card>
         );
@@ -80,8 +78,8 @@ export default function TripStatusCard({ step, driver, ride, onReviewAndFinish }
          return (
              <Card className="shadow-2xl">
                 <CardHeader>
-                    <CardTitle className="font-headline">Driver is on the way!</CardTitle>
-                    <CardDescription>Your driver will arrive shortly.</CardDescription>
+                    <CardTitle className="font-headline">Partner is on the way!</CardTitle>
+                    <CardDescription>Your partner will arrive shortly.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <DriverDetails driver={driver} ride={ride} />
@@ -119,7 +117,7 @@ export default function TripStatusCard({ step, driver, ride, onReviewAndFinish }
                     </div>
                 </CardContent>
                 <CardFooter className="flex-col gap-2">
-                   <p className="text-sm text-muted-foreground mb-2">Please rate your driver to complete the process.</p>
+                   <p className="text-sm text-muted-foreground mb-2">Please rate your partner to complete the process.</p>
                     <RideReviewDialog 
                         ride={ride} 
                         otherUser={driver}
@@ -136,5 +134,3 @@ export default function TripStatusCard({ step, driver, ride, onReviewAndFinish }
 
     return null;
 }
-
-    

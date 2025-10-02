@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useAuth } from '@/context/app-context';
-import { Loader2, User as UserIcon, Shield, Store, Car } from 'lucide-react';
+import { Loader2, User as UserIcon, Shield, Store, Car, Bike } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,8 +15,8 @@ import { GhanaMustGoIcon } from '@/components/icons';
 
 const testRoles: { role: User['role'], title: string, icon: React.ElementType }[] = [
     { role: 'user', title: 'User', icon: UserIcon },
-    { role: 'biker', title: 'Biker', icon: Car },
-    { role: 'driver', title: 'Driver', icon: Car },
+    { role: 'biker', title: 'Okada Rider', icon: Bike },
+    { role: 'driver', title: 'Taxi Driver', icon: Car },
     { role: 'vendor', title: 'Vendor', icon: Store },
     { role: 'admin', title: 'Admin', icon: Shield },
 ];
@@ -40,7 +40,7 @@ export default function TestLoginPage() {
     if (result.success) {
       toast({
         title: 'Login Successful',
-        description: `Logged in as ${role}.`,
+        description: `Logged in as test ${role}.`,
       });
     } else {
       toast({

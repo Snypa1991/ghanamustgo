@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsService, DirectionsRenderer, Circle } from '@react-google-maps/api';
-import { Power, Crosshair, Plus, Minus, Loader2, History } from 'lucide-react';
+import { Power, Crosshair, Plus, Minus, Loader2, History, Bike } from 'lucide-react';
 import { useAuth } from '@/context/app-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -316,11 +316,11 @@ export default function DashboardPage() {
     };
 
     if (user.role === 'biker') {
-        const svgPath = 'M5 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM19 16.5c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM8 19h8M19 14a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2zM5 11v-5h8M11 6L7 4M13 11V4h-2';
+        const bikeSVG = 'M11.5,4.5a1,1,0,0,1-1-1V2a1,1,0,0,1,2,0V3.5A1,1,0,0,1,11.5,4.5Zm-3,4a1,1,0,0,1-1-1V4.5a1,1,0,0,1,2,0V7.5A1,1,0,0,1,8.5,8.5Zm6,0a1,1,0,0,1-1-1V4.5a1,1,0,0,1,2,0V7.5A1,1,0,0,1,14.5,8.5ZM18,17.5a2,2,0,1,1,2-2A2,2,0,0,1,18,17.5Zm-13,0a2,2,0,1,1,2-2A2,2,0,0,1,5,17.5Zm13.8-5.7-1.4-3.5A1,1,0,0,0,16.5,8h-9a1,1,0,0,0-1,.8L5.2,11.8a1,1,0,0,0,1,.8h.6a2,2,0,0,1,4.4,0h2.6a2,2,0,0,1,4.4,0h.6a1,1,0,0,0,1-.8Z';
         return {
             ...commonOptions,
-            path: svgPath,
-            scale: 1.2,
+            path: bikeSVG,
+            scale: 1.5,
         };
     }
 
@@ -528,5 +528,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
