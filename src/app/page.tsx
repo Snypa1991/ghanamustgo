@@ -30,7 +30,7 @@ const features = [
     title: 'Dispatch Now',
     description: 'Affordable and secure on-demand dispatch services.',
     icon: Package,
-    href: '/dispatch',
+    href: '/book',
     cta: 'Dispatch Now',
   },
 ];

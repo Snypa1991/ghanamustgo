@@ -12,7 +12,6 @@ import { UserNav } from './user-nav';
 
 const defaultNavItems = [
   { href: '/book', icon: Car, label: 'Book' },
-  { href: '/dispatch', icon: Package, label: 'Dispatch' },
   { href: '/food', icon: UtensilsCrossed, label: 'Food' },
   { href: '/marketplace', icon: Store, label: 'Market' },
 ];
