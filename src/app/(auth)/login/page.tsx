@@ -22,7 +22,7 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const { login, user, loading } = useAuth();
+  const { login, user, loading, redirectToDashboard } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -35,15 +35,16 @@ export default function LoginPage() {
   
   useEffect(() => {
     if (!loading && user) {
-        router.push('/');
+        redirectToDashboard(user);
     }
-  }, [user, loading, router]);
+  }, [user, loading, redirectToDashboard]);
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const result = await login(values.email, values.password);
-    if (result.success) {
+    if (result.success && result.user) {
         toast({ title: "Login successful" });
+        redirectToDashboard(result.user);
     } else {
         toast({ title: "Error", description: result.error || "An error occurred during login", variant: "destructive" });
     }
@@ -106,5 +107,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    

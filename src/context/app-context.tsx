@@ -10,7 +10,7 @@ import { DUMMY_USERS, User } from '@/lib/dummy-data';
 interface AppContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User | null }>;
   signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   switchUserForTesting: (role: User['role']) => Promise<{ success: boolean; error?: string }>;
@@ -79,11 +79,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, [user]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User | null }> => {
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      return { success: true };
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      const appUser = DUMMY_USERS.find(u => u.email === firebaseUser.email);
+      if (appUser) {
+        setUser(appUser);
+        setLoading(false);
+        return { success: true, user: appUser };
+      }
+      setLoading(false);
+      return { success: false, error: 'User not found in application data.' };
     } catch (error: any) {
       setLoading(false);
       return { success: false, error: error.message };
@@ -94,6 +102,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       try {
         await createUserWithEmailAndPassword(auth, email, password);
+        // The onAuthStateChanged listener will handle setting the user
         return { success: true };
       } catch (error: any) {
         setLoading(false);
@@ -120,7 +129,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const testUser = DUMMY_USERS.find(u => u.role === role);
     if (testUser) {
       setUser(testUser);
-      redirectToDashboard(testUser);
+      // We don't need to call redirectToDashboard here because the useEffect on the test login page will handle it.
       setLoading(false);
       return { success: true };
     } else {
