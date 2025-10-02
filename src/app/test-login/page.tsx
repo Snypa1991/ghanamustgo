@@ -1,11 +1,2 @@
-// This page is disabled to resolve a route conflict with /src/app/(auth)/test-login/page.tsx.
-// By commenting out its contents, we prevent Next.js from treating it as a page and creating a conflicting route.
-
-/*
-"use client";
-import { redirect } from 'next/navigation';
-
-export default function DisabledTestLoginPage() {
-  redirect('/login');
-}
-*/
+// This file is intentionally left blank to resolve a routing conflict with /src/app/(auth)/test-login/page.tsx
+// The active test login page is located at /src/app/(auth)/test-login/page.tsx
