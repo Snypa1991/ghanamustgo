@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bot, Map, Clock, Fuel, Loader2, Navigation } from 'lucide-react';
+import { Map, Clock, Fuel, Loader2, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -50,7 +50,7 @@ export default function AdminRouteOptimization() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2"><Bot /> Smart Route Optimizer</CardTitle>
+        <CardTitle className="font-headline flex items-center gap-2"><Navigation /> Route Optimizer</CardTitle>
         <CardDescription>Find the most efficient route between two points using analysis of traffic patterns.</CardDescription>
       </CardHeader>
       <Form {...form}>

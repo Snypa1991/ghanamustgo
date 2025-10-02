@@ -47,6 +47,7 @@ export default function BookPage() {
   });
   const { user } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   const [bookingType, setBookingType] = useState<BookingType>('ride');
   const [vehicleType, setVehicleType] = useState<VehicleType>('bike');
@@ -155,7 +156,7 @@ export default function BookPage() {
       if (response.success && response.data) {
         setAiResult(response.data);
       } else {
-         toast({ variant: 'destructive', title: 'AI Error', description: response.error || "Could not get AI route optimization." });
+         toast({ variant: 'destructive', title: 'Routing Error', description: response.error || "Could not get route optimization." });
       }
     } else if (bookingType === 'dispatch' && values) {
         // We need directions to get distance for fee calculation.
@@ -350,7 +351,7 @@ export default function BookPage() {
   }
 
   const shouldRenderDirectionsService = useMemo(() => {
-    return isLoaded && startLocation && endLocation && step === 'selection';
+    return isLoaded && startLocation && endLocation && (step === 'selection' || step === 'confirming');
   }, [isLoaded, startLocation, endLocation, step]);
   
   const startMarkerIcon = useMemo(() => {
@@ -535,9 +536,9 @@ export default function BookPage() {
                          {(aiResult || dispatchFee) && (
                           <Alert className="text-left text-sm bg-primary/5 border-primary/20 mt-2">
                               <Bot className="h-4 w-4" />
-                              <AlertTitle className="font-semibold">AI Suggestion</AlertTitle>
+                              <AlertTitle className="font-semibold">Route Details</AlertTitle>
                               <AlertDescription>
-                                {aiResult ? aiResult.optimizedRoute.split('. ')[0] + '.' : dispatchFee?.reasoning}
+                                {aiResult ? aiResult.estimatedTravelTime : dispatchFee?.reasoning}
                               </AlertDescription>
                           </Alert>
                         )}
@@ -605,5 +606,3 @@ export default function BookPage() {
     </div>
   );
 }
-
-    

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bot, Tag, DollarSign, BrainCircuit, Loader2 } from 'lucide-react';
+import { Tag, DollarSign, BrainCircuit, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -56,8 +56,8 @@ export default function ListingFeeSuggestion() {
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center gap-2">
-            <Bot className="h-6 w-6 text-primary" />
-            <CardTitle className="font-headline">Smart Fee Suggestion</CardTitle>
+            <DollarSign className="h-6 w-6 text-primary" />
+            <CardTitle className="font-headline">Fee Suggestion</CardTitle>
         </div>
         <CardDescription>Get a fee recommendation to sell your item quickly and profitably.</CardDescription>
       </CardHeader>
@@ -121,7 +121,7 @@ export default function ListingFeeSuggestion() {
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
               Suggest Fee
             </Button>
           </CardFooter>

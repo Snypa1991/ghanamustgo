@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bot, ThumbsUp, ThumbsDown, Star, Loader2, Gauge } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Star, Loader2, Gauge, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -62,7 +62,7 @@ export default function ReviewSummarizer() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2"><Bot /> Smart Review Summarizer</CardTitle>
+        <CardTitle className="font-headline flex items-center gap-2"><MessageSquare /> Review Summarizer</CardTitle>
         <CardDescription>Paste raw customer reviews to get a structured summary, sentiment analysis, and key takeaways.</CardDescription>
       </CardHeader>
       <Form {...form}>
