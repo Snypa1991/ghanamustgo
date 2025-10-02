@@ -34,6 +34,8 @@ export default function LoginPage() {
   });
   
   useEffect(() => {
+    // This effect is the single source of truth for redirection.
+    // It runs when the component mounts or when `user` or `loading` state changes.
     if (!loading && user) {
         redirectToDashboard(user);
     }
@@ -44,7 +46,7 @@ export default function LoginPage() {
     const result = await login(values.email, values.password);
     if (result.success && result.user) {
         toast({ title: "Login successful" });
-        redirectToDashboard(result.user);
+        // Redirection is now handled by the useEffect hook.
     } else {
         toast({ title: "Error", description: result.error || "An error occurred during login", variant: "destructive" });
     }
@@ -107,3 +109,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
